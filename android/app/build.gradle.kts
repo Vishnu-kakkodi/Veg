@@ -1,3 +1,13 @@
+def configProperties = new Properties()
+def configFile = rootProject.file("app/config.properties")
+
+if (configFile.exists()) {
+    configProperties.load(new FileInputStream(configFile))
+}
+
+def MAPS_API_KEY = configProperties.getProperty("MAPS_API_KEY")
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -28,6 +38,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders = [
+    MAPS_API_KEY: MAPS_API_KEY ?: ""
+    ]
     }
 
     buildTypes {
