@@ -1,0 +1,4561 @@
+// // lib/screens/booking_screen.dart
+// import 'dart:convert';
+
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+// import 'package:intl/intl.dart';
+// import 'package:veegify/model/order.dart';
+// import 'package:veegify/provider/BookingProvider/booking_provider.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:veegify/views/Booking/accepted_order_polling_screen.dart';
+
+// class BookingScreen extends StatefulWidget {
+//   final String? userId;
+
+//   const BookingScreen({super.key, required this.userId});
+
+//   @override
+//   State<BookingScreen> createState() => _BookingScreenState();
+// }
+
+// class _BookingScreenState extends State<BookingScreen> with SingleTickerProviderStateMixin {
+//   late TabController _tabController;
+//   late OrderProvider _orderProvider;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _tabController = TabController(length: 3, vsync: this);
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       _orderProvider = Provider.of<OrderProvider>(context, listen: false);
+//       _orderProvider.loadAllOrders(widget.userId.toString());
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     _tabController.dispose();
+//     super.dispose();
+//   }
+
+//   Widget _buildList(List<Order> items) {
+//     if (items.isEmpty) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(
+//               Icons.receipt_long,
+//               size: 80,
+//               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+//             ),
+//             const SizedBox(height: 16),
+//             Text(
+//               'No orders found',
+//               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+//                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+//                   ),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+//     return ListView.separated(
+//       padding: const EdgeInsets.all(16),
+//       itemCount: items.length,
+//       separatorBuilder: (_, __) => const SizedBox(height: 16),
+//       itemBuilder: (context, index) {
+//         final order = items[index];
+//         return _buildModernBookingCard(order);
+//       },
+//     );
+//   }
+
+//   Widget _buildModernBookingCard(Order order) {
+//     final theme = Theme.of(context);
+//     final isDarkMode = theme.brightness == Brightness.dark;
+//     final firstProduct = order.products.isNotEmpty ? order.products.first : null;
+//     final status = order.orderStatus.toLowerCase();
+    
+//     // Status colors with theme compatibility
+//     Color statusColor;
+//     Color statusBgColor;
+//     IconData statusIcon;
+    
+//     switch (status) {
+//       case 'pending':
+//         statusColor = Colors.orange;
+//         statusBgColor = Colors.orange.withOpacity(0.1);
+//         statusIcon = Icons.access_time;
+//         break;
+//       case 'accepted':
+//       case 'rider accepted':
+//       case 'picked':
+//         statusColor = Colors.blue;
+//         statusBgColor = Colors.blue.withOpacity(0.1);
+//         statusIcon = Icons.check_circle;
+//         break;
+//       case 'completed':
+//       case 'delivered':
+//         statusColor = Colors.green;
+//         statusBgColor = Colors.green.withOpacity(0.1);
+//         statusIcon = Icons.done_all;
+//         break;
+//       case 'cancelled':
+//         statusColor = Colors.red;
+//         statusBgColor = Colors.red.withOpacity(0.1);
+//         statusIcon = Icons.cancel;
+//         break;
+//       default:
+//         statusColor = Colors.grey;
+//         statusBgColor = Colors.grey.withOpacity(0.1);
+//         statusIcon = Icons.help;
+//     }
+
+//     return Container(
+//       decoration: BoxDecoration(
+//         color: theme.cardColor,
+//         borderRadius: BorderRadius.circular(20),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.08),
+//             blurRadius: 12,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Padding(
+//         padding: const EdgeInsets.all(20),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Header with Restaurant Info
+//             Row(
+//               children: [
+//                 Container(
+//                   width: 50,
+//                   height: 50,
+//                   decoration: BoxDecoration(
+//                     color: theme.colorScheme.primary.withOpacity(0.1),
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: firstProduct?.image != null
+//                       ? ClipRRect(
+//                           borderRadius: BorderRadius.circular(12),
+//                           child: Image.network(
+//                             firstProduct!.image!,
+//                             width: 50,
+//                             height: 50,
+//                             fit: BoxFit.cover,
+//                             errorBuilder: (context, error, stackTrace) {
+//                               return Icon(
+//                                 Icons.restaurant,
+//                                 color: theme.colorScheme.primary,
+//                                 size: 24,
+//                               );
+//                             },
+//                           ),
+//                         )
+//                       : Icon(
+//                           Icons.restaurant,
+//                           color: theme.colorScheme.primary,
+//                           size: 24,
+//                         ),
+//                 ),
+//                 const SizedBox(width: 12),
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         order.restaurant.restaurantName,
+//                         style: theme.textTheme.titleMedium?.copyWith(
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                         maxLines: 1,
+//                         overflow: TextOverflow.ellipsis,
+//                       ),
+//                       const SizedBox(height: 4),
+//                       Text(
+//                         order.restaurant.locationName,
+//                         style: theme.textTheme.bodySmall?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 Container(
+//                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//                   decoration: BoxDecoration(
+//                     color: statusBgColor,
+//                     borderRadius: BorderRadius.circular(20),
+//                   ),
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Icon(
+//                         statusIcon,
+//                         size: 14,
+//                         color: statusColor,
+//                       ),
+//                       const SizedBox(width: 6),
+//                       Text(
+//                         order.orderStatus,
+//                         style: TextStyle(
+//                           color: statusColor,
+//                           fontWeight: FontWeight.w600,
+//                           fontSize: 12,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             // Order Items Preview
+//             if (order.products.isNotEmpty) ...[
+//               Container(
+//                 padding: const EdgeInsets.all(12),
+//                 decoration: BoxDecoration(
+//                   color: theme.colorScheme.surface.withOpacity(0.5),
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       'Order Items',
+//                       style: theme.textTheme.bodyMedium?.copyWith(
+//                         fontWeight: FontWeight.w600,
+//                       ),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     ...order.products.take(2).map((product) => Padding(
+//                           padding: const EdgeInsets.symmetric(vertical: 4),
+//                           child: Row(
+//                             children: [
+//                               Container(
+//                                 width: 4,
+//                                 height: 4,
+//                                 decoration: BoxDecoration(
+//                                   color: theme.colorScheme.primary,
+//                                   shape: BoxShape.circle,
+//                                 ),
+//                               ),
+//                               const SizedBox(width: 8),
+//                               Expanded(
+//                                 child: Text(
+//                                   '${product.quantity}x ${product.name}',
+//                                   style: theme.textTheme.bodySmall,
+//                                 ),
+//                               ),
+//                               Text(
+//                                 '₹${(product.quantity * product.basePrice).toStringAsFixed(2)}',
+//                                 style: theme.textTheme.bodySmall?.copyWith(
+//                                   fontWeight: FontWeight.w600,
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         )),
+//                     if (order.products.length > 2)
+//                       Padding(
+//                         padding: const EdgeInsets.only(top: 4),
+//                         child: Text(
+//                           '+ ${order.products.length - 2} more items',
+//                           style: theme.textTheme.bodySmall?.copyWith(
+//                             color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                             fontStyle: FontStyle.italic,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
+//             ],
+
+//             // Order Summary
+//             Container(
+//               padding: const EdgeInsets.all(16),
+//               decoration: BoxDecoration(
+//                 gradient: LinearGradient(
+//                   begin: Alignment.topLeft,
+//                   end: Alignment.bottomRight,
+//                   colors: [
+//                     theme.colorScheme.primary.withOpacity(0.05),
+//                     theme.colorScheme.primary.withOpacity(0.1),
+//                   ],
+//                 ),
+//                 borderRadius: BorderRadius.circular(16),
+//                 border: Border.all(
+//                   color: theme.colorScheme.primary.withOpacity(0.2),
+//                 ),
+//               ),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         'Total Amount',
+//                         style: theme.textTheme.bodySmall?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.7),
+//                         ),
+//                       ),
+//                       Text(
+//                         '₹${order.totalPayable.toStringAsFixed(2)}',
+//                         style: theme.textTheme.titleLarge?.copyWith(
+//                           fontWeight: FontWeight.bold,
+//                           color: theme.colorScheme.primary,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   Column(
+//                     crossAxisAlignment: CrossAxisAlignment.end,
+//                     children: [
+//                       Text(
+//                         '${order.totalItems} items',
+//                         style: theme.textTheme.bodySmall?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.7),
+//                         ),
+//                       ),
+//                       Text(
+//                         order.createdAt == null
+//                             ? 'N/A'
+//                             : DateFormat('MMM dd, hh:mm a').format(order.createdAt!.toLocal()),
+//                         style: theme.textTheme.bodySmall?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             // Action Buttons
+//             Row(
+//               children: [
+//                 // View Details Button
+//                 Expanded(
+//                   child: ElevatedButton(
+//                     onPressed: () {
+//                       if (status == 'pending' || 
+//                           status == 'rider accepted' || 
+//                           status == 'accepted' || 
+//                           status == 'picked') {
+//                         Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                             builder: (_) => AcceptedOrderPollingScreen(
+//                               userId: order.userId,
+//                               orderId: order.id,
+//                             ),
+//                           ),
+//                         );
+//                       } else {
+//                         showModalBottomSheet(
+//                           context: context,
+//                           backgroundColor: theme.cardColor,
+//                           shape: const RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.vertical(
+//                               top: Radius.circular(20),
+//                             ),
+//                           ),
+//                           builder: (_) => _buildOrderDetailSheet(order),
+//                         );
+//                       }
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: theme.colorScheme.primary,
+//                       foregroundColor: theme.colorScheme.onPrimary,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                       padding: const EdgeInsets.symmetric(vertical: 12),
+//                     ),
+//                     child: Row(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Icon(
+//                           Icons.remove_red_eye_outlined,
+//                           size: 20,
+//                         ),
+//                         const SizedBox(width: 8),
+//                         Text(
+//                           'View Details',
+//                           style: theme.textTheme.bodyMedium?.copyWith(
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+                
+//                 // Add Review Button (only for completed orders)
+//                 if (status == 'completed' || status == 'delivered') ...[
+//                   const SizedBox(width: 12),
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       _showReviewDialog(order);
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.amber,
+//                       foregroundColor: Colors.black,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+//                     ),
+//                     child: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         Icon(
+//                           Icons.star,
+//                           size: 20,
+//                         ),
+//                         const SizedBox(width: 4),
+//                         Text(
+//                           'Review',
+//                           style: theme.textTheme.bodyMedium?.copyWith(
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   void _showReviewDialog(Order order) {
+//     showDialog(
+//       context: context,
+//       builder: (context) => ReviewDialog(
+//         order: order,
+//         userId: widget.userId!,
+//         onReviewSubmitted: () {
+//           // Refresh orders after review submission
+//           _orderProvider.loadAllOrders(widget.userId.toString());
+//         },
+//       ),
+//     );
+//   }
+
+// Widget _buildOrderDetailSheet(Order order) {
+//   final theme = Theme.of(context);
+  
+//   return Padding(
+//     padding: const EdgeInsets.all(24),
+//     child: Column(
+//       mainAxisSize: MainAxisSize.min,
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Center(
+//           child: Container(
+//             width: 40,
+//             height: 4,
+//             decoration: BoxDecoration(
+//               color: theme.colorScheme.onSurface.withOpacity(0.3),
+//               borderRadius: BorderRadius.circular(2),
+//             ),
+//           ),
+//         ),
+//         const SizedBox(height: 20),
+//         Text(
+//           'Order Details',
+//           style: theme.textTheme.titleLarge?.copyWith(
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         const SizedBox(height: 16),
+        
+//         // Make the content scrollable
+//         Expanded(
+//           child: SingleChildScrollView(
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 _buildDetailRow('Order ID', order.id, theme),
+//                 _buildDetailRow('Restaurant', order.restaurant.restaurantName, theme),
+//                 _buildDetailRow(
+//                   'Address', 
+//                   '${order.deliveryAddress.street}, ${order.deliveryAddress.city}', 
+//                   theme
+//                 ),
+//                 _buildDetailRow('Payment', '${order.paymentMethod} • ${order.paymentStatus}', theme),
+//                 _buildDetailRow('Total', '₹${order.totalPayable.toStringAsFixed(2)}', theme),
+//                 const SizedBox(height: 16),
+//                 Text(
+//                   'Items Ordered',
+//                   style: theme.textTheme.titleMedium?.copyWith(
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 12),
+//                 ...order.products.map((p) => Container(
+//                   margin: const EdgeInsets.only(bottom: 8),
+//                   padding: const EdgeInsets.all(12),
+//                   decoration: BoxDecoration(
+//                     color: theme.colorScheme.surface.withOpacity(0.5),
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Row(
+//                     children: [
+//                       Expanded(
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                           children: [
+//                             Text(
+//                               p.name,
+//                               style: theme.textTheme.bodyMedium?.copyWith(
+//                                 fontWeight: FontWeight.w600,
+//                               ),
+//                             ),
+//                             Text(
+//                               '${p.quantity} x ₹${p.basePrice.toStringAsFixed(2)}',
+//                               style: theme.textTheme.bodySmall?.copyWith(
+//                                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                       Text(
+//                         '₹${(p.quantity * p.basePrice).toStringAsFixed(2)}',
+//                         style: theme.textTheme.bodyLarge?.copyWith(
+//                           fontWeight: FontWeight.bold,
+//                           color: theme.colorScheme.primary,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 )),
+//                 const SizedBox(height: 20),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+//   Widget _buildDetailRow(String label, String value, ThemeData theme) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           SizedBox(
+//             width: 100,
+//             child: Text(
+//               label,
+//               style: theme.textTheme.bodyMedium?.copyWith(
+//                 fontWeight: FontWeight.w600,
+//                 color: theme.colorScheme.onSurface.withOpacity(0.7),
+//               ),
+//             ),
+//           ),
+//           const SizedBox(width: 12),
+//           Expanded(
+//             child: Text(
+//               value,
+//               style: theme.textTheme.bodyMedium,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDarkMode = theme.brightness == Brightness.dark;
+//     final provider = Provider.of<OrderProvider>(context);
+//     final isLoading = provider.state == OrdersState.loading;
+//     final error = provider.error;
+
+//     return Scaffold(
+//       backgroundColor: theme.scaffoldBackgroundColor,
+//       appBar: AppBar(
+//         leading: IconButton(
+//           onPressed: () {
+//             Navigator.pop(context);
+//           },
+//           icon: Icon(
+//             Icons.arrow_back_ios,
+//             color: theme.colorScheme.onSurface,
+//           ),
+//         ),
+//         centerTitle: true,
+//         title: Text(
+//           "My Orders",
+//           style: theme.textTheme.titleLarge?.copyWith(
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         elevation: 0,
+//         backgroundColor: Colors.transparent,
+//         bottom: PreferredSize(
+//           preferredSize: const Size.fromHeight(80),
+//           child: Container(
+//             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//             child: TabBar(
+//               controller: _tabController,
+//               isScrollable: true,
+//               indicator: BoxDecoration(
+//                 color: theme.colorScheme.primary,
+//                 borderRadius: BorderRadius.circular(12),
+//                 boxShadow: [
+//                   BoxShadow(
+//                     color: theme.colorScheme.primary.withOpacity(0.3),
+//                     blurRadius: 8,
+//                     offset: const Offset(0, 3),
+//                   ),
+//                 ],
+//               ),
+//               indicatorSize: TabBarIndicatorSize.tab,
+//               indicatorColor: Colors.transparent,
+//               overlayColor: MaterialStateProperty.all(Colors.transparent),
+//               dividerColor: Colors.transparent,
+//               labelColor: theme.colorScheme.onPrimary,
+//               unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
+//               labelPadding: const EdgeInsets.symmetric(horizontal: 12),
+//               tabs: [
+//                 _buildTabItem(
+//                   "Today",
+//                   Icons.calendar_today,
+//                   _tabController.index == 0,
+//                   theme,
+//                 ),
+//                 _buildTabItem(
+//                   "All Orders",
+//                   Icons.receipt_long,
+//                   _tabController.index == 1,
+//                   theme,
+//                 ),
+//                 _buildTabItem(
+//                   "Cancelled",
+//                   Icons.cancel,
+//                   _tabController.index == 2,
+//                   theme,
+//                 ),
+//               ],
+//               onTap: (i) {
+//                 setState(() {});
+//               },
+//             ),
+//           ),
+//         ),
+//       ),
+//       body: isLoading
+//           ? const Center(child: CircularProgressIndicator())
+//           : error != null
+//               ? Center(
+//                   child: Column(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Icon(
+//                         Icons.error_outline,
+//                         size: 64,
+//                         color: theme.colorScheme.error,
+//                       ),
+//                       const SizedBox(height: 16),
+//                       Text(
+//                         'Error loading orders',
+//                         style: theme.textTheme.titleMedium?.copyWith(
+//                           color: theme.colorScheme.error,
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Text(
+//                         error,
+//                         textAlign: TextAlign.center,
+//                         style: theme.textTheme.bodyMedium?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 16),
+//                       ElevatedButton(
+//                         onPressed: () => provider.loadAllOrders(widget.userId.toString()),
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: theme.colorScheme.primary,
+//                           foregroundColor: theme.colorScheme.onPrimary,
+//                         ),
+//                         child: const Text('Try Again'),
+//                       ),
+//                     ],
+//                   ),
+//                 )
+//               : TabBarView(
+//                   controller: _tabController,
+//                   children: [
+//                     RefreshIndicator(
+//                       onRefresh: () => provider.loadAllOrders(widget.userId.toString()),
+//                       child: _buildList(provider.todayOrders),
+//                     ),
+//                     RefreshIndicator(
+//                       onRefresh: () => provider.loadAllOrders(widget.userId.toString()),
+//                       child: _buildList(provider.orders),
+//                     ),
+//                     RefreshIndicator(
+//                       onRefresh: () => provider.loadAllOrders(widget.userId.toString()),
+//                       child: _buildList(provider.cancelledOrders),
+//                     ),
+//                   ],
+//                 ),
+//     );
+//   }
+
+//   Widget _buildTabItem(String text, IconData icon, bool isSelected, ThemeData theme) {
+//     return Tab(
+//       child: Container(
+//         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+//         decoration: BoxDecoration(
+//           color: isSelected ? theme.colorScheme.primary : theme.cardColor,
+//           borderRadius: BorderRadius.circular(12),
+//           border: isSelected ? null : Border.all(color: theme.dividerColor),
+//           boxShadow: isSelected
+//               ? [
+//                   BoxShadow(
+//                     color: theme.colorScheme.primary.withOpacity(0.3),
+//                     blurRadius: 8,
+//                     offset: const Offset(0, 3),
+//                   ),
+//                 ]
+//               : [
+//                   BoxShadow(
+//                     color: Colors.black.withOpacity(0.05),
+//                     blurRadius: 3,
+//                     offset: const Offset(0, 1),
+//                   ),
+//                 ],
+//         ),
+//         child: Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(
+//               icon,
+//               size: 18,
+//               color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface.withOpacity(0.7),
+//             ),
+//             const SizedBox(width: 8),
+//             Text(
+//               text,
+//               style: TextStyle(
+//                 fontWeight: FontWeight.w600,
+//                 fontSize: 14,
+//                 color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface.withOpacity(0.7),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// // class ReviewDialog extends StatefulWidget {
+// //   final Order order;
+// //   final String userId;
+// //   final VoidCallback onReviewSubmitted;
+
+// //   const ReviewDialog({
+// //     super.key,
+// //     required this.order,
+// //     required this.userId,
+// //     required this.onReviewSubmitted,
+// //   });
+
+// //   @override
+// //   State<ReviewDialog> createState() => _ReviewDialogState();
+// // }
+
+// // class _ReviewDialogState extends State<ReviewDialog> {
+// //   int _selectedRating = 0;
+// //   final TextEditingController _reviewController = TextEditingController();
+// //   bool _isSubmitting = false;
+
+// //   Future<void> _submitReview() async {
+// //     if (_selectedRating == 0) {
+// //       ScaffoldMessenger.of(context).showSnackBar(
+// //         SnackBar(
+// //           content: const Text('Please select a rating'),
+// //           backgroundColor: Theme.of(context).colorScheme.error,
+// //         ),
+// //       );
+// //       return;
+// //     }
+
+// //     setState(() {
+// //       _isSubmitting = true;
+// //     });
+
+// //     try {
+// //       final response = await http.post(
+// //         Uri.parse('http://31.97.206.144:4087/api/addreview'),
+// //         headers: {
+// //           'Content-Type': 'application/json',
+// //         },
+// //         body: json.encode({
+// //           "productId": widget.order.products.isNotEmpty 
+// //               ? widget.order.products.first.id 
+// //               : widget.order.id, // Fallback to order ID if product ID not available
+// //           "userId": widget.userId,
+// //           "stars": _selectedRating,
+// //           "comment": _reviewController.text.trim(),
+// //         }),
+// //       );
+
+// //       if (response.statusCode == 200) {
+// //         if (mounted) {
+// //           ScaffoldMessenger.of(context).showSnackBar(
+// //             SnackBar(
+// //               content: const Text('Review submitted successfully!'),
+// //               backgroundColor: Colors.green,
+// //             ),
+// //           );
+// //           widget.onReviewSubmitted();
+// //           Navigator.of(context).pop();
+// //         }
+// //       } else {
+// //         throw Exception('Failed to submit review');
+// //       }
+// //     } catch (e) {
+// //       if (mounted) {
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(
+// //             content: Text('Error submitting review: $e'),
+// //             backgroundColor: Theme.of(context).colorScheme.error,
+// //           ),
+// //         );
+// //       }
+// //     } finally {
+// //       if (mounted) {
+// //         setState(() {
+// //           _isSubmitting = false;
+// //         });
+// //       }
+// //     }
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     final theme = Theme.of(context);
+// //     final firstProduct = widget.order.products.isNotEmpty 
+// //         ? widget.order.products.first 
+// //         : null;
+
+// //     return Dialog(
+// //       backgroundColor: theme.cardColor,
+// //       shape: RoundedRectangleBorder(
+// //         borderRadius: BorderRadius.circular(20),
+// //       ),
+// //       child: Padding(
+// //         padding: const EdgeInsets.all(24),
+// //         child: Column(
+// //           mainAxisSize: MainAxisSize.min,
+// //           crossAxisAlignment: CrossAxisAlignment.start,
+// //           children: [
+// //             // Header
+// //             Row(
+// //               children: [
+// //                 Icon(
+// //                   Icons.star_rate_rounded,
+// //                   color: Colors.amber,
+// //                   size: 28,
+// //                 ),
+// //                 const SizedBox(width: 12),
+// //                 Expanded(
+// //                   child: Text(
+// //                     'Rate Your Order',
+// //                     style: theme.textTheme.titleLarge?.copyWith(
+// //                       fontWeight: FontWeight.bold,
+// //                     ),
+// //                   ),
+// //                 ),
+// //               ],
+// //             ),
+            
+// //             const SizedBox(height: 8),
+// //             Text(
+// //               'How was your experience with this order?',
+// //               style: theme.textTheme.bodyMedium?.copyWith(
+// //                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+// //               ),
+// //             ),
+            
+// //             const SizedBox(height: 20),
+            
+// //             // Restaurant Info
+// //             Container(
+// //               padding: const EdgeInsets.all(12),
+// //               decoration: BoxDecoration(
+// //                 color: theme.colorScheme.surface.withOpacity(0.5),
+// //                 borderRadius: BorderRadius.circular(12),
+// //               ),
+// //               child: Row(
+// //                 children: [
+// //                   Container(
+// //                     width: 40,
+// //                     height: 40,
+// //                     decoration: BoxDecoration(
+// //                       color: theme.colorScheme.primary.withOpacity(0.1),
+// //                       borderRadius: BorderRadius.circular(8),
+// //                     ),
+// //                     child: firstProduct?.image != null
+// //                         ? ClipRRect(
+// //                             borderRadius: BorderRadius.circular(8),
+// //                             child: Image.network(
+// //                               firstProduct!.image!,
+// //                               fit: BoxFit.cover,
+// //                             ),
+// //                           )
+// //                         : Icon(
+// //                             Icons.restaurant,
+// //                             color: theme.colorScheme.primary,
+// //                             size: 20,
+// //                           ),
+// //                   ),
+// //                   const SizedBox(width: 12),
+// //                   Expanded(
+// //                     child: Column(
+// //                       crossAxisAlignment: CrossAxisAlignment.start,
+// //                       children: [
+// //                         Text(
+// //                           widget.order.restaurant.restaurantName,
+// //                           style: theme.textTheme.bodyMedium?.copyWith(
+// //                             fontWeight: FontWeight.w600,
+// //                           ),
+// //                         ),
+// //                         Text(
+// //                           'Order #${widget.order.id.substring(0, 8)}...',
+// //                           style: theme.textTheme.bodySmall?.copyWith(
+// //                             color: theme.colorScheme.onSurface.withOpacity(0.6),
+// //                           ),
+// //                         ),
+// //                       ],
+// //                     ),
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+            
+// //             const SizedBox(height: 24),
+            
+// //             // Star Rating
+// //             Center(
+// //               child: Column(
+// //                 children: [
+// //                   Text(
+// //                     'Tap to rate',
+// //                     style: theme.textTheme.bodyMedium?.copyWith(
+// //                       color: theme.colorScheme.onSurface.withOpacity(0.6),
+// //                     ),
+// //                   ),
+// //                   const SizedBox(height: 8),
+// //                   Row(
+// //                     mainAxisAlignment: MainAxisAlignment.center,
+// //                     children: List.generate(5, (index) {
+// //                       return GestureDetector(
+// //                         onTap: () {
+// //                           setState(() {
+// //                             _selectedRating = index + 1;
+// //                           });
+// //                         },
+// //                         child: Icon(
+// //                           index < _selectedRating 
+// //                               ? Icons.star_rounded 
+// //                               : Icons.star_border_rounded,
+// //                           color: Colors.amber,
+// //                           size: 40,
+// //                         ),
+// //                       );
+// //                     }),
+// //                   ),
+// //                   const SizedBox(height: 8),
+// //                   Text(
+// //                     _selectedRating == 0 
+// //                         ? 'Select rating'
+// //                         : '$_selectedRating ${_selectedRating == 1 ? 'star' : 'stars'}',
+// //                     style: theme.textTheme.bodyMedium?.copyWith(
+// //                       fontWeight: FontWeight.w600,
+// //                       color: theme.colorScheme.primary,
+// //                     ),
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+            
+// //             const SizedBox(height: 24),
+            
+// //             // Review Text Field
+// //             Text(
+// //               'Your Review (Optional)',
+// //               style: theme.textTheme.bodyMedium?.copyWith(
+// //                 fontWeight: FontWeight.w600,
+// //               ),
+// //             ),
+// //             const SizedBox(height: 8),
+// //             TextField(
+// //               controller: _reviewController,
+// //               maxLines: 4,
+// //               decoration: InputDecoration(
+// //                 hintText: 'Share your experience...',
+// //                 border: OutlineInputBorder(
+// //                   borderRadius: BorderRadius.circular(12),
+// //                   borderSide: BorderSide(
+// //                     color: theme.dividerColor,
+// //                   ),
+// //                 ),
+// //                 focusedBorder: OutlineInputBorder(
+// //                   borderRadius: BorderRadius.circular(12),
+// //                   borderSide: BorderSide(
+// //                     color: theme.colorScheme.primary,
+// //                   ),
+// //                 ),
+// //               ),
+// //             ),
+            
+// //             const SizedBox(height: 24),
+            
+// //             // Action Buttons
+// //             Row(
+// //               children: [
+// //                 Expanded(
+// //                   child: OutlinedButton(
+// //                     onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+// //                     style: OutlinedButton.styleFrom(
+// //                       foregroundColor: theme.colorScheme.onSurface,
+// //                       side: BorderSide(color: theme.dividerColor),
+// //                       shape: RoundedRectangleBorder(
+// //                         borderRadius: BorderRadius.circular(12),
+// //                       ),
+// //                       padding: const EdgeInsets.symmetric(vertical: 16),
+// //                     ),
+// //                     child: const Text('Cancel'),
+// //                   ),
+// //                 ),
+// //                 const SizedBox(width: 12),
+// //                 Expanded(
+// //                   child: ElevatedButton(
+// //                     onPressed: _isSubmitting ? null : _submitReview,
+// //                     style: ElevatedButton.styleFrom(
+// //                       backgroundColor: theme.colorScheme.primary,
+// //                       foregroundColor: theme.colorScheme.onPrimary,
+// //                       shape: RoundedRectangleBorder(
+// //                         borderRadius: BorderRadius.circular(12),
+// //                       ),
+// //                       padding: const EdgeInsets.symmetric(vertical: 16),
+// //                     ),
+// //                     child: _isSubmitting
+// //                         ? const SizedBox(
+// //                             width: 20,
+// //                             height: 20,
+// //                             child: CircularProgressIndicator(
+// //                               strokeWidth: 2,
+// //                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+// //                             ),
+// //                           )
+// //                         : const Text('Submit Review'),
+// //                   ),
+// //                 ),
+// //               ],
+// //             ),
+// //           ],
+// //         ),
+// //       ),
+// //     );
+// //   }
+
+// //   @override
+// //   void dispose() {
+// //     _reviewController.dispose();
+// //     super.dispose();
+// //   }
+// // }
+
+
+// class ReviewDialog extends StatefulWidget {
+//   final Order order;
+//   final String userId;
+//   final VoidCallback onReviewSubmitted;
+
+//   const ReviewDialog({
+//     super.key,
+//     required this.order,
+//     required this.userId,
+//     required this.onReviewSubmitted,
+//   });
+
+//   @override
+//   State<ReviewDialog> createState() => _ReviewDialogState();
+// }
+
+// class _ReviewDialogState extends State<ReviewDialog> {
+//   final Map<String, Map<String, dynamic>> _selectedProducts = {};
+//   bool _isSubmitting = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     // Initialize all products as unselected
+//     for (final product in widget.order.products) {
+//       _selectedProducts[product.id] = {
+//         'selected': false,
+//         'rating': 0,
+//         'review': '',
+//         'product': product,
+//         'isSubmitting': false,
+//       };
+//     }
+//   }
+
+//   Future<void> _submitReviews() async {
+//     // Check if at least one product is selected and rated
+//     final selectedProducts = _selectedProducts.entries
+//         .where((entry) => entry.value['selected'] == true)
+//         .toList();
+
+//         print("----- Selected Products -----");
+// for (final entry in selectedProducts) {
+//   final product = entry.value['product'] as OrderProduct;
+//   final rating = entry.value['rating'];
+//   final review = entry.value['review'];
+
+//   print("Product ID: ${product.recommendedId}");
+//   print("Product Name: ${product.name}");
+//   print("Rating: $rating");
+//   print("Review: $review");
+//   print("-----------------------------");
+// }
+
+
+//     if (selectedProducts.isEmpty) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: const Text('Please select at least one product to review'),
+//           backgroundColor: Theme.of(context).colorScheme.error,
+//         ),
+//       );
+//       return;
+//     }
+
+//     // Check if all selected products have ratings
+//     for (final entry in selectedProducts) {
+//       if (entry.value['rating'] == 0) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text('Please rate ${entry.value['product'].name}'),
+//             backgroundColor: Theme.of(context).colorScheme.error,
+//           ),
+//         );
+//         return;
+//       }
+//     }
+
+//     setState(() {
+//       _isSubmitting = true;
+//     });
+
+//     bool allSuccessful = true;
+//     int successfulCount = 0;
+
+//     // Submit reviews for all selected products with separate API calls
+//     for (final entry in selectedProducts) {
+//       final product = entry.value['product'] as OrderProduct;
+//       final rating = entry.value['rating'] as int;
+//       final review = entry.value['review'] as String;
+
+//       // Update individual product submitting state
+//       setState(() {
+//         _selectedProducts[product.id]?['isSubmitting'] = true;
+//       });
+
+//       try {
+
+//                 print("fhsfsdfdslfjjdlfhldsfjdskfjdslfjd;${product.recommendedId}");
+//                                 print("fhsfsdfdslfjjdlfhldsfjdskfjdslfjd;${widget.userId}");
+
+
+//         final response = await http.post(
+//           Uri.parse('http://31.97.206.144:5051/api/addreview'),
+//           headers: {
+//             'Content-Type': 'application/json',
+//           },
+//           body: json.encode({
+//             "productId": product.recommendedId,
+//             "userId": widget.userId,
+//             "stars": rating,
+//             "comment": review.trim(),
+//           }),
+//         );
+
+//         print("fhsfsdfdslfjjdlfhldsfjdskfjdslfjd;${response.body}");
+
+//         if (response.statusCode == 200) {
+//           successfulCount++;
+//           // Mark as submitted
+//           setState(() {
+//             _selectedProducts[product.id]?['selected'] = false;
+//           });
+//         } else {
+//           allSuccessful = false;
+//           throw Exception('Failed to submit review for ${product.name}');
+//         }
+//       } catch (e) {
+//         allSuccessful = false;
+//         if (mounted) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(
+//               content: Text('Error submitting review for ${product.name}: $e'),
+//               backgroundColor: Theme.of(context).colorScheme.error,
+//             ),
+//           );
+//         }
+//       } finally {
+//         if (mounted) {
+//           setState(() {
+//             _selectedProducts[product.id]?['isSubmitting'] = false;
+//           });
+//         }
+//       }
+//     }
+
+//     setState(() {
+//       _isSubmitting = false;
+//     });
+
+//     if (mounted) {
+//       if (allSuccessful) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text('$successfulCount review${successfulCount > 1 ? 's' : ''} submitted successfully!'),
+//             backgroundColor: Colors.green,
+//           ),
+//         );
+//         widget.onReviewSubmitted();
+//         Navigator.of(context).pop();
+//       } else if (successfulCount > 0) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text('$successfulCount review${successfulCount > 1 ? 's' : ''} submitted, but some failed'),
+//             backgroundColor: Colors.orange,
+//           ),
+//         );
+//         // Don't close the dialog if some failed, let user retry
+//       }
+//     }
+//   }
+
+//   void _toggleProductSelection(String productId) {
+//     setState(() {
+//       _selectedProducts[productId]?['selected'] = 
+//           !_selectedProducts[productId]?['selected'];
+//     });
+//   }
+
+//   void _updateProductRating(String productId, int rating) {
+//     setState(() {
+//       _selectedProducts[productId]?['rating'] = rating;
+//     });
+//   }
+
+//   void _updateProductReview(String productId, String review) {
+//     setState(() {
+//       _selectedProducts[productId]?['review'] = review;
+//     });
+//   }
+
+//   bool get _hasSelectedProducts {
+//     return _selectedProducts.entries.any((entry) => entry.value['selected'] == true);
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final selectedCount = _selectedProducts.entries
+//         .where((entry) => entry.value['selected'] == true)
+//         .length;
+
+//     return Scaffold(
+//       backgroundColor: theme.scaffoldBackgroundColor,
+//       appBar: AppBar(
+//         leading: IconButton(
+//           onPressed: () => Navigator.of(context).pop(),
+//           icon: Icon(
+//             Icons.arrow_back,
+//             color: theme.colorScheme.onSurface,
+//           ),
+//         ),
+//         title: Text(
+//           'Rate Your Order',
+//           style: theme.textTheme.titleLarge?.copyWith(
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         actions: [
+//           if (_hasSelectedProducts)
+//             Padding(
+//               padding: const EdgeInsets.only(right: 16),
+//               child: Text(
+//                 '$selectedCount selected',
+//                 style: theme.textTheme.bodyMedium?.copyWith(
+//                   color: theme.colorScheme.primary,
+//                   fontWeight: FontWeight.w600,
+//                 ),
+//               ),
+//             ),
+//         ],
+//       ),
+//       body: Column(
+//         children: [
+//           // Order Info Card
+//           Container(
+//             width: double.infinity,
+//             padding: const EdgeInsets.all(16),
+//             decoration: BoxDecoration(
+//               color: theme.cardColor,
+//               border: Border(
+//                 bottom: BorderSide(
+//                   color: theme.dividerColor.withOpacity(0.3),
+//                 ),
+//               ),
+//             ),
+//             child: Row(
+//               children: [
+//                 Container(
+//                   width: 50,
+//                   height: 50,
+//                   decoration: BoxDecoration(
+//                     color: theme.colorScheme.primary.withOpacity(0.1),
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: widget.order.products.isNotEmpty &&
+//                           widget.order.products.first.image != null
+//                       ? ClipRRect(
+//                           borderRadius: BorderRadius.circular(12),
+//                           child: Image.network(
+//                             widget.order.products.first.image.toString(),
+//                             fit: BoxFit.cover,
+//                           ),
+//                         )
+//                       : Icon(
+//                           Icons.restaurant,
+//                           color: theme.colorScheme.primary,
+//                           size: 24,
+//                         ),
+//                 ),
+//                 const SizedBox(width: 12),
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         widget.order.restaurant.restaurantName,
+//                         style: theme.textTheme.titleMedium?.copyWith(
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                       Text(
+//                         'Order #${widget.order.id.substring(0, 8)}...',
+//                         style: theme.textTheme.bodySmall?.copyWith(
+//                           color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+
+//           // Instruction
+//           Container(
+//             width: double.infinity,
+//             padding: const EdgeInsets.all(16),
+//             color: theme.colorScheme.primary.withOpacity(0.05),
+//             child: Text(
+//               'Select products to review and rate your experience',
+//               style: theme.textTheme.bodyMedium?.copyWith(
+//                 color: theme.colorScheme.primary,
+//                 fontWeight: FontWeight.w500,
+//               ),
+//               textAlign: TextAlign.center,
+//             ),
+//           ),
+
+//           // Products List
+//           Expanded(
+//             child: ListView.builder(
+//               padding: EdgeInsets.zero,
+//               itemCount: widget.order.products.length,
+//               itemBuilder: (context, index) {
+//                 final product = widget.order.products[index];
+//                 final productData = _selectedProducts[product.id]!;
+//                 final isSelected = productData['selected'] as bool;
+//                 final rating = productData['rating'] as int;
+//                 final review = productData['review'] as String;
+//                 final isSubmitting = productData['isSubmitting'] as bool;
+
+//                 return Container(
+//                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+//                   decoration: BoxDecoration(
+//                     color: theme.cardColor,
+//                     border: isSelected
+//                         ? Border.all(
+//                             color: theme.colorScheme.primary,
+//                             width: 2,
+//                           )
+//                         : null,
+//                   ),
+//                   child: Column(
+//                     children: [
+//                       // Product Header with Checkbox
+//                       ListTile(
+//                         leading: Checkbox(
+//                           value: isSelected,
+//                           onChanged: (value) {
+//                             _toggleProductSelection(product.id);
+//                           },
+//                           activeColor: theme.colorScheme.primary,
+//                         ),
+//                         title: Text(
+//                           product.name,
+//                           style: theme.textTheme.bodyLarge?.copyWith(
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         subtitle: Text(
+//                           '${product.quantity}x • ₹${(product.quantity * product.basePrice).toStringAsFixed(2)}',
+//                           style: theme.textTheme.bodyMedium?.copyWith(
+//                             color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                           ),
+//                         ),
+//                         trailing: isSubmitting
+//                             ? const SizedBox(
+//                                 width: 20,
+//                                 height: 20,
+//                                 child: CircularProgressIndicator(strokeWidth: 2),
+//                               )
+//                             : null,
+//                       ),
+
+//                       // Rating Section (only show if selected)
+//                       if (isSelected) ...[
+//                         Divider(
+//                           height: 1,
+//                           color: theme.dividerColor.withOpacity(0.3),
+//                         ),
+//                         Padding(
+//                           padding: const EdgeInsets.all(16),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               // Star Rating
+//                               Text(
+//                                 'Rate this product',
+//                                 style: theme.textTheme.bodyMedium?.copyWith(
+//                                   fontWeight: FontWeight.w600,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 12),
+//                               Row(
+//                                 mainAxisAlignment: MainAxisAlignment.center,
+//                                 children: List.generate(5, (index) {
+//                                   return GestureDetector(
+//                                     onTap: () {
+//                                       _updateProductRating(product.id, index + 1);
+//                                     },
+//                                     child: Icon(
+//                                       index < rating
+//                                           ? Icons.star_rounded
+//                                           : Icons.star_border_rounded,
+//                                       color: Colors.amber,
+//                                       size: 36,
+//                                     ),
+//                                   );
+//                                 }),
+//                               ),
+//                               const SizedBox(height: 8),
+//                               Text(
+//                                 rating == 0
+//                                     ? 'Tap to rate'
+//                                     : '$rating ${rating == 1 ? 'star' : 'stars'}',
+//                                 textAlign: TextAlign.center,
+//                                 style: theme.textTheme.bodyMedium?.copyWith(
+//                                   fontWeight: FontWeight.w600,
+//                                   color: theme.colorScheme.primary,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 16),
+
+//                               // Review Text Field
+//                               Text(
+//                                 'Your Review (Optional)',
+//                                 style: theme.textTheme.bodyMedium?.copyWith(
+//                                   fontWeight: FontWeight.w600,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 8),
+//                               TextField(
+//                                 onChanged: (value) {
+//                                   _updateProductReview(product.id, value);
+//                                 },
+//                                 maxLines: 3,
+//                                 decoration: InputDecoration(
+//                                   hintText: 'Share your experience with ${product.name}...',
+//                                   border: OutlineInputBorder(
+//                                     borderRadius: BorderRadius.circular(12),
+//                                     borderSide: BorderSide(
+//                                       color: theme.dividerColor,
+//                                     ),
+//                                   ),
+//                                   focusedBorder: OutlineInputBorder(
+//                                     borderRadius: BorderRadius.circular(12),
+//                                     borderSide: BorderSide(
+//                                       color: theme.colorScheme.primary,
+//                                     ),
+//                                   ),
+//                                   contentPadding: const EdgeInsets.all(12),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ],
+//                     ],
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+
+//           // Submit Button
+//           Container(
+//             width: double.infinity,
+//             padding: const EdgeInsets.all(16),
+//             decoration: BoxDecoration(
+//               color: theme.cardColor,
+//               border: Border(
+//                 top: BorderSide(
+//                   color: theme.dividerColor.withOpacity(0.3),
+//                 ),
+//               ),
+//             ),
+//             child: Row(
+//               children: [
+//                 Expanded(
+//                   child: ElevatedButton(
+//                     onPressed: _isSubmitting || !_hasSelectedProducts
+//                         ? null
+//                         : _submitReviews,
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: theme.colorScheme.primary,
+//                       foregroundColor: theme.colorScheme.onPrimary,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                       ),
+//                       padding: const EdgeInsets.symmetric(vertical: 16),
+//                     ),
+//                     child: _isSubmitting
+//                         ? const SizedBox(
+//                             width: 20,
+//                             height: 20,
+//                             child: CircularProgressIndicator(
+//                               strokeWidth: 2,
+//                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+//                             ),
+//                           )
+//                         : Text(
+//                             'Submit ${selectedCount > 0 ? '$selectedCount ' : ''}Review${selectedCount > 1 ? 's' : ''}',
+//                             style: theme.textTheme.bodyLarge?.copyWith(
+//                               fontWeight: FontWeight.w600,
+//                             ),
+//                           ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // lib/screens/booking_screen.dart
+// import 'dart:convert';
+
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+// import 'package:intl/intl.dart';
+// import 'package:veegify/model/order.dart';
+// import 'package:veegify/provider/BookingProvider/booking_provider.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:veegify/views/Booking/accepted_order_polling_screen.dart';
+
+// class BookingScreen extends StatefulWidget {
+//   final String? userId;
+
+//   const BookingScreen({super.key, required this.userId});
+
+//   @override
+//   State<BookingScreen> createState() => _BookingScreenState();
+// }
+
+// class _BookingScreenState extends State<BookingScreen>
+//     with SingleTickerProviderStateMixin {
+//   late TabController _tabController;
+//   late OrderProvider _orderProvider;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _tabController = TabController(length: 3, vsync: this);
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       _orderProvider = Provider.of<OrderProvider>(context, listen: false);
+//       _orderProvider.loadAllOrders(widget.userId.toString());
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     _tabController.dispose();
+//     super.dispose();
+//   }
+
+//   Widget _buildList(List<Order> items) {
+//     if (items.isEmpty) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(
+//               Icons.receipt_long,
+//               size: 80,
+//               color: Theme.of(context)
+//                   .colorScheme
+//                   .onSurface
+//                   .withOpacity(0.3),
+//             ),
+//             const SizedBox(height: 16),
+//             Text(
+//               'No orders found',
+//               style:
+//                   Theme.of(context).textTheme.titleMedium?.copyWith(
+//                         color: Theme.of(context)
+//                             .colorScheme
+//                             .onSurface
+//                             .withOpacity(0.5),
+//                       ),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+//     return ListView.separated(
+//       padding: const EdgeInsets.all(16),
+//       itemCount: items.length,
+//       separatorBuilder: (_, __) => const SizedBox(height: 16),
+//       itemBuilder: (context, index) {
+//         final order = items[index];
+//         return _buildModernBookingCard(order);
+//       },
+//     );
+//   }
+
+//   Widget _buildModernBookingCard(Order order) {
+//     final theme = Theme.of(context);
+//     final isDarkMode = theme.brightness == Brightness.dark;
+//     final firstProduct =
+//         order.products.isNotEmpty ? order.products.first : null;
+//     final status = order.orderStatus.toLowerCase();
+
+//     // Status colors with theme compatibility
+//     Color statusColor;
+//     Color statusBgColor;
+//     IconData statusIcon;
+
+//     switch (status) {
+//       case 'pending':
+//         statusColor = Colors.orange;
+//         statusBgColor = Colors.orange.withOpacity(0.1);
+//         statusIcon = Icons.access_time;
+//         break;
+//       case 'accepted':
+//       case 'rider accepted':
+//       case 'picked':
+//         statusColor = Colors.blue;
+//         statusBgColor = Colors.blue.withOpacity(0.1);
+//         statusIcon = Icons.check_circle;
+//         break;
+//       case 'completed':
+//       case 'delivered':
+//         statusColor = Colors.green;
+//         statusBgColor = Colors.green.withOpacity(0.1);
+//         statusIcon = Icons.done_all;
+//         break;
+//       case 'cancelled':
+//         statusColor = Colors.red;
+//         statusBgColor = Colors.red.withOpacity(0.1);
+//         statusIcon = Icons.cancel;
+//         break;
+//       default:
+//         statusColor = Colors.grey;
+//         statusBgColor = Colors.grey.withOpacity(0.1);
+//         statusIcon = Icons.help;
+//     }
+
+//     return Container(
+//       decoration: BoxDecoration(
+//         color: theme.cardColor,
+//         borderRadius: BorderRadius.circular(20),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black
+//                 .withOpacity(isDarkMode ? 0.2 : 0.08),
+//             blurRadius: 12,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Padding(
+//         padding: const EdgeInsets.all(20),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Header with Restaurant Info
+//             Row(
+//               children: [
+//                 Container(
+//                   width: 50,
+//                   height: 50,
+//                   decoration: BoxDecoration(
+//                     color: theme.colorScheme.primary
+//                         .withOpacity(0.1),
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: firstProduct?.image != null
+//                       ? ClipRRect(
+//                           borderRadius: BorderRadius.circular(12),
+//                           child: Image.network(
+//                             firstProduct!.image!,
+//                             width: 50,
+//                             height: 50,
+//                             fit: BoxFit.cover,
+//                             errorBuilder:
+//                                 (context, error, stackTrace) {
+//                               return Icon(
+//                                 Icons.restaurant,
+//                                 color: theme.colorScheme.primary,
+//                                 size: 24,
+//                               );
+//                             },
+//                           ),
+//                         )
+//                       : Icon(
+//                           Icons.restaurant,
+//                           color: theme.colorScheme.primary,
+//                           size: 24,
+//                         ),
+//                 ),
+//                 const SizedBox(width: 12),
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment:
+//                         CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         order.restaurant.restaurantName,
+//                         style: theme.textTheme.titleMedium
+//                             ?.copyWith(
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                         maxLines: 1,
+//                         overflow: TextOverflow.ellipsis,
+//                       ),
+//                       const SizedBox(height: 4),
+//                       Text(
+//                         order.restaurant.locationName,
+//                         style: theme.textTheme.bodySmall
+//                             ?.copyWith(
+//                           color: theme.colorScheme.onSurface
+//                               .withOpacity(0.6),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 Container(
+//                   padding:
+//                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//                   decoration: BoxDecoration(
+//                     color: statusBgColor,
+//                     borderRadius: BorderRadius.circular(20),
+//                   ),
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Icon(
+//                         statusIcon,
+//                         size: 14,
+//                         color: statusColor,
+//                       ),
+//                       const SizedBox(width: 6),
+//                       Text(
+//                         order.orderStatus,
+//                         style: TextStyle(
+//                           color: statusColor,
+//                           fontWeight: FontWeight.w600,
+//                           fontSize: 12,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             // Order Items Preview
+//             if (order.products.isNotEmpty) ...[
+//               Container(
+//                 padding: const EdgeInsets.all(12),
+//                 decoration: BoxDecoration(
+//                   color: theme.colorScheme.surface
+//                       .withOpacity(0.5),
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
+//                 child: Column(
+//                   crossAxisAlignment:
+//                       CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       'Order Items',
+//                       style: theme.textTheme.bodyMedium
+//                           ?.copyWith(
+//                         fontWeight: FontWeight.w600,
+//                       ),
+//                     ),
+//                     const SizedBox(height: 8),
+//                     ...order.products
+//                         .take(2)
+//                         .map((product) => Padding(
+//                               padding:
+//                                   const EdgeInsets.symmetric(
+//                                       vertical: 4),
+//                               child: Row(
+//                                 children: [
+//                                   Container(
+//                                     width: 4,
+//                                     height: 4,
+//                                     decoration:
+//                                         BoxDecoration(
+//                                       color:
+//                                           theme.colorScheme.primary,
+//                                       shape: BoxShape.circle,
+//                                     ),
+//                                   ),
+//                                   const SizedBox(width: 8),
+//                                   Expanded(
+//                                     child: Text(
+//                                       '${product.quantity}x ${product.name}',
+//                                       style: theme.textTheme
+//                                           .bodySmall,
+//                                     ),
+//                                   ),
+//                                   Text(
+//                                     '₹${(product.quantity * product.basePrice).toStringAsFixed(2)}',
+//                                     style: theme
+//                                         .textTheme.bodySmall
+//                                         ?.copyWith(
+//                                       fontWeight:
+//                                           FontWeight.w600,
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             )),
+//                     if (order.products.length > 2)
+//                       Padding(
+//                         padding:
+//                             const EdgeInsets.only(top: 4),
+//                         child: Text(
+//                           '+ ${order.products.length - 2} more items',
+//                           style: theme.textTheme.bodySmall
+//                               ?.copyWith(
+//                             color: theme.colorScheme
+//                                 .onSurface
+//                                 .withOpacity(0.6),
+//                             fontStyle: FontStyle.italic,
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
+//             ],
+
+//             // Order Summary
+//             Container(
+//               padding: const EdgeInsets.all(16),
+//               decoration: BoxDecoration(
+//                 gradient: LinearGradient(
+//                   begin: Alignment.topLeft,
+//                   end: Alignment.bottomRight,
+//                   colors: [
+//                     theme.colorScheme.primary
+//                         .withOpacity(0.05),
+//                     theme.colorScheme.primary
+//                         .withOpacity(0.1),
+//                   ],
+//                 ),
+//                 borderRadius: BorderRadius.circular(16),
+//                 border: Border.all(
+//                   color: theme.colorScheme.primary
+//                       .withOpacity(0.2),
+//                 ),
+//               ),
+//               child: Row(
+//                 mainAxisAlignment:
+//                     MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Column(
+//                     crossAxisAlignment:
+//                         CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         'Total Amount',
+//                         style: theme.textTheme.bodySmall
+//                             ?.copyWith(
+//                           color: theme.colorScheme.onSurface
+//                               .withOpacity(0.7),
+//                         ),
+//                       ),
+//                       Text(
+//                         '₹${order.totalPayable.toStringAsFixed(2)}',
+//                         style: theme.textTheme.titleLarge
+//                             ?.copyWith(
+//                           fontWeight: FontWeight.bold,
+//                           color:
+//                               theme.colorScheme.primary,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   Column(
+//                     crossAxisAlignment:
+//                         CrossAxisAlignment.end,
+//                     children: [
+//                       Text(
+//                         '${order.totalItems} items',
+//                         style: theme.textTheme.bodySmall
+//                             ?.copyWith(
+//                           color: theme.colorScheme.onSurface
+//                               .withOpacity(0.7),
+//                         ),
+//                       ),
+//                       Text(
+//                         order.createdAt == null
+//                             ? 'N/A'
+//                             : DateFormat('MMM dd, hh:mm a')
+//                                 .format(order
+//                                     .createdAt!
+//                                     .toLocal()),
+//                         style: theme.textTheme.bodySmall
+//                             ?.copyWith(
+//                           color: theme.colorScheme.onSurface
+//                               .withOpacity(0.6),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ),
+
+//             const SizedBox(height: 16),
+
+//             // Action Buttons
+//             Row(
+//               children: [
+//                 // View Details Button
+//                 Expanded(
+//                   child: ElevatedButton(
+//                     onPressed: () {
+//                       if (status == 'pending' ||
+//                           status == 'rider accepted' ||
+//                           status == 'accepted' ||
+//                           status == 'picked') {
+//                         Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                             builder: (_) =>
+//                                 AcceptedOrderPollingScreen(
+//                               userId: order.userId,
+//                               orderId: order.id,
+//                             ),
+//                           ),
+//                         );
+//                       } else {
+//                         showModalBottomSheet(
+//                           context: context,
+//                           backgroundColor:
+//                               theme.cardColor,
+//                           shape:
+//                               const RoundedRectangleBorder(
+//                             borderRadius:
+//                                 BorderRadius.vertical(
+//                               top: Radius.circular(20),
+//                             ),
+//                           ),
+//                           builder: (_) =>
+//                               _buildOrderDetailSheet(order),
+//                         );
+//                       }
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor:
+//                           theme.colorScheme.primary,
+//                       foregroundColor:
+//                           theme.colorScheme.onPrimary,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius:
+//                             BorderRadius.circular(12),
+//                       ),
+//                       padding:
+//                           const EdgeInsets.symmetric(
+//                               vertical: 12),
+//                     ),
+//                     child: Row(
+//                       mainAxisAlignment:
+//                           MainAxisAlignment.center,
+//                       children: [
+//                         const Icon(
+//                           Icons.remove_red_eye_outlined,
+//                           size: 20,
+//                         ),
+//                         const SizedBox(width: 8),
+//                         Text(
+//                           'View Details',
+//                           style: theme.textTheme
+//                               .bodyMedium
+//                               ?.copyWith(
+//                             fontWeight:
+//                                 FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+
+//                 // Add Review Button (only for completed orders)
+//                 if (status == 'completed' ||
+//                     status == 'delivered') ...[
+//                   const SizedBox(width: 12),
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       _showReviewDialog(order);
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Colors.amber,
+//                       foregroundColor: Colors.black,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius:
+//                             BorderRadius.circular(12),
+//                       ),
+//                       padding: const EdgeInsets.symmetric(
+//                           vertical: 12, horizontal: 16),
+//                     ),
+//                     child: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         const Icon(
+//                           Icons.star,
+//                           size: 20,
+//                         ),
+//                         const SizedBox(width: 4),
+//                         Text(
+//                           'Review',
+//                           style: theme.textTheme
+//                               .bodyMedium
+//                               ?.copyWith(
+//                             fontWeight:
+//                                 FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   void _showReviewDialog(Order order) {
+//     showDialog(
+//       context: context,
+//       builder: (context) => ReviewDialog(
+//         order: order,
+//         userId: widget.userId!,
+//         onReviewSubmitted: () {
+//           // Refresh orders after review submission
+//           _orderProvider
+//               .loadAllOrders(widget.userId.toString());
+//         },
+//         // If later you have existing restaurant review:
+//         // existingRestaurantReviewId: order.restaurantReviewId,
+//         // existingRestaurantRating: order.restaurantRating,
+//         // existingRestaurantComment: order.restaurantReviewComment,
+//       ),
+//     );
+//   }
+
+//   Widget _buildOrderDetailSheet(Order order) {
+//     final theme = Theme.of(context);
+
+//     return Padding(
+//       padding: const EdgeInsets.all(24),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         crossAxisAlignment:
+//             CrossAxisAlignment.start,
+//         children: [
+//           Center(
+//             child: Container(
+//               width: 40,
+//               height: 4,
+//               decoration: BoxDecoration(
+//                 color: theme.colorScheme.onSurface
+//                     .withOpacity(0.3),
+//                 borderRadius: BorderRadius.circular(2),
+//               ),
+//             ),
+//           ),
+//           const SizedBox(height: 20),
+//           Text(
+//             'Order Details',
+//             style: theme.textTheme.titleLarge?.copyWith(
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           const SizedBox(height: 16),
+
+//           // Make the content scrollable
+//           Expanded(
+//             child: SingleChildScrollView(
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 crossAxisAlignment:
+//                     CrossAxisAlignment.start,
+//                 children: [
+//                   _buildDetailRow('Order ID', order.id, theme),
+//                   _buildDetailRow(
+//                       'Restaurant',
+//                       order.restaurant.restaurantName,
+//                       theme),
+//                   _buildDetailRow(
+//                     'Address',
+//                     '${order.deliveryAddress.street}, ${order.deliveryAddress.city}',
+//                     theme,
+//                   ),
+//                   _buildDetailRow(
+//                       'Payment',
+//                       '${order.paymentMethod} • ${order.paymentStatus}',
+//                       theme),
+//                   _buildDetailRow(
+//                       'Total',
+//                       '₹${order.totalPayable.toStringAsFixed(2)}',
+//                       theme),
+//                   const SizedBox(height: 16),
+//                   Text(
+//                     'Items Ordered',
+//                     style: theme.textTheme.titleMedium
+//                         ?.copyWith(
+//                       fontWeight: FontWeight.w600,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 12),
+//                   ...order.products.map(
+//                     (p) => Container(
+//                       margin: const EdgeInsets.only(bottom: 8),
+//                       padding: const EdgeInsets.all(12),
+//                       decoration: BoxDecoration(
+//                         color: theme.colorScheme.surface
+//                             .withOpacity(0.5),
+//                         borderRadius:
+//                             BorderRadius.circular(12),
+//                       ),
+//                       child: Row(
+//                         children: [
+//                           Expanded(
+//                             child: Column(
+//                               crossAxisAlignment:
+//                                   CrossAxisAlignment.start,
+//                               children: [
+//                                 Text(
+//                                   p.name,
+//                                   style: theme.textTheme
+//                                       .bodyMedium
+//                                       ?.copyWith(
+//                                     fontWeight:
+//                                         FontWeight.w600,
+//                                   ),
+//                                 ),
+//                                 Text(
+//                                   '${p.quantity} x ₹${p.basePrice.toStringAsFixed(2)}',
+//                                   style: theme.textTheme
+//                                       .bodySmall
+//                                       ?.copyWith(
+//                                     color: theme
+//                                         .colorScheme
+//                                         .onSurface
+//                                         .withOpacity(0.6),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                           Text(
+//                             '₹${(p.quantity * p.basePrice).toStringAsFixed(2)}',
+//                             style: theme.textTheme
+//                                 .bodyLarge
+//                                 ?.copyWith(
+//                               fontWeight: FontWeight.bold,
+//                               color: theme
+//                                   .colorScheme.primary,
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 20),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildDetailRow(
+//       String label, String value, ThemeData theme) {
+//     return Padding(
+//       padding:
+//           const EdgeInsets.symmetric(vertical: 8),
+//       child: Row(
+//         crossAxisAlignment:
+//             CrossAxisAlignment.start,
+//         children: [
+//           SizedBox(
+//             width: 100,
+//             child: Text(
+//               label,
+//               style: theme.textTheme.bodyMedium
+//                   ?.copyWith(
+//                 fontWeight: FontWeight.w600,
+//                 color: theme.colorScheme.onSurface
+//                     .withOpacity(0.7),
+//               ),
+//             ),
+//           ),
+//           const SizedBox(width: 12),
+//           Expanded(
+//             child: Text(
+//               value,
+//               style: theme.textTheme.bodyMedium,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final provider = Provider.of<OrderProvider>(context);
+//     final isLoading =
+//         provider.state == OrdersState.loading;
+//     final error = provider.error;
+
+//     return Scaffold(
+//       backgroundColor: theme.scaffoldBackgroundColor,
+//       appBar: AppBar(
+//         leading: IconButton(
+//           onPressed: () {
+//             Navigator.pop(context);
+//           },
+//           icon: Icon(
+//             Icons.arrow_back_ios,
+//             color: theme.colorScheme.onSurface,
+//           ),
+//         ),
+//         centerTitle: true,
+//         title: Text(
+//           "My Orders",
+//           style: theme.textTheme.titleLarge?.copyWith(
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         elevation: 0,
+//         backgroundColor: Colors.transparent,
+//         bottom: PreferredSize(
+//           preferredSize: const Size.fromHeight(80),
+//           child: Container(
+//             padding: const EdgeInsets.symmetric(
+//                 horizontal: 16, vertical: 12),
+//             child: TabBar(
+//               controller: _tabController,
+//               isScrollable: true,
+//               indicator: BoxDecoration(
+//                 color: theme.colorScheme.primary,
+//                 borderRadius: BorderRadius.circular(12),
+//                 boxShadow: [
+//                   BoxShadow(
+//                     color: theme.colorScheme.primary
+//                         .withOpacity(0.3),
+//                     blurRadius: 8,
+//                     offset: const Offset(0, 3),
+//                   ),
+//                 ],
+//               ),
+//               indicatorSize: TabBarIndicatorSize.tab,
+//               indicatorColor: Colors.transparent,
+//               overlayColor: MaterialStateProperty.all(
+//                   Colors.transparent),
+//               dividerColor: Colors.transparent,
+//               labelColor:
+//                   theme.colorScheme.onPrimary,
+//               unselectedLabelColor: theme
+//                   .colorScheme.onSurface
+//                   .withOpacity(0.7),
+//               labelPadding:
+//                   const EdgeInsets.symmetric(
+//                       horizontal: 12),
+//               tabs: [
+//                 _buildTabItem(
+//                   "Today",
+//                   Icons.calendar_today,
+//                   _tabController.index == 0,
+//                   theme,
+//                 ),
+//                 _buildTabItem(
+//                   "All Orders",
+//                   Icons.receipt_long,
+//                   _tabController.index == 1,
+//                   theme,
+//                 ),
+//                 _buildTabItem(
+//                   "Cancelled",
+//                   Icons.cancel,
+//                   _tabController.index == 2,
+//                   theme,
+//                 ),
+//               ],
+//               onTap: (i) {
+//                 setState(() {});
+//               },
+//             ),
+//           ),
+//         ),
+//       ),
+//       body: isLoading
+//           ? const Center(
+//               child: CircularProgressIndicator(),
+//             )
+//           : error != null
+//               ? Center(
+//                   child: Column(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Icon(
+//                         Icons.error_outline,
+//                         size: 64,
+//                         color: theme.colorScheme.error,
+//                       ),
+//                       const SizedBox(height: 16),
+//                       Text(
+//                         'Error loading orders',
+//                         style: theme
+//                             .textTheme.titleMedium
+//                             ?.copyWith(
+//                           color:
+//                               theme.colorScheme.error,
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Text(
+//                         error,
+//                         textAlign: TextAlign.center,
+//                         style: theme
+//                             .textTheme.bodyMedium
+//                             ?.copyWith(
+//                           color: theme
+//                               .colorScheme.onSurface
+//                               .withOpacity(0.6),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 16),
+//                       ElevatedButton(
+//                         onPressed: () =>
+//                             provider.loadAllOrders(
+//                                 widget.userId
+//                                     .toString()),
+//                         style:
+//                             ElevatedButton.styleFrom(
+//                           backgroundColor: theme
+//                               .colorScheme.primary,
+//                           foregroundColor: theme
+//                               .colorScheme.onPrimary,
+//                         ),
+//                         child: const Text('Try Again'),
+//                       ),
+//                     ],
+//                   ),
+//                 )
+//               : TabBarView(
+//                   controller: _tabController,
+//                   children: [
+//                     RefreshIndicator(
+//                       onRefresh: () => provider
+//                           .loadAllOrders(widget.userId
+//                               .toString()),
+//                       child: _buildList(
+//                           provider.todayOrders),
+//                     ),
+//                     RefreshIndicator(
+//                       onRefresh: () => provider
+//                           .loadAllOrders(widget.userId
+//                               .toString()),
+//                       child: _buildList(
+//                           provider.orders),
+//                     ),
+//                     RefreshIndicator(
+//                       onRefresh: () => provider
+//                           .loadAllOrders(widget.userId
+//                               .toString()),
+//                       child: _buildList(
+//                           provider.cancelledOrders),
+//                     ),
+//                   ],
+//                 ),
+//     );
+//   }
+
+//   Widget _buildTabItem(String text, IconData icon,
+//       bool isSelected, ThemeData theme) {
+//     return Tab(
+//       child: Container(
+//         padding: const EdgeInsets.symmetric(
+//             horizontal: 20, vertical: 12),
+//         decoration: BoxDecoration(
+//           color: isSelected
+//               ? theme.colorScheme.primary
+//               : theme.cardColor,
+//           borderRadius: BorderRadius.circular(12),
+//           border: isSelected
+//               ? null
+//               : Border.all(color: theme.dividerColor),
+//           boxShadow: isSelected
+//               ? [
+//                   BoxShadow(
+//                     color: theme.colorScheme.primary
+//                         .withOpacity(0.3),
+//                     blurRadius: 8,
+//                     offset: const Offset(0, 3),
+//                   ),
+//                 ]
+//               : [
+//                   BoxShadow(
+//                     color: Colors.black
+//                         .withOpacity(0.05),
+//                     blurRadius: 3,
+//                     offset: const Offset(0, 1),
+//                   ),
+//                 ],
+//         ),
+//         child: Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(
+//               icon,
+//               size: 18,
+//               color: isSelected
+//                   ? theme.colorScheme.onPrimary
+//                   : theme.colorScheme.onSurface
+//                       .withOpacity(0.7),
+//             ),
+//             const SizedBox(width: 8),
+//             Text(
+//               text,
+//               style: TextStyle(
+//                 fontWeight: FontWeight.w600,
+//                 fontSize: 14,
+//                 color: isSelected
+//                     ? theme.colorScheme.onPrimary
+//                     : theme.colorScheme.onSurface
+//                         .withOpacity(0.7),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// // ========== REVIEW DIALOG WITH RESTAURANT + PRODUCTS ==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// lib/screens/booking_screen.dart
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:veegify/model/order.dart';
+import 'package:veegify/provider/BookingProvider/booking_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:veegify/views/Booking/accepted_order_polling_screen.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:veegify/utils/invoice_html_builder.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
+
+class BookingScreen extends StatefulWidget {
+  final String? userId;
+
+  const BookingScreen({super.key, required this.userId});
+
+  @override
+  State<BookingScreen> createState() => _BookingScreenState();
+}
+
+class _BookingScreenState extends State<BookingScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late OrderProvider _orderProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      _orderProvider.loadAllOrders(widget.userId.toString());
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  /// Generate and download invoice PDF for a given order
+Future<void> _downloadInvoice(Order order) async {
+  final theme = Theme.of(context);
+Future<String> assetToBase64(String assetPath) async {
+  final bytes = await rootBundle.load(assetPath);
+  return base64Encode(bytes.buffer.asUint8List());
+}
+  try {
+    final vegPlaceholderBase64 =
+     assetToBase64('assets/images/logo.png');
+    // 1) Build your colorful HTML
+    final htmlContent = buildInvoiceHtml(order);
+
+    // 2) Show system PDF preview / print dialog
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async {
+        // This converts your HTML to PDF bytes
+        final pdfBytes = await Printing.convertHtml(
+          format: format,
+          html: htmlContent,
+        );
+
+        return pdfBytes;
+      },
+    );
+  } catch (e, st) {
+    debugPrint('Invoice error: $e\n$st');
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to generate invoice: $e'),
+        backgroundColor: theme.colorScheme.error,
+      ),
+    );
+  }
+}
+
+
+  Widget _buildList(List<Order> items) {
+    if (items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_long,
+              size: 80,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No orders found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.5),
+                  ),
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final order = items[index];
+        return _buildModernBookingCard(order);
+      },
+    );
+  }
+
+  Widget _buildModernBookingCard(Order order) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final firstProduct = order.products.isNotEmpty ? order.products.first : null;
+    final status = order.orderStatus.toLowerCase();
+
+    // Status colors with theme compatibility
+    Color statusColor;
+    Color statusBgColor;
+    IconData statusIcon;
+
+    switch (status) {
+      case 'pending':
+        statusColor = Colors.orange;
+        statusBgColor = Colors.orange.withOpacity(0.1);
+        statusIcon = Icons.access_time;
+        break;
+      case 'accepted':
+      case 'rider accepted':
+      case 'picked':
+        statusColor = Colors.blue;
+        statusBgColor = Colors.blue.withOpacity(0.1);
+        statusIcon = Icons.check_circle;
+        break;
+      case 'completed':
+      case 'delivered':
+        statusColor = Colors.green;
+        statusBgColor = Colors.green.withOpacity(0.1);
+        statusIcon = Icons.done_all;
+        break;
+      case 'cancelled':
+        statusColor = Colors.red;
+        statusBgColor = Colors.red.withOpacity(0.1);
+        statusIcon = Icons.cancel;
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusBgColor = Colors.grey.withOpacity(0.1);
+        statusIcon = Icons.help;
+    }
+
+    final isCompletedOrDelivered =
+        status == 'completed' || status == 'delivered';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with Restaurant Info
+            Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: firstProduct?.image != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            firstProduct!.image!,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.restaurant,
+                                color: theme.colorScheme.primary,
+                                size: 24,
+                              );
+                            },
+                          ),
+                        )
+                      : Icon(
+                          Icons.restaurant,
+                          color: theme.colorScheme.primary,
+                          size: 24,
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.restaurant.restaurantName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        order.restaurant.locationName,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        statusIcon,
+                        size: 14,
+                        color: statusColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        order.orderStatus,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Order Items Preview
+            if (order.products.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Order Items',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...order.products.take(2).map(
+                          (product) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${product.quantity}x ${product.name}',
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                                Text(
+                                  '₹${(product.quantity * product.basePrice).toStringAsFixed(2)}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    if (order.products.length > 2)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '+ ${order.products.length - 2} more items',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.6),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Order Summary
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary.withOpacity(0.05),
+                    theme.colorScheme.primary.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.2),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Amount',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      Text(
+                        '₹${order.totalPayable.toStringAsFixed(2)}',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${order.totalItems} items',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      Text(
+                        order.createdAt == null
+                            ? 'N/A'
+                            : DateFormat('MMM dd, hh:mm a')
+                                .format(order.createdAt!.toLocal()),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Action Buttons
+            Row(
+              children: [
+                // Invoice download icon (only for completed/delivered)
+                if (isCompletedOrDelivered) ...[
+                  IconButton(
+                    onPressed: () => _downloadInvoice(order),
+                    tooltip: 'Download Invoice',
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          theme.colorScheme.primary.withOpacity(0.1),
+                      foregroundColor: theme.colorScheme.primary,
+                    ),
+                    icon: const Icon(Icons.download_rounded),
+                    
+                  ),
+                  const SizedBox(width: 8),
+                ],
+
+                // View Details Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (status == 'pending' ||
+                          status == 'rider accepted' ||
+                          status == 'accepted' ||
+                          status == 'picked') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AcceptedOrderPollingScreen(
+                              userId: order.userId,
+                              orderId: order.id,
+                            ),
+                          ),
+                        );
+                      } else {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: theme.cardColor,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder: (_) => _buildOrderDetailSheet(order),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.remove_red_eye_outlined,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'View Details',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Add Review Button (only for completed orders)
+                if (isCompletedOrDelivered) ...[
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () {
+                      _showReviewDialog(order);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Review',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReviewDialog(Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => ReviewDialog(
+        order: order,
+        userId: widget.userId!,
+        onReviewSubmitted: () {
+          _orderProvider.loadAllOrders(widget.userId.toString());
+        },
+      ),
+    );
+  }
+
+  Widget _buildOrderDetailSheet(Order order) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Order Details',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Make the content scrollable
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow('Order ID', order.id, theme),
+                  _buildDetailRow(
+                      'Restaurant', order.restaurant.restaurantName, theme),
+                  _buildDetailRow(
+                    'Address',
+                    '${order.deliveryAddress.street}, ${order.deliveryAddress.city}',
+                    theme,
+                  ),
+                  _buildDetailRow(
+                      'Payment',
+                      '${order.paymentMethod} • ${order.paymentStatus}',
+                      theme),
+                  _buildDetailRow(
+                      'Total',
+                      '₹${order.totalPayable.toStringAsFixed(2)}',
+                      theme),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Items Ordered',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...order.products.map(
+                    (p) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  p.name,
+                                  style:
+                                      theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Text(
+                                  '${p.quantity} x ₹${p.basePrice.toStringAsFixed(2)}',
+                                  style:
+                                      theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '₹${(p.quantity * p.basePrice).toStringAsFixed(2)}',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(
+      String label, String value, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final provider = Provider.of<OrderProvider>(context);
+    final isLoading = provider.state == OrdersState.loading;
+    final error = provider.error;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        centerTitle: true,
+        title: Text(
+          "My Orders",
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicator: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorColor: Colors.transparent,
+              overlayColor:
+                  MaterialStateProperty.all(Colors.transparent),
+              dividerColor: Colors.transparent,
+              labelColor: theme.colorScheme.onPrimary,
+              unselectedLabelColor:
+                  theme.colorScheme.onSurface.withOpacity(0.7),
+              labelPadding:
+                  const EdgeInsets.symmetric(horizontal: 12),
+              tabs: [
+                _buildTabItem(
+                  "Today",
+                  Icons.calendar_today,
+                  _tabController.index == 0,
+                  theme,
+                ),
+                _buildTabItem(
+                  "All Orders",
+                  Icons.receipt_long,
+                  _tabController.index == 1,
+                  theme,
+                ),
+                _buildTabItem(
+                  "Cancelled",
+                  Icons.cancel,
+                  _tabController.index == 2,
+                  theme,
+                ),
+              ],
+              onTap: (i) {
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : error != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading orders',
+                        style:
+                            theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error,
+                        textAlign: TextAlign.center,
+                        style:
+                            theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface
+                              .withOpacity(0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => provider
+                            .loadAllOrders(widget.userId.toString()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              theme.colorScheme.primary,
+                          foregroundColor:
+                              theme.colorScheme.onPrimary,
+                        ),
+                        child: const Text('Try Again'),
+                      ),
+                    ],
+                  ),
+                )
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    RefreshIndicator(
+                      onRefresh: () =>
+                          provider.loadAllOrders(widget.userId.toString()),
+                      child: _buildList(provider.todayOrders),
+                    ),
+                    RefreshIndicator(
+                      onRefresh: () =>
+                          provider.loadAllOrders(widget.userId.toString()),
+                      child: _buildList(provider.orders),
+                    ),
+                    RefreshIndicator(
+                      onRefresh: () =>
+                          provider.loadAllOrders(widget.userId.toString()),
+                      child: _buildList(provider.cancelledOrders),
+                    ),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildTabItem(
+      String text, IconData icon, bool isSelected, ThemeData theme) {
+    return Tab(
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border:
+              isSelected ? null : Border.all(color: theme.dividerColor),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: isSelected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ====== ReviewDialog stays as in your original code (no changes needed) ======
+
+class ReviewDialog extends StatefulWidget {
+  final Order order;
+  final String userId;
+  final VoidCallback onReviewSubmitted;
+
+  /// Optional existing restaurant review info (for edit/delete use later).
+  final String? existingRestaurantReviewId;
+  final int? existingRestaurantRating;
+  final String? existingRestaurantComment;
+
+  const ReviewDialog({
+    super.key,
+    required this.order,
+    required this.userId,
+    required this.onReviewSubmitted,
+    this.existingRestaurantReviewId,
+    this.existingRestaurantRating,
+    this.existingRestaurantComment,
+  });
+
+  @override
+  State<ReviewDialog> createState() =>
+      _ReviewDialogState();
+}
+
+class _ReviewDialogState extends State<ReviewDialog> {
+  // Product review state (multi-product, your original logic)
+  final Map<String, Map<String, dynamic>>
+      _selectedProducts = {};
+  bool _isSubmitting = false;
+
+  // Restaurant review state
+  int _restaurantRating = 0;
+  final TextEditingController
+      _restaurantReviewController =
+      TextEditingController();
+  bool _isRestaurantSubmitting = false;
+  String? _restaurantReviewId; // if set => edit/delete
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize all products as unselected
+    for (final product in widget.order.products) {
+      _selectedProducts[product.id] = {
+        'selected': false,
+        'rating': 0,
+        'review': '',
+        'product': product,
+        'isSubmitting': false,
+      };
+    }
+
+    // Initialize restaurant review if existing
+    _restaurantReviewId =
+        widget.existingRestaurantReviewId;
+    _restaurantRating =
+        widget.existingRestaurantRating ?? 0;
+    _restaurantReviewController.text =
+        widget.existingRestaurantComment ?? '';
+  }
+
+  // ---------- RESTAURANT REVIEW API CALLS ----------
+
+  Future<void> _submitRestaurantReview() async {
+    if (_restaurantRating == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'Please rate the restaurant'),
+          backgroundColor: Theme.of(context)
+              .colorScheme
+              .error,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isRestaurantSubmitting = true;
+    });
+
+    try {
+      // Adjust this if your Order model exposes restaurantId differently
+      final restaurantId =
+          widget.order.restaurant.id;
+
+      final uri = _restaurantReviewId == null
+          ? Uri.parse(
+              'http://31.97.206.144:5051/api/addrestureview')
+          : Uri.parse(
+              'http://31.97.206.144:5051/api/editrestureview');
+
+      final payload = {
+        "restaurantId": restaurantId,
+        "userId": widget.userId,
+        "stars": _restaurantRating,
+        "comment": _restaurantReviewController.text
+            .trim(),
+        if (_restaurantReviewId != null)
+          "reviewId": _restaurantReviewId,
+      };
+
+      final response =
+          await (_restaurantReviewId == null
+              ? http.post(
+                  uri,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: json.encode(payload),
+                )
+              : http.put(
+                  uri,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: json.encode(payload),
+                ));
+
+      if (response.statusCode == 200) {
+        // Optionally, parse and update _restaurantReviewId from response if backend returns it.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _restaurantReviewId == null
+                  ? 'Restaurant review added successfully!'
+                  : 'Restaurant review updated successfully!',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception(
+            'Failed to submit restaurant review');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Error submitting restaurant review: $e'),
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRestaurantSubmitting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteRestaurantReview() async {
+    if (_restaurantReviewId == null) return;
+
+    setState(() {
+      _isRestaurantSubmitting = true;
+    });
+
+    try {
+      final restaurantId =
+          widget.order.restaurant.id;
+
+      final uri = Uri.parse(
+          'http://31.97.206.144:5051/api/deleterestureview');
+
+      final payload = {
+        "restaurantId": restaurantId,
+        "userId": widget.userId,
+        "reviewId": _restaurantReviewId,
+      };
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _restaurantReviewId = null;
+          _restaurantRating = 0;
+          _restaurantReviewController.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Restaurant review deleted'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception(
+            'Failed to delete restaurant review');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Error deleting restaurant review: $e'),
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRestaurantSubmitting = false;
+        });
+      }
+    }
+  }
+
+  // ---------- PRODUCT REVIEWS (YOUR ORIGINAL MULTI-PRODUCT LOGIC) ----------
+
+  Future<void> _submitReviews() async {
+    // Check if at least one product is selected and rated
+    final selectedProducts = _selectedProducts.entries
+        .where((entry) =>
+            entry.value['selected'] == true)
+        .toList();
+
+    print("----- Selected Products -----");
+    for (final entry in selectedProducts) {
+      final product =
+          entry.value['product'] as OrderProduct;
+      final rating = entry.value['rating'];
+      final review = entry.value['review'];
+
+      print("Product ID: ${product.recommendedId}");
+      print("Product Name: ${product.name}");
+      print("Rating: $rating");
+      print("Review: $review");
+      print("-----------------------------");
+    }
+
+    if (selectedProducts.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'Please select at least one product to review'),
+          backgroundColor: Theme.of(context)
+              .colorScheme
+              .error,
+        ),
+      );
+      return;
+    }
+
+    // Check if all selected products have ratings
+    for (final entry in selectedProducts) {
+      if (entry.value['rating'] == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Please rate ${entry.value['product'].name}'),
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .error,
+          ),
+        );
+        return;
+      }
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    bool allSuccessful = true;
+    int successfulCount = 0;
+
+    // Submit reviews for all selected products with separate API calls
+    for (final entry in selectedProducts) {
+      final product =
+          entry.value['product'] as OrderProduct;
+      final rating = entry.value['rating'] as int;
+      final review = entry.value['review'] as String;
+
+      // Update individual product submitting state
+      setState(() {
+        _selectedProducts[product.id]
+            ?['isSubmitting'] = true;
+      });
+
+      try {
+        print(
+            "ProductId:${product.recommendedId}, UserId:${widget.userId}");
+
+        final response = await http.post(
+          Uri.parse(
+              'http://31.97.206.144:5051/api/addreview'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            "productId": product.recommendedId,
+            "userId": widget.userId,
+            "stars": rating,
+            "comment": review.trim(),
+          }),
+        );
+
+        print("Product review response: ${response.body}");
+
+        if (response.statusCode == 200) {
+          successfulCount++;
+          // Mark as submitted
+          setState(() {
+            _selectedProducts[product.id]
+                ?['selected'] = false;
+          });
+        } else {
+          allSuccessful = false;
+          throw Exception(
+              'Failed to submit review for ${product.name}');
+        }
+      } catch (e) {
+        allSuccessful = false;
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Error submitting review for ${product.name}: $e'),
+              backgroundColor:
+                  Theme.of(context)
+                      .colorScheme
+                      .error,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _selectedProducts[product.id]
+                ?['isSubmitting'] = false;
+          });
+        }
+      }
+    }
+
+    setState(() {
+      _isSubmitting = false;
+    });
+
+    if (mounted) {
+      if (allSuccessful) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '$successfulCount review${successfulCount > 1 ? 's' : ''} submitted successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        widget.onReviewSubmitted();
+        Navigator.of(context).pop();
+      } else if (successfulCount > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '$successfulCount review${successfulCount > 1 ? 's' : ''} submitted, but some failed'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        // Don't close the dialog if some failed, let user retry
+      }
+    }
+  }
+
+  void _toggleProductSelection(String productId) {
+    setState(() {
+      final current =
+          _selectedProducts[productId]?['selected'] ==
+              true;
+      _selectedProducts[productId]?['selected'] =
+          !current;
+    });
+  }
+
+  void _updateProductRating(
+      String productId, int rating) {
+    setState(() {
+      _selectedProducts[productId]?['rating'] =
+          rating;
+    });
+  }
+
+  void _updateProductReview(
+      String productId, String review) {
+    setState(() {
+      _selectedProducts[productId]?['review'] =
+          review;
+    });
+  }
+
+  bool get _hasSelectedProducts {
+    return _selectedProducts.entries.any(
+        (entry) => entry.value['selected'] == true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedCount =
+        _selectedProducts.entries
+            .where((entry) =>
+                entry.value['selected'] == true)
+            .length;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () =>
+              Navigator.of(context).pop(),
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+        title: Text(
+          'Rate Your Order',
+          style: theme.textTheme.titleLarge
+              ?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          if (_hasSelectedProducts)
+            Padding(
+              padding:
+                  const EdgeInsets.only(right: 16),
+              child: Text(
+                '$selectedCount selected',
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(
+                  color:
+                      theme.colorScheme.primary,
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Order Info Card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.dividerColor
+                      .withOpacity(0.3),
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary
+                        .withOpacity(0.1),
+                    borderRadius:
+                        BorderRadius.circular(12),
+                  ),
+                  child: widget.order.products
+                              .isNotEmpty &&
+                          widget.order.products.first
+                                  .image !=
+                              null
+                      ? ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(12),
+                          child: Image.network(
+                            widget.order.products.first
+                                .image
+                                .toString(),
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Icon(
+                          Icons.restaurant,
+                          color: theme
+                              .colorScheme.primary,
+                          size: 24,
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.order.restaurant
+                            .restaurantName,
+                        style: theme.textTheme
+                            .titleMedium
+                            ?.copyWith(
+                          fontWeight:
+                              FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Order #${widget.order.id.substring(0, 8)}...',
+                        style: theme.textTheme
+                            .bodySmall
+                            ?.copyWith(
+                          color: theme
+                              .colorScheme.onSurface
+                              .withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Instruction
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: theme.colorScheme.primary
+                .withOpacity(0.05),
+            child: Text(
+              'Rate the restaurant and products in this order',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
+          // CONTENT: restaurant review + product list
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // ===== RESTAURANT REVIEW SECTION =====
+                Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius:
+                        BorderRadius.circular(12),
+                    border: Border.all(
+                      color: theme.colorScheme.primary
+                          .withOpacity(0.4),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.restaurant,
+                            color: theme
+                                .colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Restaurant Rating',
+                            style: theme.textTheme
+                                .titleMedium
+                                ?.copyWith(
+                              fontWeight:
+                                  FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center,
+                          children:
+                              List.generate(5, (index) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _restaurantRating =
+                                      index + 1;
+                                });
+                              },
+                              child: Icon(
+                                index <
+                                        _restaurantRating
+                                    ? Icons
+                                        .star_rounded
+                                    : Icons
+                                        .star_border_rounded,
+                                color: Colors.amber,
+                                size: 36,
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Text(
+                          _restaurantRating == 0
+                              ? 'Tap to rate the restaurant'
+                              : '$_restaurantRating ${_restaurantRating == 1 ? 'star' : 'stars'}',
+                          style: theme
+                              .textTheme.bodyMedium
+                              ?.copyWith(
+                            fontWeight:
+                                FontWeight.w600,
+                            color: theme
+                                .colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Your Review for Restaurant (Optional)',
+                        style: theme
+                            .textTheme.bodyMedium
+                            ?.copyWith(
+                          fontWeight:
+                              FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller:
+                            _restaurantReviewController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText:
+                              'Share your experience with the restaurant...',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                                    12),
+                            borderSide: BorderSide(
+                              color:
+                                  theme.dividerColor,
+                            ),
+                          ),
+                          focusedBorder:
+                              OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                                    12),
+                            borderSide: BorderSide(
+                              color: theme.colorScheme
+                                  .primary,
+                            ),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.all(12),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed:
+                                  _isRestaurantSubmitting
+                                      ? null
+                                      : _submitRestaurantReview,
+                              style: ElevatedButton
+                                  .styleFrom(
+                                backgroundColor: theme
+                                    .colorScheme
+                                    .primary,
+                                foregroundColor: theme
+                                    .colorScheme
+                                    .onPrimary,
+                                shape:
+                                    RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                              12),
+                                ),
+                                padding:
+                                     EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              child:
+                                  _isRestaurantSubmitting
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child:
+                                              CircularProgressIndicator(
+                                            strokeWidth:
+                                                2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<
+                                                    Color>(
+                                              Colors
+                                                  .white,
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          _restaurantReviewId ==
+                                                  null
+                                              ? 'Submit Restaurant Review'
+                                              : 'Update Restaurant Review',
+                                          style: theme
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                            fontWeight:
+                                                FontWeight
+                                                    .w600,
+                                          ),
+                                        ),
+                            ),
+                          ),
+                          if (_restaurantReviewId !=
+                              null) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed:
+                                  _isRestaurantSubmitting
+                                      ? null
+                                      : _deleteRestaurantReview,
+                              icon: Icon(
+                                Icons.delete_outline,
+                                color: theme
+                                    .colorScheme
+                                    .error,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ===== PRODUCTS LIST FOR REVIEW =====
+                ListView.builder(
+                  physics:
+                      const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount:
+                      widget.order.products.length,
+                  itemBuilder: (context, index) {
+                    final product =
+                        widget.order.products[index];
+                    final productData =
+                        _selectedProducts[product.id]!;
+                    final isSelected =
+                        productData['selected'] as bool;
+                    final rating =
+                        productData['rating'] as int;
+                    final review =
+                        productData['review'] as String;
+                    final isSubmitting =
+                        productData['isSubmitting']
+                            as bool;
+
+                    return Container(
+                      margin:
+                          const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        border: isSelected
+                            ? Border.all(
+                                color: theme
+                                    .colorScheme
+                                    .primary,
+                                width: 2,
+                              )
+                            : null,
+                      ),
+                      child: Column(
+                        children: [
+                          // Product Header with Checkbox
+                          ListTile(
+                            leading: Checkbox(
+                              value: isSelected,
+                              onChanged: (value) {
+                                _toggleProductSelection(
+                                    product.id);
+                              },
+                              activeColor: theme
+                                  .colorScheme.primary,
+                            ),
+                            title: Text(
+                              product.name,
+                              style: theme.textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                fontWeight:
+                                    FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${product.quantity}x • ₹${(product.quantity * product.basePrice).toStringAsFixed(2)}',
+                              style: theme.textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                color: theme
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
+                              ),
+                            ),
+                            trailing: isSubmitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child:
+                                        CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : null,
+                          ),
+
+                          // Rating Section (only show if selected)
+                          if (isSelected) ...[
+                            Divider(
+                              height: 1,
+                              color: theme.dividerColor
+                                  .withOpacity(0.3),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.all(
+                                      16),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+                                children: [
+                                  // Star Rating
+                                  Text(
+                                    'Rate this product',
+                                    style: theme
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                      fontWeight:
+                                          FontWeight
+                                              .w600,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      height: 12),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment
+                                            .center,
+                                    children: List
+                                        .generate(
+                                            5,
+                                            (index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          _updateProductRating(
+                                              product.id,
+                                              index +
+                                                  1);
+                                        },
+                                        child: Icon(
+                                          index <
+                                                  rating
+                                              ? Icons
+                                                  .star_rounded
+                                              : Icons
+                                                  .star_border_rounded,
+                                          color: Colors
+                                              .amber,
+                                          size: 36,
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                  const SizedBox(
+                                      height: 8),
+                                  Text(
+                                    rating == 0
+                                        ? 'Tap to rate'
+                                        : '$rating ${rating == 1 ? 'star' : 'stars'}',
+                                    textAlign:
+                                        TextAlign.center,
+                                    style: theme
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                      fontWeight:
+                                          FontWeight
+                                              .w600,
+                                      color: theme
+                                          .colorScheme
+                                          .primary,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      height: 16),
+
+                                  // Review Text Field
+                                  Text(
+                                    'Your Review (Optional)',
+                                    style: theme
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                      fontWeight:
+                                          FontWeight
+                                              .w600,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      height: 8),
+                                  TextField(
+                                    onChanged:
+                                        (value) {
+                                      _updateProductReview(
+                                          product.id,
+                                          value);
+                                    },
+                                    maxLines: 3,
+                                    decoration:
+                                        InputDecoration(
+                                      hintText:
+                                          'Share your experience with ${product.name}...',
+                                      border:
+                                          OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius
+                                                .circular(
+                                                    12),
+                                        borderSide:
+                                            BorderSide(
+                                          color: theme
+                                              .dividerColor,
+                                        ),
+                                      ),
+                                      focusedBorder:
+                                          OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius
+                                                .circular(
+                                                    12),
+                                        borderSide:
+                                            BorderSide(
+                                          color: theme
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets
+                                              .all(
+                                                  12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Submit Button (for product reviews)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              border: Border(
+                top: BorderSide(
+                  color: theme.dividerColor
+                      .withOpacity(0.3),
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ||
+                            !_hasSelectedProducts
+                        ? null
+                        : _submitReviews,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme
+                          .colorScheme.primary,
+                      foregroundColor: theme
+                          .colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                                12),
+                      ),
+                      padding:
+                          const EdgeInsets.symmetric(
+                              vertical: 16),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<
+                                      Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Submit ${selectedCount > 0 ? '$selectedCount ' : ''}Review${selectedCount > 1 ? 's' : ''}',
+                            style: theme
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                              fontWeight:
+                                  FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _restaurantReviewController.dispose();
+    super.dispose();
+  }
+}
+

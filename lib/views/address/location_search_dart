@@ -1,0 +1,173 @@
+// screens/location_search_screen.dart
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
+
+class LocationSearchScreen extends StatefulWidget {
+  const LocationSearchScreen({super.key});
+
+  @override
+  State<LocationSearchScreen> createState() => _LocationSearchScreenState();
+}
+
+class _LocationSearchScreenState extends State<LocationSearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _suggestions = [];
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Search for places using Nominatim API
+  Future<void> _searchPlaces(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _suggestions = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?format=json&q=$query&limit=5&addressdetails=1');
+
+    try {
+      final response = await http.get(url, headers: {
+        'User-Agent': 'FlutterApp',
+      });
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _suggestions = data.map((item) => {
+            'display_name': item['display_name'],
+            'lat': double.parse(item['lat']),
+            'lon': double.parse(item['lon']),
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print('Error searching places: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Handle suggestion selection
+  void _selectLocation(Map<String, dynamic> suggestion) {
+    final result = {
+      'location': LatLng(suggestion['lat'], suggestion['lon']),
+      'address': suggestion['display_name'],
+    };
+    Navigator.pop(context, result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Search Location'),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        titleTextStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      body: Column(
+        children: [
+          // Search input field
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Enter location name...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _suggestions = [];
+                          });
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              onChanged: (value) {
+                // Debounce search to avoid too many API calls
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (_searchController.text == value) {
+                    _searchPlaces(value);
+                  }
+                });
+              },
+            ),
+          ),
+          
+          // Loading indicator
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            ),
+          
+          // Suggestions list
+          Expanded(
+            child: _suggestions.isEmpty && !_isLoading
+                ? Center(
+                    child: Text(
+                      _searchController.text.isEmpty
+                          ? 'Type to search for locations'
+                          : 'No locations found',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _suggestions.length,
+                    itemBuilder: (context, index) {
+                      final suggestion = _suggestions[index];
+                      return ListTile(
+                        leading: const Icon(Icons.location_on, color: Colors.grey),
+                        title: Text(
+                          suggestion['display_name'],
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => _selectLocation(suggestion),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,602 @@
+// lib/utils/invoice_html_builder.dart
+import 'package:intl/intl.dart';
+import 'package:veegify/model/order.dart';
+
+/// Build colorful Veegify invoice HTML (pista green, pure veg)
+///
+/// NOTE: Replace `VEGIFY_LOGO_URL` in the HTML with your real logo URL,
+/// or dynamically replace it in Dart before calling Printing.convertHtml.
+String buildInvoiceHtml(Order order) {
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df");
+  final rowsBuffer = StringBuffer();
+
+  // Use backend prices; fallback to basePrice if needed
+  for (int i = 0; i < order.products.length; i++) {
+    final item = order.products[i];
+
+    final unitPrice =
+        (item.price > 0 ? item.price : item.basePrice); // safest
+    final lineTotal = unitPrice * item.quantity;
+
+    // Plate label
+    String plateLabel = '';
+    if (item.isHalfPlate == true) plateLabel = 'Half Plate';
+    if (item.isFullPlate == true) plateLabel = 'Full Plate';
+
+    final imgTag = (item.image != null && item.image!.isNotEmpty)
+        ? '<img src="${item.image}" class="item-img" />'
+        : '<div class="item-img placeholder"></div>';
+
+    rowsBuffer.writeln("""
+      <tr class="item-row">
+        <td class="cell index">${i + 1}</td>
+        <td class="cell name">
+          <div class="item-info">
+            $imgTag
+            <div class="item-text">
+              <div class="item-name">${item.name}</div>
+              ${plateLabel.isNotEmpty ? '<div class="item-meta">$plateLabel</div>' : ''}
+            </div>
+          </div>
+        </td>
+        <td class="cell qty">${item.quantity}</td>
+        <td class="cell price">₹${unitPrice.toStringAsFixed(2)}</td>
+        <td class="cell total">₹${lineTotal.toStringAsFixed(2)}</td>
+      </tr>
+    """);
+  }
+
+  final createdAt = (order.createdAt ?? DateTime.now()).toLocal();
+  final formattedDate =
+      DateFormat('dd MMM yyyy, hh:mm a').format(createdAt);
+
+  // Use backend values directly
+  final itemsTotal = order.subTotal;
+  final gst = order.gstAmount;
+  final platform = order.platformCharge;
+  final delivery = order.deliveryCharge;
+  final coupon = order.couponDiscount;
+  final grandTotal = order.totalPayable;
+
+  final itemsTotalFormatted = itemsTotal.toStringAsFixed(2);
+  final gstFormatted = gst.toStringAsFixed(2);
+  final platformFormatted = platform.toStringAsFixed(2);
+  final deliveryFormatted = delivery.toStringAsFixed(2);
+  final couponFormatted = coupon.toStringAsFixed(2);
+  final grandTotalFormatted = grandTotal.toStringAsFixed(2);
+
+  final deliveryAddress =
+      '${order.deliveryAddress.street}, ${order.deliveryAddress.city}';
+
+  return """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Invoice ${order.id}</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f5f7f5;
+      color: #223322;
+    }
+
+    .invoice-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      border: 1px solid #e1f2e1;
+    }
+
+    /* HEADER */
+
+    .invoice-header {
+      background: linear-gradient(135deg, #7cb342, #9ccc65);
+      padding: 20px 24px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .brand-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      opacity: 0.95;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .veg-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1.5px solid #1b5e20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8f5e9;
+    }
+
+    .veg-icon-inner {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1b5e20;
+    }
+
+    .invoice-meta {
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .invoice-id {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #c8e6c9;
+    }
+
+    .invoice-body {
+      padding: 20px 24px 24px;
+    }
+
+    /* SECTION TITLES */
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7f8d7f;
+      margin-bottom: 6px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .info-card {
+      flex: 1;
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f7fbf7;
+      border: 1px solid #e1f2e1;
+    }
+
+    .info-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9e9e9e;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 500;
+      color: #334433;
+    }
+
+    .info-muted {
+      font-size: 12px;
+      color: #6b7b6b;
+      margin-top: 2px;
+      white-space: pre-line;
+    }
+
+    .items-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(124, 179, 66, 0.12);
+      color: #33691e;
+      font-weight: 500;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #33691e;
+    }
+
+    /* TABLE */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: #f1f8e9;
+    }
+
+    th {
+      padding: 10px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #558b2f;
+      text-align: left;
+      border-bottom: 1px solid #dcedc8;
+      white-space: nowrap;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(4) {
+      text-align: center;
+    }
+
+    .item-row:nth-child(odd) {
+      background: #fafdf7;
+    }
+
+    .item-row:nth-child(even) {
+      background: #ffffff;
+    }
+
+    .cell {
+      padding: 9px 8px;
+      font-size: 12px;
+      border-bottom: 1px solid #eef3ea;
+    }
+
+    .cell.index {
+      color: #9e9e9e;
+      width: 32px;
+    }
+
+    .cell.name {
+      font-weight: 500;
+      color: #374837;
+    }
+
+    .cell.qty {
+      font-weight: 500;
+    }
+
+    .cell.price,
+    .cell.total {
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid #dce8dc;
+    }
+
+    .item-img.placeholder {
+      background: #e8f5e9;
+    }
+
+    .item-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .item-meta {
+      font-size: 10px;
+      color: #689f38;
+    }
+
+    /* SUMMARY */
+
+    .summary-row {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .summary-card {
+      width: 280px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f7fbf7;
+      border: 1px solid #dcedc8;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #566656;
+    }
+
+    .summary-line.muted {
+      color: #8a9a8a;
+    }
+
+    .summary-line.total {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(85, 139, 47, 0.5);
+      font-weight: 700;
+      font-size: 13px;
+      color: #2e7d32;
+    }
+
+    .summary-label {
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+
+    .summary-value.negative {
+      color: #c62828;
+    }
+
+    /* FOOTER */
+
+    .footer-note {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px dashed #e0e0e0;
+      font-size: 11px;
+      color: #8a9a8a;
+      text-align: center;
+    }
+
+    .footer-brand {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+
+    .brand-logo {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #A5D6A7; /* pista green border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E8F5E9;
+}
+
+.brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  </style>
+</head>
+<body>
+  <div class="invoice-wrapper">
+    <div class="invoice-header">
+      <div class="brand">
+<div class="brand-logo">
+  <img 
+    src="https://vegiffyy.com/static/media/veggifylogo.3fc4c1893871f095e27e.jpeg" 
+    alt="Veegify Logo" 
+    class="brand-logo-img"
+  />
+</div>
+
+        <div class="brand-text">
+          <div class="brand-title">Veegify</div>
+          <div class="brand-subtitle">
+            <span>Pure Veg Delivery</span>
+            <span class="veg-icon">
+              <span class="veg-icon-inner"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <div class="invoice-id">Invoice #${order.id}</div>
+        <div style="margin-top: 4px;">
+          <span style="opacity: 0.85;">Date:</span>
+          <span style="font-weight: 500;">
+            $formattedDate
+          </span>
+        </div>
+        <div class="status-chip">
+          <span class="status-dot"></span>
+          <span>Delivered</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      <div class="section-title">Order & Customer</div>
+      <div class="info-row">
+        <div class="info-card">
+          <div class="info-label">Order Details</div>
+          <div class="info-value">Order ID: ${order.id}</div>
+          <div class="info-muted">
+            Placed on: $formattedDate
+          </div>
+          <div class="info-muted">
+            Payment: ${order.paymentMethod} • ${order.paymentStatus}
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-label">Deliver To</div>
+          <div class="info-value">$deliveryAddress</div>
+          <div class="info-muted">
+            Items: ${order.totalItems}
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Restaurant</div>
+      <div class="info-row" style="margin-bottom: 12px;">
+        <div class="info-card">
+          <div class="info-label">Restaurant</div>
+          <div class="info-value">${order.restaurant.restaurantName}</div>
+          <div class="info-muted">
+            ${order.restaurant.locationName}
+          </div>
+        </div>
+      </div>
+
+      <div class="items-section-title">
+        <div class="section-title" style="margin-bottom: 0;">Items</div>
+        <div class="badge">
+          <span class="badge-dot"></span>
+          ${order.products.length} item${order.products.length == 1 ? '' : 's'}
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Item Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsBuffer.toString()}
+        </tbody>
+      </table>
+
+      <div class="summary-row">
+        <div class="summary-card">
+          <div class="summary-line">
+            <span class="summary-label">Items Total</span>
+            <span class="summary-value">₹$itemsTotalFormatted</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-label">GST</span>
+            <span class="summary-value">₹$gstFormatted</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-label">Platform Charge</span>
+            <span class="summary-value">₹$platformFormatted</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-label">Delivery Charge</span>
+            <span class="summary-value">₹$deliveryFormatted</span>
+          </div>
+          ${coupon > 0 ? '''
+          <div class="summary-line muted">
+            <span class="summary-label">Coupon Discount</span>
+            <span class="summary-value negative">-₹$couponFormatted</span>
+          </div>
+          ''' : ''}
+          <div class="summary-line total">
+            <span class="summary-label">Grand Total</span>
+            <span class="summary-value">₹$grandTotalFormatted</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Thank you for ordering with <span class="footer-brand">Veegify</span>.<br/>
+        For help with this order, contact support with your invoice ID.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  """;
+}
