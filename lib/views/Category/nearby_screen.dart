@@ -1,3 +1,6 @@
+
+// import 'dart:async';
+
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
 // import 'package:veegify/views/home/recommended_screen.dart';
@@ -13,12 +16,57 @@
 // }
 
 // class _NearbyScreenState extends State<NearbyScreen> {
+//   Timer? _pollingTimer;
+//   bool _hasLoadedOnce = false;
+
 //   @override
 //   void initState() {
 //     super.initState();
+
 //     // Fetch nearby restaurants when screen loads
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       context.read<RestaurantProvider>().getNearbyRestaurants(widget.userId);
+//     WidgetsBinding.instance.addPostFrameCallback((_) async {
+//       await _fetchNearby(initial: true);
+//       _startPolling();
+//     });
+//   }
+
+//   @override
+//   void dispose() {
+//     _pollingTimer?.cancel();
+//     super.dispose();
+//   }
+
+//   Future<void> _fetchNearby({bool initial = false}) async {
+//     try {
+//       await context
+//           .read<RestaurantProvider>()
+//           .getNearbyRestaurants(widget.userId);
+
+//       if (initial && mounted) {
+//         setState(() {
+//           _hasLoadedOnce = true;
+//         });
+//       }
+//     } catch (e) {
+//       debugPrint('Error fetching nearby restaurants: $e');
+//     }
+//   }
+
+//   void _startPolling() {
+//     _pollingTimer?.cancel();
+//     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+//       if (!mounted) {
+//         _pollingTimer?.cancel();
+//         return;
+//       }
+//       try {
+//         await context
+//             .read<RestaurantProvider>()
+//             .getNearbyRestaurants(widget.userId);
+//         // No loader here – silent refresh.
+//       } catch (e) {
+//         debugPrint('Error polling nearby restaurants: $e');
+//       }
 //     });
 //   }
 
@@ -26,7 +74,7 @@
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
-    
+
 //     return Scaffold(
 //       backgroundColor: theme.scaffoldBackgroundColor,
 //       body: SafeArea(
@@ -34,7 +82,8 @@
 //           children: [
 //             // Custom AppBar
 //             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+//               padding:
+//                   const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
 //               child: SizedBox(
 //                 height: 48,
 //                 child: Stack(
@@ -69,7 +118,8 @@
 //             Expanded(
 //               child: Consumer<RestaurantProvider>(
 //                 builder: (context, restaurantProvider, child) {
-//                   if (restaurantProvider.isLoading) {
+//                   // Show loader ONLY before first data comes
+//                   if (restaurantProvider.isLoading && !_hasLoadedOnce) {
 //                     return Center(
 //                       child: CircularProgressIndicator(
 //                         color: theme.colorScheme.primary,
@@ -85,13 +135,16 @@
 //                           Icon(
 //                             Icons.restaurant,
 //                             size: 64,
-//                             color: theme.colorScheme.onSurface.withOpacity(0.5),
+//                             color: theme.colorScheme.onSurface
+//                                 .withOpacity(0.5),
 //                           ),
 //                           const SizedBox(height: 16),
 //                           Text(
 //                             "No nearby restaurants found",
-//                             style: theme.textTheme.bodyLarge?.copyWith(
-//                               color: theme.colorScheme.onSurface.withOpacity(0.7),
+//                             style:
+//                                 theme.textTheme.bodyLarge?.copyWith(
+//                               color: theme.colorScheme.onSurface
+//                                   .withOpacity(0.7),
 //                             ),
 //                           ),
 //                         ],
@@ -100,173 +153,278 @@
 //                   }
 
 //                   return ListView.builder(
-//                     padding: const EdgeInsets.symmetric(horizontal: 16),
+//                     padding:
+//                         const EdgeInsets.symmetric(horizontal: 16),
 //                     itemCount: restaurantProvider.nearbyRestaurants.length,
 //                     itemBuilder: (context, index) {
-//                       final restaurant = restaurantProvider.nearbyRestaurants[index];
-//                       return GestureDetector(
-//                         onTap: () => Navigator.push(
-//                           context,
-//                           MaterialPageRoute(
-//                             builder: (context) => RestaurantDetailScreen(restaurantId: restaurant.id,),
-//                           ),
-//                         ),
-//                         child: Container(
-//                           padding: const EdgeInsets.all(8),
-//                           margin: const EdgeInsets.only(bottom: 16),
-//                           decoration: BoxDecoration(
-//                             borderRadius: BorderRadius.circular(12),
-//                             border: Border.all(
-//                               color: isDark ? Colors.grey[700]! : const Color.fromARGB(255, 196, 196, 196),
-//                             ),
-//                             color: isDark ? theme.cardColor : Colors.white,
-//                             boxShadow: [
-//                               if (!isDark)
-//                               BoxShadow(
-//                                 color: Colors.grey.withOpacity(0.15),
-//                                 blurRadius: 8,
-//                                 offset: const Offset(0, 4),
-//                               )
-//                             ],
-//                           ),
-//                           child: Row(
-//                             children: [
-//                               // Restaurant Image with Heart Icon
-//                               Stack(
-//                                 children: [
-//                                   ClipRRect(
-//                                     borderRadius: BorderRadius.circular(12),
-//                                     child: Image.network(
-//                                       restaurant.imageUrl ?? '', // Handle null image
-//                                       height: 122,
-//                                       width: 122,
-//                                       fit: BoxFit.cover,
-//                                       errorBuilder: (context, error, stackTrace) {
-//                                         return Container(
-//                                           height: 122,
-//                                           width: 122,
-//                                           decoration: BoxDecoration(
-//                                             color: isDark ? Colors.grey[700] : Colors.grey[200],
-//                                             borderRadius: BorderRadius.circular(12),
-//                                           ),
-//                                           child: Icon(
-//                                             Icons.restaurant,
-//                                             size: 40,
-//                                             color: theme.colorScheme.onSurface.withOpacity(0.5),
-//                                           ),
-//                                         );
-//                                       },
-//                                       loadingBuilder: (context, child, loadingProgress) {
-//                                         if (loadingProgress == null) return child;
-//                                         return Container(
-//                                           height: 122,
-//                                           width: 122,
-//                                           decoration: BoxDecoration(
-//                                             color: isDark ? Colors.grey[700] : Colors.grey[200],
-//                                             borderRadius: BorderRadius.circular(12),
-//                                           ),
-//                                           child: Center(
-//                                             child: CircularProgressIndicator(
-//                                               color: theme.colorScheme.primary,
-//                                             ),
-//                                           ),
-//                                         );
-//                                       },
-//                                     ),
-//                                   ),
-//                                   Positioned(
-//                                     top: 8,
-//                                     right: 8,
-//                                     child: CircleAvatar(
-//                                       radius: 14,
-//                                       backgroundColor: isDark ? theme.cardColor : Colors.white,
-//                                       child: Icon(
-//                                         Icons.favorite_border,
-//                                         size: 16,
-//                                         color: theme.colorScheme.onSurface,
-//                                       ),
-//                                     ),
-//                                   )
-//                                 ],
-//                               ),
+//                       final restaurant =
+//                           restaurantProvider.nearbyRestaurants[index];
 
-//                               // Restaurant Info
-//                               Expanded(
-//                                 child: Padding(
-//                                   padding: const EdgeInsets.symmetric(
-//                                     vertical: 12,
-//                                     horizontal: 12,
+//                       // ⚠️ Change `restaurant.status` to your actual field if named differently.
+//                       final bool isActive =
+//                           (restaurant.status ?? '').toLowerCase() == 'active';
+
+//                       return GestureDetector(
+//                         onTap: isActive
+//                             ? () => Navigator.push(
+//                                   context,
+//                                   MaterialPageRoute(
+//                                     builder: (context) =>
+//                                         RestaurantDetailScreen(
+//                                       restaurantId: restaurant.id,
+//                                     ),
 //                                   ),
-//                                   child: Column(
-//                                     crossAxisAlignment: CrossAxisAlignment.start,
-//                                     children: [
-//                                       Text(
-//                                         restaurant.restaurantName ?? 'Restaurant Name',
-//                                         style: theme.textTheme.titleMedium?.copyWith(
-//                                           fontWeight: FontWeight.w700,
-//                                           color: theme.colorScheme.onSurface,
-//                                         ),
-//                                       ),
-//                                       const SizedBox(height: 4),
-//                                       Row(
-//                                         children: [
-//                                           Container(
-//                                             padding: const EdgeInsets.all(4),
+//                                 )
+//                             : null, // Block navigation when inactive
+//                         child: Opacity(
+//                           opacity: isActive ? 1.0 : 0.55, // Dim inactive vendors
+//                           child: Container(
+//                             padding: const EdgeInsets.all(8),
+//                             margin: const EdgeInsets.only(bottom: 16),
+//                             decoration: BoxDecoration(
+//                               borderRadius: BorderRadius.circular(12),
+//                               border: Border.all(
+//                                 color: isDark
+//                                     ? Colors.grey[700]!
+//                                     : const Color.fromARGB(
+//                                         255, 196, 196, 196),
+//                               ),
+//                               color: isDark
+//                                   ? theme.cardColor
+//                                   : Colors.white,
+//                               boxShadow: [
+//                                 BoxShadow(
+//                                   color: isActive
+//                                       ? Colors.grey.withOpacity(0.15)
+//                                       : Colors.black.withOpacity(
+//                                           0.6), // darker when closed
+//                                   blurRadius: isActive ? 8 : 10,
+//                                   offset: const Offset(0, 4),
+//                                 ),
+//                               ],
+//                             ),
+//                             child: Row(
+//                               children: [
+//                                 // Restaurant Image with Heart Icon + Closed overlay
+//                                 Stack(
+//                                   children: [
+//                                     ClipRRect(
+//                                       borderRadius:
+//                                           BorderRadius.circular(12),
+//                                       child: Image.network(
+//                                         restaurant.imageUrl ?? '',
+//                                         height: 122,
+//                                         width: 122,
+//                                         fit: BoxFit.cover,
+//                                         errorBuilder: (context, error,
+//                                             stackTrace) {
+//                                           return Container(
+//                                             height: 122,
+//                                             width: 122,
 //                                             decoration: BoxDecoration(
-//                                               borderRadius: BorderRadius.circular(20),
-//                                               color: theme.colorScheme.primary,
+//                                               color: isDark
+//                                                   ? Colors.grey[700]
+//                                                   : Colors.grey[200],
+//                                               borderRadius:
+//                                                   BorderRadius.circular(12),
 //                                             ),
 //                                             child: Icon(
-//                                               Icons.star,
-//                                               size: 16,
-//                                               color: theme.colorScheme.onPrimary,
+//                                               Icons.restaurant,
+//                                               size: 40,
+//                                               color: theme
+//                                                   .colorScheme.onSurface
+//                                                   .withOpacity(0.5),
 //                                             ),
-//                                           ),
-//                                           const SizedBox(width: 4),
-//                                           Text(
-//                                             restaurant.rating?.toString() ?? '0.0',
-//                                             style: theme.textTheme.bodyMedium?.copyWith(
-//                                               fontWeight: FontWeight.w600,
-//                                               color: theme.colorScheme.onSurface,
+//                                           );
+//                                         },
+//                                         loadingBuilder: (context, child,
+//                                             loadingProgress) {
+//                                           if (loadingProgress == null) {
+//                                             return child;
+//                                           }
+//                                           return Container(
+//                                             height: 122,
+//                                             width: 122,
+//                                             decoration: BoxDecoration(
+//                                               color: isDark
+//                                                   ? Colors.grey[700]
+//                                                   : Colors.grey[200],
+//                                               borderRadius:
+//                                                   BorderRadius.circular(12),
 //                                             ),
-//                                           ),
-//                                         ],
-//                                       ),
-//                                       const SizedBox(height: 4),
-//                                       Text(
-//                                         restaurant.description ?? 'No description available',
-//                                         style: theme.textTheme.bodySmall?.copyWith(
-//                                           color: theme.colorScheme.onSurface.withOpacity(0.7),
-//                                         ),
-//                                         maxLines: 2,
-//                                         overflow: TextOverflow.ellipsis,
-//                                       ),
-//                                       const SizedBox(height: 6),
-//                                       Row(
-//                                         children: [
-//                                           Icon(
-//                                             Icons.location_on,
-//                                             color: theme.colorScheme.primary,
-//                                             size: 16,
-//                                           ),
-//                                           const SizedBox(width: 4),
-//                                           Expanded(
-//                                             child: Text(
-//                                               restaurant.locationName.split(' ').first,
-//                                               style: theme.textTheme.bodySmall?.copyWith(
-//                                                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                                             child: Center(
+//                                               child:
+//                                                   CircularProgressIndicator(
+//                                                 color: theme
+//                                                     .colorScheme.primary,
 //                                               ),
-//                                               maxLines: 2,
-//                                               overflow: TextOverflow.ellipsis,
 //                                             ),
-//                                           )
-//                                         ],
-//                                       )
-//                                     ],
+//                                           );
+//                                         },
+//                                       ),
+//                                     ),
+
+//                                     // Favorite icon (still just UI)
+//                                     Positioned(
+//                                       top: 8,
+//                                       right: 8,
+//                                       child: CircleAvatar(
+//                                         radius: 14,
+//                                         backgroundColor: isDark
+//                                             ? theme.cardColor
+//                                             : Colors.white,
+//                                         child: Icon(
+//                                           Icons.favorite_border,
+//                                           size: 16,
+//                                           color: theme
+//                                               .colorScheme.onSurface,
+//                                         ),
+//                                       ),
+//                                     ),
+
+//                                     // Vendor Closed overlay
+//                                     if (!isActive)
+//                                       Positioned.fill(
+//                                         child: Container(
+//                                           decoration: BoxDecoration(
+//                                             color: Colors.black
+//                                                 .withOpacity(0.55),
+//                                             borderRadius:
+//                                                 BorderRadius.circular(12),
+//                                           ),
+//                                           child: Center(
+//                                             child: Container(
+//                                               padding:
+//                                                   const EdgeInsets.symmetric(
+//                                                 horizontal: 14,
+//                                                 vertical: 6,
+//                                               ),
+//                                               decoration: BoxDecoration(
+//                                                 color: Colors.red.shade600
+//                                                     .withOpacity(0.9),
+//                                                 borderRadius:
+//                                                     BorderRadius.circular(10),
+//                                               ),
+//                                               child: const Text(
+//                                                 "Vendor Closed",
+//                                                 style: TextStyle(
+//                                                   color: Colors.white,
+//                                                   fontWeight: FontWeight.bold,
+//                                                   fontSize: 13,
+//                                                 ),
+//                                               ),
+//                                             ),
+//                                           ),
+//                                         ),
+//                                       ),
+//                                   ],
+//                                 ),
+
+//                                 // Restaurant Info
+//                                 Expanded(
+//                                   child: Padding(
+//                                     padding: const EdgeInsets.symmetric(
+//                                       vertical: 12,
+//                                       horizontal: 12,
+//                                     ),
+//                                     child: Column(
+//                                       crossAxisAlignment:
+//                                           CrossAxisAlignment.start,
+//                                       children: [
+//                                         Text(
+//                                           restaurant.restaurantName ??
+//                                               'Restaurant Name',
+//                                           style: theme
+//                                               .textTheme.titleMedium
+//                                               ?.copyWith(
+//                                             fontWeight: FontWeight.w700,
+//                                             color: theme
+//                                                 .colorScheme.onSurface,
+//                                           ),
+//                                         ),
+//                                         const SizedBox(height: 4),
+//                                         Row(
+//                                           children: [
+//                                             Container(
+//                                               padding:
+//                                                   const EdgeInsets.all(4),
+//                                               decoration: BoxDecoration(
+//                                                 borderRadius:
+//                                                     BorderRadius.circular(20),
+//                                                 color: theme
+//                                                     .colorScheme.primary,
+//                                               ),
+//                                               child: Icon(
+//                                                 Icons.star,
+//                                                 size: 16,
+//                                                 color: theme.colorScheme
+//                                                     .onPrimary,
+//                                               ),
+//                                             ),
+//                                             const SizedBox(width: 4),
+//                                             Text(
+//                                               (restaurant.rating ??
+//                                                       0.0)
+//                                                   .toStringAsFixed(1),
+//                                               style: theme
+//                                                   .textTheme.bodyMedium
+//                                                   ?.copyWith(
+//                                                 fontWeight: FontWeight.w600,
+//                                                 color: theme.colorScheme
+//                                                     .onSurface,
+//                                               ),
+//                                             ),
+//                                           ],
+//                                         ),
+//                                         const SizedBox(height: 4),
+//                                         Text(
+//                                           restaurant.description ??
+//                                               'No description available',
+//                                           style: theme
+//                                               .textTheme.bodySmall
+//                                               ?.copyWith(
+//                                             color: theme
+//                                                 .colorScheme.onSurface
+//                                                 .withOpacity(0.7),
+//                                           ),
+//                                           maxLines: 2,
+//                                           overflow: TextOverflow.ellipsis,
+//                                         ),
+//                                         const SizedBox(height: 6),
+//                                         Row(
+//                                           children: [
+//                                             Icon(
+//                                               Icons.location_on,
+//                                               color: theme
+//                                                   .colorScheme.primary,
+//                                               size: 16,
+//                                             ),
+//                                             const SizedBox(width: 4),
+//                                             Expanded(
+//                                               child: Text(
+//                                                 restaurant.locationName
+//                                                     .split(' ')
+//                                                     .first,
+//                                                 style: theme.textTheme
+//                                                     .bodySmall
+//                                                     ?.copyWith(
+//                                                   color: theme
+//                                                       .colorScheme.onSurface
+//                                                       .withOpacity(0.6),
+//                                                 ),
+//                                                 maxLines: 2,
+//                                                 overflow:
+//                                                     TextOverflow.ellipsis,
+//                                               ),
+//                                             )
+//                                           ],
+//                                         )
+//                                       ],
+//                                     ),
 //                                   ),
 //                                 ),
-//                               ),
-//                             ],
+//                               ],
+//                             ),
 //                           ),
 //                         ),
 //                       );
@@ -295,16 +453,25 @@
 
 
 
+
+
+
+
+
+
+
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/home/recommended_screen.dart';
 
 import '../../provider/RestaurantProvider/nearby_restaurants_provider.dart';
 
 class NearbyScreen extends StatefulWidget {
-  final String userId; // Add userId parameter
+  final String userId;
   const NearbyScreen({super.key, required this.userId});
 
   @override
@@ -319,7 +486,6 @@ class _NearbyScreenState extends State<NearbyScreen> {
   void initState() {
     super.initState();
 
-    // Fetch nearby restaurants when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _fetchNearby(initial: true);
       _startPolling();
@@ -359,7 +525,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
         await context
             .read<RestaurantProvider>()
             .getNearbyRestaurants(widget.userId);
-        // No loader here – silent refresh.
+        // Silent refresh
       } catch (e) {
         debugPrint('Error polling nearby restaurants: $e');
       }
@@ -370,6 +536,19 @@ class _NearbyScreenState extends State<NearbyScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    // 🔥 Responsive sizes
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
+    final double imageSize = isMobile
+        ? 110
+        : isTablet
+            ? 130
+            : 140;
+
+    final double horizontalPadding = isMobile ? 16 : 24;
+    final double cardVerticalPadding = isMobile ? 8 : 10;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -397,7 +576,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                     ),
                     Center(
                       child: Text(
-                        "Near By Restaurants",
+                        "Nearby Restaurants",
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -410,11 +589,11 @@ class _NearbyScreenState extends State<NearbyScreen> {
 
             const SizedBox(height: 8),
 
-            // List of Restaurants using Consumer
+            // List of Restaurants
             Expanded(
               child: Consumer<RestaurantProvider>(
                 builder: (context, restaurantProvider, child) {
-                  // Show loader ONLY before first data comes
+                  // Loader only before first data
                   if (restaurantProvider.isLoading && !_hasLoadedOnce) {
                     return Center(
                       child: CircularProgressIndicator(
@@ -437,8 +616,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                           const SizedBox(height: 16),
                           Text(
                             "No nearby restaurants found",
-                            style:
-                                theme.textTheme.bodyLarge?.copyWith(
+                            style: theme.textTheme.bodyLarge?.copyWith(
                               color: theme.colorScheme.onSurface
                                   .withOpacity(0.7),
                             ),
@@ -449,16 +627,19 @@ class _NearbyScreenState extends State<NearbyScreen> {
                   }
 
                   return ListView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: restaurantProvider.nearbyRestaurants.length,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: 4,
+                    ),
+                    itemCount:
+                        restaurantProvider.nearbyRestaurants.length,
                     itemBuilder: (context, index) {
                       final restaurant =
                           restaurantProvider.nearbyRestaurants[index];
 
-                      // ⚠️ Change `restaurant.status` to your actual field if named differently.
                       final bool isActive =
-                          (restaurant.status ?? '').toLowerCase() == 'active';
+                          (restaurant.status ?? '').toLowerCase() ==
+                              'active';
 
                       return GestureDetector(
                         onTap: isActive
@@ -471,11 +652,11 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                     ),
                                   ),
                                 )
-                            : null, // Block navigation when inactive
+                            : null,
                         child: Opacity(
-                          opacity: isActive ? 1.0 : 0.55, // Dim inactive vendors
+                          opacity: isActive ? 1.0 : 0.55,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(cardVerticalPadding),
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
@@ -492,8 +673,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                 BoxShadow(
                                   color: isActive
                                       ? Colors.grey.withOpacity(0.15)
-                                      : Colors.black.withOpacity(
-                                          0.6), // darker when closed
+                                      : Colors.black.withOpacity(0.6),
                                   blurRadius: isActive ? 8 : 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -501,7 +681,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                             ),
                             child: Row(
                               children: [
-                                // Restaurant Image with Heart Icon + Closed overlay
+                                // Image + heart + CLOSED overlay
                                 Stack(
                                   children: [
                                     ClipRRect(
@@ -509,20 +689,21 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                           BorderRadius.circular(12),
                                       child: Image.network(
                                         restaurant.imageUrl ?? '',
-                                        height: 122,
-                                        width: 122,
+                                        height: imageSize,
+                                        width: imageSize,
                                         fit: BoxFit.cover,
                                         errorBuilder: (context, error,
                                             stackTrace) {
                                           return Container(
-                                            height: 122,
-                                            width: 122,
+                                            height: imageSize,
+                                            width: imageSize,
                                             decoration: BoxDecoration(
                                               color: isDark
                                                   ? Colors.grey[700]
                                                   : Colors.grey[200],
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(
+                                                      12),
                                             ),
                                             child: Icon(
                                               Icons.restaurant,
@@ -539,14 +720,15 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                             return child;
                                           }
                                           return Container(
-                                            height: 122,
-                                            width: 122,
+                                            height: imageSize,
+                                            width: imageSize,
                                             decoration: BoxDecoration(
                                               color: isDark
                                                   ? Colors.grey[700]
                                                   : Colors.grey[200],
                                               borderRadius:
-                                                  BorderRadius.circular(12),
+                                                  BorderRadius.circular(
+                                                      12),
                                             ),
                                             child: Center(
                                               child:
@@ -560,7 +742,6 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                       ),
                                     ),
 
-                                    // Favorite icon (still just UI)
                                     Positioned(
                                       top: 8,
                                       right: 8,
@@ -578,7 +759,6 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                       ),
                                     ),
 
-                                    // Vendor Closed overlay
                                     if (!isActive)
                                       Positioned.fill(
                                         child: Container(
@@ -591,7 +771,8 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                           child: Center(
                                             child: Container(
                                               padding:
-                                                  const EdgeInsets.symmetric(
+                                                  const EdgeInsets
+                                                      .symmetric(
                                                 horizontal: 14,
                                                 vertical: 6,
                                               ),
@@ -599,13 +780,15 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                                 color: Colors.red.shade600
                                                     .withOpacity(0.9),
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                    BorderRadius.circular(
+                                                        10),
                                               ),
                                               child: const Text(
                                                 "Vendor Closed",
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                                  fontWeight:
+                                                      FontWeight.bold,
                                                   fontSize: 13,
                                                 ),
                                               ),
@@ -616,7 +799,7 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                   ],
                                 ),
 
-                                // Restaurant Info
+                                // Info
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -630,10 +813,11 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                         Text(
                                           restaurant.restaurantName ??
                                               'Restaurant Name',
-                                          style: theme
-                                              .textTheme.titleMedium
+                                          style: theme.textTheme
+                                              .titleMedium
                                               ?.copyWith(
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight:
+                                                FontWeight.w700,
                                             color: theme
                                                 .colorScheme.onSurface,
                                           ),
@@ -643,10 +827,12 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                           children: [
                                             Container(
                                               padding:
-                                                  const EdgeInsets.all(4),
+                                                  const EdgeInsets.all(
+                                                      4),
                                               decoration: BoxDecoration(
                                                 borderRadius:
-                                                    BorderRadius.circular(20),
+                                                    BorderRadius.circular(
+                                                        20),
                                                 color: theme
                                                     .colorScheme.primary,
                                               ),
@@ -659,13 +845,13 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
-                                              (restaurant.rating ??
-                                                      0.0)
+                                              (restaurant.rating ?? 0.0)
                                                   .toStringAsFixed(1),
-                                              style: theme
-                                                  .textTheme.bodyMedium
+                                              style: theme.textTheme
+                                                  .bodyMedium
                                                   ?.copyWith(
-                                                fontWeight: FontWeight.w600,
+                                                fontWeight:
+                                                    FontWeight.w600,
                                                 color: theme.colorScheme
                                                     .onSurface,
                                               ),
@@ -684,7 +870,8 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                                 .withOpacity(0.7),
                                           ),
                                           maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                          overflow:
+                                              TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 6),
                                         Row(
@@ -701,16 +888,18 @@ class _NearbyScreenState extends State<NearbyScreen> {
                                                 restaurant.locationName
                                                     .split(' ')
                                                     .first,
-                                                style: theme.textTheme
-                                                    .bodySmall
+                                                style: theme
+                                                    .textTheme.bodySmall
                                                     ?.copyWith(
                                                   color: theme
-                                                      .colorScheme.onSurface
-                                                      .withOpacity(0.6),
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(
+                                                          0.6),
                                                 ),
                                                 maxLines: 2,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow
+                                                    .ellipsis,
                                               ),
                                             )
                                           ],

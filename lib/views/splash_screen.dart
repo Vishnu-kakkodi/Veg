@@ -298,7 +298,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (UserPreferences.isLoggedIn()) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => NavbarScreen()),
+        MaterialPageRoute(builder: (_) => NavbarScreen(initialIndex: 0,)),
       );
     } else {
       Navigator.pushReplacement(
@@ -358,24 +358,24 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
 
                 const SizedBox(height: 100),
-                    Text(
-                      'Pure Vegiterian',
-                      style: const TextStyle(
-                        fontFamily: 'Cursive',
-                        fontWeight: FontWeight.w900,
-                        fontSize: 50,
-                        letterSpacing: 1.5,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(2, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    // Text(
+                    //   'Pure Vegiterian',
+                    //   style: const TextStyle(
+                    //     fontFamily: 'Cursive',
+                    //     fontWeight: FontWeight.w900,
+                    //     fontSize: 50,
+                    //     letterSpacing: 1.5,
+                    //     color: Colors.white,
+                    //     shadows: [
+                    //       Shadow(
+                    //         color: Colors.black26,
+                    //         offset: Offset(2, 2),
+                    //         blurRadius: 4,
+                    //       ),
+                    //     ],
+                    //   ),
+                    //   overflow: TextOverflow.ellipsis,
+                    // ),
 
                                 const SizedBox(height: 100),
 

@@ -374,6 +374,7 @@ class RestaurantProductsProvider with ChangeNotifier {
   int _totalRatings = 0;
   int _totalReviews = 0;
     String _restaurantStatus = "";
+    String _resImage = "";
 
 
   // Getters
@@ -389,6 +390,7 @@ class RestaurantProductsProvider with ChangeNotifier {
   int get totalRatings => _totalRatings;
   int get totalReviews => _totalReviews;
     String get restaurantStatus => _restaurantStatus;
+    String get resImage => _resImage;
 
 
   // Get all recommended items for display with their product IDs
@@ -416,6 +418,8 @@ class RestaurantProductsProvider with ChangeNotifier {
         _recommendedProducts = response.recommendedProducts;
         _totalRecommendedItems = response.totalRecommendedItems;
                 _restaurantStatus = response.restaurantStatus;
+                                _resImage = response.restaurantImage;
+
 
 
         _restaurantReviews = response.restaurantReviews;

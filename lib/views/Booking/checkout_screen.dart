@@ -149,7 +149,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     var options = {
       'key': 'rzp_test_RgqXPvDLbgEIVv', // Replace with your Razorpay key
       'amount': (cartProvider.totalPayable * 100).toInt(), // Amount in paise
-      'name': 'Veginine',
+      'name': 'Vegiffyy',
       'description': 'Order Payment',
       'retry': {'enabled': true, 'max_count': 1},
       'send_sms_hash': true,
@@ -216,6 +216,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final result = await OrderService.createOrder(orderData);
 
       if (result['success']) {
+        final orderId = result['data']['data']['_id'];
         // Clear cart after successful order
         await cartProvider.clearCart();
 
@@ -229,6 +230,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             MaterialPageRoute(
               builder: (context) => PaymentSuccessScreen(
                 userId: user?.userId.toString(),
+                orderId:orderId.toString()
               ),
             ),
           );
@@ -533,7 +535,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                   Text(
-                    '₹${item.totalPrice.toStringAsFixed(2)}',
+                    '₹${item.price.toStringAsFixed(2)}',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -840,6 +842,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _buildPriceRow(
             'Delivery Charge',
             '₹${cartProvider.deliveryCharge.toStringAsFixed(2)}',
+            theme,
+            colorScheme,
+          ),
+                    _buildPriceRow(
+            'Platform Charge',
+            '₹${cartProvider.platformCharge.toStringAsFixed(2)}',
+            theme,
+            colorScheme,
+          ),
+                              _buildPriceRow(
+            'GST Charge',
+            '₹${cartProvider.gstAmount.toStringAsFixed(2)}',
+            theme,
+            colorScheme,
+          ),
+                                        _buildPriceRow(
+            'Delivery GST Charge',
+            '₹${cartProvider.gstOnDelivery.toStringAsFixed(2)}',
+            theme,
+            colorScheme,
+          ),
+                                        _buildPriceRow(
+            'Packing Charge',
+            '₹${cartProvider.packingCharges.toStringAsFixed(2)}',
             theme,
             colorScheme,
           ),

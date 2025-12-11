@@ -343,7 +343,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           label: 'Phone Number',
                           icon: Icons.phone_outlined,
                           enabled: false,
-                          helperText: 'Phone number cannot be changed',
+                          // helperText: 'Phone number cannot be changed',
                           theme: theme,
                           colorScheme: colorScheme,
                         );

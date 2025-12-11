@@ -124,7 +124,7 @@ class AuthProvider with ChangeNotifier {
       // Navigate to home screen
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => NavbarScreen()),
+        MaterialPageRoute(builder: (_) => NavbarScreen(initialIndex: 0,)),
         (route) => false,
       );
     } on ValidationException catch (e) {

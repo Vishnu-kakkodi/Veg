@@ -4,7 +4,19 @@ import 'package:veegify/model/previous_order.dart';
 
 /// Build colorful Veegify invoice HTML (pista green, pure veg)
 String buildInvoiceHtml(Order order) {
-    print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df");
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.deliveryCharge}");
+    print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.gstAmount}");
+
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.gstOnDelivery}");
+
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.totalPayable}");
+
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.subTotal}");
+
+  print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.platformCharge}");
+    print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df${order.packingCharges}");
+
+
 
   final rowsBuffer = StringBuffer();
 
@@ -12,12 +24,18 @@ String buildInvoiceHtml(Order order) {
   for (int i = 0; i < order.products.length; i++) {
     final item = order.products[i];
 
-    // If you have both price & basePrice in model, this is safe
-    final double unitPrice = (item.price > 0)
-        ? item.price
-        : (item.basePrice ?? 0); // basePrice can be nullable in model
+    // Safe unit price: prefer price if > 0, else basePrice, else 0
+    final double unitPrice;
+    if ((item.price ?? 0) > 0) {
+      unitPrice = item.price!;
+    } else if ((item.basePrice ?? 0) > 0) {
+      unitPrice = item.basePrice!;
+    } else {
+      unitPrice = 0;
+    }
 
-    final lineTotal = unitPrice * item.quantity;
+    final int quantity = item.quantity ?? 0;
+    final double lineTotal = unitPrice * quantity;
 
     // Plate label
     String plateLabel = '';
@@ -36,12 +54,12 @@ String buildInvoiceHtml(Order order) {
           <div class="item-info">
             $imgTag
             <div class="item-text">
-              <div class="item-name">${item.name}</div>
+              <div class="item-name">${item.name ?? ''}</div>
               ${plateLabel.isNotEmpty ? '<div class="item-meta">$plateLabel</div>' : ''}
             </div>
           </div>
         </td>
-        <td class="cell qty">${item.quantity}</td>
+        <td class="cell qty">$quantity</td>
         <td class="cell price">₹${unitPrice.toStringAsFixed(2)}</td>
         <td class="cell total">₹${lineTotal.toStringAsFixed(2)}</td>
       </tr>
@@ -52,44 +70,97 @@ String buildInvoiceHtml(Order order) {
   final formattedDate =
       DateFormat('dd MMM yyyy, hh:mm a').format(createdAt);
 
-  // Use backend values directly, with null-safe fallbacks
-  final double itemsTotal = order.subTotal;
-  final double gst = order.gstAmount ?? 0;
-  final double platform = order.platformCharge ?? 0;
-  final double delivery = order.deliveryCharge;
-  final double coupon = order.couponDiscount;
-  final double grandTotal = order.totalPayable;
+  // ====== NUMERIC VALUES WITH NULL HANDLING ======
 
-  final itemsTotalFormatted = itemsTotal.toStringAsFixed(2);
-  final gstFormatted = gst.toStringAsFixed(2);
-  final platformFormatted = platform.toStringAsFixed(2);
-  final deliveryFormatted = delivery.toStringAsFixed(2);
-  final couponFormatted = coupon.toStringAsFixed(2);
-  final grandTotalFormatted = grandTotal.toStringAsFixed(2);
+  // Base totals (fallback to 0, but always show these lines)
+  final double itemsTotal = (order.subTotal ?? 0).toDouble();
+  final double grandTotal = (order.totalPayable ?? 0).toDouble();
 
-  final deliveryAddress =
-      '${order.deliveryAddress.street}, ${order.deliveryAddress.city}';
+  // Optional charges: if null -> line is not shown
+  final double? gst = order.gstAmount;
+  final double? gstOnDelivery = order.gstOnDelivery;
+  final double? packingCharges = order.packingCharges;
+  final double? platformCharge = order.platformCharge;
+  final double? deliveryCharge = order.deliveryCharge;
 
-  final transactionLine = order.transactionId != null &&
-          order.transactionId!.trim().isNotEmpty
-      ? '<div class="info-muted">Txn ID: ${order.transactionId}</div>'
-      : '';
+  // Coupon: null -> 0, line shown only when > 0
+  final double coupon = (order.couponDiscount ?? 0).toDouble();
 
-  final couponBlock = coupon > 0
+  final String itemsTotalFormatted = itemsTotal.toStringAsFixed(2);
+  final String grandTotalFormatted = grandTotal.toStringAsFixed(2);
+
+  final String gstLine = gst != null
       ? '''
-          <div class="summary-line muted">
-            <span class="summary-label">Coupon Discount</span>
-            <span class="summary-value negative">-₹$couponFormatted</span>
+          <div class="summary-line">
+            <span class="summary-label">GST (Items)</span>
+            <span class="summary-value">₹${gst.toStringAsFixed(2)}</span>
           </div>
         '''
       : '';
+
+  final String gstDeliveryLine = gstOnDelivery != null
+      ? '''
+          <div class="summary-line">
+            <span class="summary-label">GST on Delivery</span>
+            <span class="summary-value">₹${gstOnDelivery.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+  final String packingLine = packingCharges != null
+      ? '''
+          <div class="summary-line">
+            <span class="summary-label">Packing Charges</span>
+            <span class="summary-value">₹${packingCharges.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+  final String platformLine = platformCharge != null
+      ? '''
+          <div class="summary-line">
+            <span class="summary-label">Platform Charge</span>
+            <span class="summary-value">₹${platformCharge.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+  final String deliveryLine = deliveryCharge != null
+      ? '''
+          <div class="summary-line">
+            <span class="summary-label">Delivery Charge</span>
+            <span class="summary-value">₹${deliveryCharge.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+  final String couponBlock = coupon > 0
+      ? '''
+          <div class="summary-line muted">
+            <span class="summary-label">Coupon Discount</span>
+            <span class="summary-value negative">-₹${coupon.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+  // Delivery address safe join
+  final da = order.deliveryAddress;
+  final deliveryAddress = [
+    da?.street,
+    da?.city,
+  ].where((e) => e != null && e!.trim().isNotEmpty).join(', ');
+
+  final transactionLine =
+      order.transactionId != null && order.transactionId!.trim().isNotEmpty
+          ? '<div class="info-muted">Txn ID: ${order.transactionId}</div>'
+          : '';
 
   return """
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Invoice ${order.id}</title>
+  <title>Invoice ${order.id ?? ''}</title>
   <style>
     * {
       box-sizing: border-box;
@@ -474,7 +545,7 @@ String buildInvoiceHtml(Order order) {
           />
         </div>
         <div class="brand-text">
-          <div class="brand-title">Veegify</div>
+          <div class="brand-title">Vegiffyy</div>
           <div class="brand-subtitle">
             <span>Pure Veg Delivery</span>
             <span class="veg-icon">
@@ -484,7 +555,7 @@ String buildInvoiceHtml(Order order) {
         </div>
       </div>
       <div class="invoice-meta">
-        <div class="invoice-id">Invoice #${order.id}</div>
+        <div class="invoice-id">Invoice #${order.id ?? ''}</div>
         <div style="margin-top: 4px;">
           <span style="opacity: 0.85;">Date:</span>
           <span style="font-weight: 500;">
@@ -503,12 +574,12 @@ String buildInvoiceHtml(Order order) {
       <div class="info-row">
         <div class="info-card">
           <div class="info-label">Order Details</div>
-          <div class="info-value">Order ID: ${order.id}</div>
+          <div class="info-value">Order ID: ${order.id ?? ''}</div>
           <div class="info-muted">
             Placed on: $formattedDate
           </div>
           <div class="info-muted">
-            Payment: ${order.paymentMethod} • ${order.paymentStatus}
+            Payment: ${order.paymentMethod ?? ''} • ${order.paymentStatus ?? ''}
           </div>
           $transactionLine
         </div>
@@ -517,7 +588,7 @@ String buildInvoiceHtml(Order order) {
           <div class="info-label">Deliver To</div>
           <div class="info-value">$deliveryAddress</div>
           <div class="info-muted">
-            Items: ${order.totalItems}
+            Items: ${order.totalItems ?? order.products.length}
           </div>
         </div>
       </div>
@@ -526,9 +597,9 @@ String buildInvoiceHtml(Order order) {
       <div class="info-row" style="margin-bottom: 12px;">
         <div class="info-card">
           <div class="info-label">Restaurant</div>
-          <div class="info-value">${order.restaurant.restaurantName}</div>
+          <div class="info-value">${order.restaurant.restaurantName ?? ''}</div>
           <div class="info-muted">
-            ${order.restaurant.locationName}
+            ${order.restaurant.locationName ?? ''}
           </div>
         </div>
       </div>
@@ -562,18 +633,11 @@ String buildInvoiceHtml(Order order) {
             <span class="summary-label">Items Total</span>
             <span class="summary-value">₹$itemsTotalFormatted</span>
           </div>
-          <div class="summary-line">
-            <span class="summary-label">GST</span>
-            <span class="summary-value">₹$gstFormatted</span>
-          </div>
-          <div class="summary-line">
-            <span class="summary-label">Platform Charge</span>
-            <span class="summary-value">₹$platformFormatted</span>
-          </div>
-          <div class="summary-line">
-            <span class="summary-label">Delivery Charge</span>
-            <span class="summary-value">₹$deliveryFormatted</span>
-          </div>
+          $gstLine
+          $gstDeliveryLine
+          $packingLine
+          $platformLine
+          $deliveryLine
           $couponBlock
           <div class="summary-line total">
             <span class="summary-label">Grand Total</span>
@@ -583,7 +647,7 @@ String buildInvoiceHtml(Order order) {
       </div>
 
       <div class="footer-note">
-        Thank you for ordering with <span class="footer-brand">Veegify</span>.<br/>
+        Thank you for ordering with <span class="footer-brand">Vegiffyy</span>.<br/>
         For help with this order, contact support with your invoice ID.
       </div>
     </div>

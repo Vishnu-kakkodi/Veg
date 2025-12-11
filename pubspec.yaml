@@ -1,7 +1,7 @@
 name: veegify
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.3+7
 
 environment:
   sdk: ^3.8.1
@@ -40,6 +40,10 @@ dependencies:
   flutter_html_to_pdf: ^0.7.0
   printing: ^5.14.2
   pdf: ^3.11.3
+  lottie: ^3.3.1
+  flutter_easyloading: ^3.0.5
+  package_info_plus: ^8.3.1
+  new_version_plus: ^0.1.1
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +71,8 @@ flutter:
     - assets/images/map_placeholder.png
     - assets/images/rider.png
     - assets/images/destination.png
+    - assets/images/wattsapp.png
+    - assets/lottie/food_preparing.json
 
 # <-- IMPORTANT: flutter_icons must be a top-level key (not under flutter:)
 flutter_icons:

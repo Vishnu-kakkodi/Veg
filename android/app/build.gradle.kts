@@ -1,12 +1,3 @@
-def configProperties = new Properties()
-def configFile = rootProject.file("app/config.properties")
-
-if (configFile.exists()) {
-    configProperties.load(new FileInputStream(configFile))
-}
-
-def MAPS_API_KEY = configProperties.getProperty("MAPS_API_KEY")
-
 
 plugins {
     id("com.android.application")
@@ -17,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.veegify"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -31,25 +22,31 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.veegify"
+        applicationId = "com.veggify.veegify"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 24
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders = [
-    MAPS_API_KEY: MAPS_API_KEY ?: ""
-    ]
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+          
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

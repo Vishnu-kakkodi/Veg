@@ -1,7 +1,6 @@
 // import 'package:flutter/material.dart';
 // import 'package:veegify/views/home/recommended_screen.dart';
 
-// // --- RestaurantCard Widget ---
 // class RestaurantCard extends StatelessWidget {
 //   final String id;
 //   final String imagePath;
@@ -10,7 +9,7 @@
 //   final String description;
 //   final dynamic price;
 //   final String locationName;
-//   final String status;
+//   final String status; // "active" / "inactive"
 
 //   const RestaurantCard({
 //     super.key,
@@ -21,189 +20,174 @@
 //     required this.description,
 //     required this.price,
 //     required this.locationName,
-//     required this.status
+//     required this.status,
 //   });
 
 //   @override
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
-    
+
+//     final bool isActive = status.toLowerCase() == "active";
+
 //     return GestureDetector(
-//       onTap: () => Navigator.push(
-//         context, 
-//         MaterialPageRoute(
-//           builder: (context) => RestaurantDetailScreen(restaurantId: id)
-//         )
-//       ),
-//       child: Container(
-//         margin: const EdgeInsets.only(right: 12),
-//         width: 186,
-//         decoration: BoxDecoration(
-//           color: isDark ? theme.cardColor : Colors.white,
-//           borderRadius: BorderRadius.circular(12),
-//           boxShadow: [
-//             if (!isDark)
-//             BoxShadow(
-//               color: Colors.grey.withOpacity(0.1),
-//               spreadRadius: 1,
-//               blurRadius: 4,
-//               offset: const Offset(0, 2),
-//             ),
-//           ],
-//         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // Image Container with Stack
-//             Container(
-//               height: 186,
-//               child: Stack(
-//                 children: [
-//                   // Image Container with Direct Shadow
-//                   Container(
-//                     height: 186,
-//                     decoration: BoxDecoration(
-//                       borderRadius: BorderRadius.circular(12),
-//                       image: DecorationImage(
-//                         image: NetworkImage(imagePath),
-//                         fit: BoxFit.cover,
+//       onTap: isActive
+//           ? () => Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) =>
+//                       RestaurantDetailScreen(restaurantId: id),
+//                 ),
+//               )
+//           : null,
+//       child: Opacity(
+//         opacity: isActive ? 1.0 : 0.55,
+//         child: Container(
+//           margin: const EdgeInsets.only(right: 12),
+//           width: 130,
+//           decoration: BoxDecoration(
+//             color: isDark ? null : null,
+//             borderRadius: BorderRadius.circular(12),
+//             // boxShadow: [
+//             //   BoxShadow(
+//             //     color: isActive
+//             //         ? Colors.grey.withOpacity(0.12)
+//             //         : Colors.black.withOpacity(0.6),
+//             //     spreadRadius: isActive ? 1 : 2,
+//             //     blurRadius: isActive ? 4 : 8,
+//             //     offset: const Offset(0, 2),
+//             //   ),
+//             // ],
+//           ),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               /// IMAGE + RATING + CLOSED BANNER
+//               SizedBox(
+//                 height: 120,
+//                 child: Stack(
+//                   children: [
+//                     // Image
+//                     Container(
+//                       height: 120,
+//                       decoration: BoxDecoration(
+//                         borderRadius: BorderRadius.circular(12),
+//                         image: DecorationImage(
+//                           image: NetworkImage(imagePath),
+//                           fit: BoxFit.cover,
+//                         ),
 //                       ),
 //                     ),
-//                   ),
-      
-//                   // Favorite Icon - Top Right (commented out but themed)
-//                   // Positioned(
-//                   //   top: 8,
-//                   //   right: 8,
-//                   //   child: Container(
-//                   //     width: 40,
-//                   //     height: 40,
-//                   //     padding: const EdgeInsets.all(4),
-//                   //     decoration: BoxDecoration(
-//                   //       color: isDark ? theme.cardColor : Colors.white,
-//                   //       borderRadius: BorderRadius.circular(25),
-//                   //     ),
-//                   //     child: Icon(
-//                   //       Icons.favorite_border,
-//                   //       size: 24,
-//                   //       color: theme.colorScheme.onSurface,
-//                   //     ),
-//                   //   ),
-//                   // ),
-      
-//                   // Price - Bottom Left
-//                   // Positioned(
-//                   //   bottom: 8,
-//                   //   left: 8,
-//                   //   child: Container(
-//                   //     padding:
-//                   //         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-//                   //     child: Column(
-//                   //       crossAxisAlignment: CrossAxisAlignment.start,
-//                   //       mainAxisSize: MainAxisSize.min,
-//                   //       children: [
-//                   //         Text(
-//                   //           'Starting at',
-//                   //           style: TextStyle(
-//                   //             color: Colors.white,
-//                   //             fontSize: 12,
-//                   //             fontWeight: FontWeight.w500,
-//                   //           ),
-//                   //         ),
-//                   //         Text(
-//                   //           '₹$price',
-//                   //           style: const TextStyle(
-//                   //             color: Colors.white,
-//                   //             fontSize: 16,
-//                   //             fontWeight: FontWeight.w600,
-//                   //           ),
-//                   //         ),
-//                   //       ],
-//                   //     ),
-//                   //   ),
-//                   // ),
-//                 ],
-//               ),
-//             ),
-      
-//             // Content Container
-//             Container(
-//               padding: const EdgeInsets.all(12),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     name,
-//                     style: theme.textTheme.titleMedium?.copyWith(
-//                       fontWeight: FontWeight.bold,
-//                       color: theme.colorScheme.onSurface,
-//                     ),
-//                     maxLines: 1,
-//                     overflow: TextOverflow.ellipsis,
-//                   ),
-//                   const SizedBox(height: 6),
-//                   Row(
-//                     mainAxisSize: MainAxisSize.min,
-//                     children: [
-//                       Container(
-//                         width: 20,
-//                         height: 20,
+
+//                     /// ⭐ Rating Badge - Bottom Right
+//                     Positioned(
+//                       right: 0,
+//                       bottom: 0,
+//                       child: Container(
+//                         padding: const EdgeInsets.symmetric(
+//                             horizontal: 8, vertical: 4),
 //                         decoration: BoxDecoration(
-//                           color: theme.colorScheme.primary,
-//                           borderRadius: BorderRadius.circular(12),
+//                           color: Colors.grey.shade200.withOpacity(0.95),
+//                           borderRadius: BorderRadius.only(topRight: Radius.circular(0),bottomRight: Radius.circular(5),topLeft: Radius.circular(10)),
 //                         ),
-//                         child: Icon(
-//                           Icons.star, 
-//                           color: theme.colorScheme.onPrimary, 
-//                           size: 12
+//                         child: Row(
+//                           children: [
+//                             Icon(
+//                               Icons.star,
+//                               size: 14,
+//                               color: const Color.fromARGB(255, 27, 160, 20),
+//                             ),
+//                             const SizedBox(width: 4),
+//                             Text(
+//                               rating.toStringAsFixed(1),
+//                               style: const TextStyle(
+//                                 fontSize: 12,
+//                                 fontWeight: FontWeight.bold,
+//                                 color: Colors.black87,
+//                               ),
+//                             ),
+//                           ],
 //                         ),
 //                       ),
-//                       const SizedBox(width: 4),
-//                       Text(
-//                         rating.toStringAsFixed(1),
-//                         style: theme.textTheme.bodyMedium?.copyWith(
+//                     ),
+
+//                     /// Vendor Closed
+//                     if (!isActive)
+//                       Positioned.fill(
+//                         child: Container(
+//                           decoration: BoxDecoration(
+//                             color: Colors.black.withOpacity(0.55),
+//                             borderRadius: BorderRadius.circular(12),
+//                           ),
+//                           child: Center(
+//                             child: Container(
+//                               padding: const EdgeInsets.symmetric(
+//                                   horizontal: 14, vertical: 8),
+//                               decoration: BoxDecoration(
+//                                 color: Colors.red.shade600.withOpacity(0.9),
+//                                 borderRadius: BorderRadius.circular(10),
+//                               ),
+//                               child: const Text(
+//                                 "Vendor Closed",
+//                                 style: TextStyle(
+//                                   color: Colors.white,
+//                                   fontWeight: FontWeight.bold,
+//                                   fontSize: 14,
+//                                 ),
+//                               ),
+//                             ),
+//                           ),
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//               ),
+
+//               /// CONTENT
+//               Container(
+//                 padding: const EdgeInsets.all(12),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     /// Name
+//                     Text(
+//                       name,
+//                       style: theme.textTheme.titleMedium?.copyWith(
 //                           fontWeight: FontWeight.bold,
 //                           color: theme.colorScheme.onSurface,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   const SizedBox(height: 6),
-//                   Text(
-//                     description,
-//                     style: theme.textTheme.bodySmall?.copyWith(
-//                       color: theme.colorScheme.onSurface.withOpacity(0.7),
+//                           fontSize: 14),
+//                       maxLines: 1,
+//                       overflow: TextOverflow.ellipsis,
 //                     ),
-//                     maxLines: 2,
-//                     overflow: TextOverflow.ellipsis,
-//                   ),
-//                   const SizedBox(height: 6),
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.start,
-//                     children: [
-//                       Icon(
-//                         Icons.location_on_outlined,
-//                         color: theme.colorScheme.primary,
-//                         size: 16,
-//                       ),
-//                       const SizedBox(width: 4),
-//                       Expanded(
-//                         child: Text(
-//                           locationName.split(' ').first,
-//                           style: theme.textTheme.bodySmall?.copyWith(
-//                             color: theme.colorScheme.onSurface.withOpacity(0.6),
-//                           ),
-//                           maxLines: 1,
-//                           overflow: TextOverflow.ellipsis,
+//                     const SizedBox(height: 6),
+
+//                     /// Location
+//                     Row(
+//                       children: [
+//                         Icon(
+//                           Icons.location_on_outlined,
+//                           color: theme.colorScheme.primary,
+//                           size: 16,
 //                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
+//                         const SizedBox(width: 4),
+//                         Expanded(
+//                           child: Text(
+//                             locationName.split(' ').first,
+//                             style: theme.textTheme.bodySmall?.copyWith(
+//                               color:
+//                                   theme.colorScheme.onSurface.withOpacity(0.9),
+//                             ),
+//                             maxLines: 1,
+//                             overflow: TextOverflow.ellipsis,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
 //               ),
-//             ),
-//           ],
+//             ],
+//           ),
 //         ),
 //       ),
 //     );
@@ -226,7 +210,12 @@
 
 
 
+
+
+
+
 import 'package:flutter/material.dart';
+import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/home/recommended_screen.dart';
 
 class RestaurantCard extends StatelessWidget {
@@ -255,8 +244,16 @@ class RestaurantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
     final bool isActive = status.toLowerCase() == "active";
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // 🔥 Responsive card width (for horizontal list)
+    final double cardWidth = Responsive.isMobile(context)
+        ? screenWidth * 0.38       // ~2.5 cards on screen
+        : Responsive.isTablet(context)
+            ? screenWidth * 0.28   // more spacious
+            : screenWidth * 0.22;  // desktop / large
 
     return GestureDetector(
       onTap: isActive
@@ -267,68 +264,119 @@ class RestaurantCard extends StatelessWidget {
                       RestaurantDetailScreen(restaurantId: id),
                 ),
               )
-          : null, // Block navigation
+          : null,
       child: Opacity(
-        opacity: isActive ? 1.0 : 0.55, // Dim inactive restaurants
+        opacity: isActive ? 1.0 : 0.55,
         child: Container(
           margin: const EdgeInsets.only(right: 12),
-          width: 186,
+          width: cardWidth,
           decoration: BoxDecoration(
-            color: isDark ? theme.cardColor : Colors.white,
+            color: isDark ? null : null,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: isActive
-                    ? Colors.grey.withOpacity(0.12)
-                    : Colors.black.withOpacity(0.6), // Dark shadow for inactive
-                spreadRadius: isActive ? 1 : 2,
-                blurRadius: isActive ? 4 : 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            // boxShadow: [
+            //   if (!isDark)
+            //     BoxShadow(
+            //       color: Colors.black.withOpacity(0.06),
+            //       blurRadius: 6,
+            //       offset: const Offset(0, 3),
+            //     ),
+            // ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Container with Stack
+              /// IMAGE + RATING + CLOSED BANNER
               SizedBox(
-                height: 186,
+                height: 120,
                 child: Stack(
                   children: [
                     // Image
-                    Container(
-                      height: 186,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: NetworkImage(imagePath),
-                          fit: BoxFit.cover,
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                        bottom: Radius.circular(12)
+                      ),
+                      child: Image.network(
+                        imagePath,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 120,
+                          color: isDark ? Colors.grey[800] : Colors.grey[200],
+                          child: Icon(
+                            Icons.restaurant_menu_rounded,
+                            size: 30,
+                            color:
+                                theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
                         ),
                       ),
                     ),
 
-                    // Vendor Closed Banner
+                    /// ⭐ Rating Badge - Bottom Right
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200.withOpacity(0.95),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 14,
+                              color: Color(0xFF1BA014),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    /// Vendor Closed overlay
                     if (!isActive)
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.55),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
                           ),
                           child: Center(
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.red.shade600.withOpacity(0.9),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Text(
+                              child: const Text(
                                 "Vendor Closed",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
                               ),
                             ),
@@ -339,66 +387,26 @@ class RestaurantCard extends StatelessWidget {
                 ),
               ),
 
-              // Content Container
-              Container(
+              /// CONTENT
+              Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Restaurant Name
+                    /// Name
                     Text(
                       name,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onSurface,
+                        fontSize: 14,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
 
-                    // Rating
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.star,
-                            color: theme.colorScheme.onPrimary,
-                            size: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toStringAsFixed(1),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Description
-                    Text(
-                      description,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                            theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Location
+                    /// Location
                     Row(
                       children: [
                         Icon(
@@ -412,7 +420,7 @@ class RestaurantCard extends StatelessWidget {
                             locationName.split(' ').first,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface
-                                  .withOpacity(0.6),
+                                  .withOpacity(0.9),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -420,6 +428,7 @@ class RestaurantCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    // You can also show `price` or `description` here later
                   ],
                 ),
               ),

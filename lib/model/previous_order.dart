@@ -269,9 +269,12 @@ class Order {
   final String? paymentType;
 
   // NEW:
-  final double? gstAmount;
-  final double? platformCharge;
+  final dynamic? gstAmount;
+  final dynamic? platformCharge;
   final String? transactionId;
+      final dynamic packingCharges;
+
+  final dynamic gstOnDelivery;
 
   Order({
     required this.id,
@@ -301,6 +304,9 @@ class Order {
     this.gstAmount,
     this.platformCharge,
     this.transactionId,
+            this.packingCharges,
+
+    this.gstOnDelivery,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -374,7 +380,11 @@ class Order {
       paymentType: json['paymentType'] as String?,
 
       // NEW FIELDS – all null-safe
-      gstAmount: (json['gstAmount'] as num?)?.toDouble(),
+      gstAmount: (json['gstCharges'] as num?)?.toDouble(),
+                      gstOnDelivery:
+          (json['gstOnDelivery'] as num?)?.toDouble() ?? 0.0,
+                packingCharges:
+          (json['packingCharges'] as num?)?.toDouble() ?? 0.0,
       platformCharge:
           (json['platformCharge'] as num?)?.toDouble(),
       transactionId: json['transactionId'] as String?,

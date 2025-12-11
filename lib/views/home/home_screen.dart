@@ -1,4 +1,5 @@
 // import 'package:flutter/material.dart';
+// import 'package:flutter_easyloading/flutter_easyloading.dart';
 // import 'package:provider/provider.dart';
 // import 'package:veegify/helper/storage_helper.dart';
 // import 'package:veegify/provider/BannerProvider/banner_provider.dart';
@@ -21,7 +22,7 @@
 // import 'package:veegify/widgets/home/search.dart';
 // import 'package:veegify/widgets/home/section_header.dart';
 // import 'package:veegify/widgets/home/top_restaurants.dart';
-// import 'dart:math';
+// import 'dart:math' as math;
 
 // import 'package:veegify/widgets/home/video.dart';
 
@@ -58,6 +59,10 @@
 //   bool _showAdsBanner = true;
 //   double _adsBannerHeight = 200.0;
 
+//   // Sticky search bar
+//   final GlobalKey _searchBarKey = GlobalKey();
+//   bool _isSearchBarPinned = false;
+
 //   // Animation controllers for different sections
 //   late AnimationController _headerController;
 //   late AnimationController _searchController;
@@ -86,6 +91,11 @@
 //   late AnimationController _giftAnimationController;
 //   late Animation<double> _giftAnimation;
 
+//   // Pagination for Popular Restaurants
+//   final int _topRestaurantsPerPage = 2;
+//   int _currentTopRestaurantsPage = 1;
+//   bool _isTopRestaurantsLoadingMore = false;
+
 //   @override
 //   void initState() {
 //     super.initState();
@@ -110,6 +120,72 @@
 //         _adsBannerController.reverse();
 //       }
 //     }
+
+//     // Sticky search bar logic
+//     if (_searchBarKey.currentContext != null) {
+//       final box =
+//           _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
+//       if (box != null) {
+//         final offsetPosition = box.localToGlobal(Offset.zero);
+//         final topPadding = MediaQuery.of(context).padding.top;
+//         final shouldPin = offsetPosition.dy <= topPadding + 8;
+
+//         if (shouldPin != _isSearchBarPinned) {
+//           setState(() {
+//             _isSearchBarPinned = shouldPin;
+//           });
+//         }
+//       }
+//     }
+
+//     // Infinite scroll for Popular Restaurants (vertical section)
+//     if (!_isTopRestaurantsLoadingMore &&
+//         !_isInitializing &&
+//         _canLoadMoreTopRestaurants) {
+//       if (_scrollController.position.pixels >=
+//           _scrollController.position.maxScrollExtent - 200) {
+//         _loadMoreTopRestaurantsPage();
+//       }
+//     }
+//   }
+
+//   bool get _canLoadMoreTopRestaurants {
+//     try {
+//       final provider = context.read<TopRestaurantsProvider>();
+//       if (provider.topRestaurants.isEmpty) return false;
+
+//       final total = provider.topRestaurants.length;
+//       final visible = _currentTopRestaurantsPage * _topRestaurantsPerPage;
+//       return visible < total;
+//     } catch (_) {
+//       return false;
+//     }
+//   }
+
+//   Future<void> _loadMoreTopRestaurantsPage() async {
+//     if (!_canLoadMoreTopRestaurants) return;
+
+//     setState(() {
+//       _isTopRestaurantsLoadingMore = true;
+//     });
+
+//     // Show EasyLoading while "loading" more
+//     EasyLoading.show(status: 'Loading more restaurants...');
+
+//     // Simulate delay – in real case you can trigger API call here
+//     await Future.delayed(const Duration(milliseconds: 600));
+
+//     if (!mounted) {
+//       EasyLoading.dismiss();
+//       return;
+//     }
+
+//     setState(() {
+//       _currentTopRestaurantsPage++;
+//       _isTopRestaurantsLoadingMore = false;
+//     });
+
+//     EasyLoading.dismiss();
 //   }
 
 //   void _initializeAnimations() {
@@ -282,11 +358,10 @@
 
 //   Future<void> _initializeData() async {
 //     try {
-//             print("6556565656565666");
+//       // EasyLoading for overall initial load / refresh
+//       EasyLoading.show(status: 'Loading...');
 
 //       await _loadUserId();
-//                   print("8888888888888888888888");
-
 //       await _handleCurrentLocation();
 //       Provider.of<CategoryProvider>(context, listen: false).fetchCategories();
 //       Provider.of<RestaurantProvider>(context, listen: false)
@@ -294,11 +369,16 @@
 //       Provider.of<TopRestaurantsProvider>(context, listen: false)
 //           .getTopRestaurants(userId.toString());
 //       Provider.of<BannerProvider>(context, listen: false).fetchBanners();
+
 //       WidgetsBinding.instance.addPostFrameCallback((_) {
 //         final locationProvider =
 //             Provider.of<LocationProvider>(context, listen: false);
 //         locationProvider.addListener(_onLocationChanged);
 //       });
+
+//       // Reset pagination when reloading data
+//       _currentTopRestaurantsPage = 1;
+//       _isTopRestaurantsLoadingMore = false;
 //     } catch (e) {
 //       debugPrint('Initialization error: $e');
 //     } finally {
@@ -306,6 +386,7 @@
 //         setState(() => _isInitializing = false);
 //         _startAnimations(); // Start animations after data is loaded
 //       }
+//       EasyLoading.dismiss();
 //     }
 //   }
 
@@ -320,6 +401,12 @@
 //             .getNearbyRestaurants(userId!);
 //         Provider.of<TopRestaurantsProvider>(context, listen: false)
 //             .getTopRestaurants(userId!);
+
+//         // Reset pagination when location changes
+//         setState(() {
+//           _currentTopRestaurantsPage = 1;
+//           _isTopRestaurantsLoadingMore = false;
+//         });
 //       }
 //     }
 //   }
@@ -335,21 +422,19 @@
 
 //   Future<void> _handleCurrentLocation() async {
 //     try {
-//       print("llllllllllll222222222222");
 //       final locationProvider =
 //           Provider.of<LocationProvider>(context, listen: false);
-//                 print("llllllllllll22222222222211");
-
 //       await locationProvider.initLocation(userId.toString());
-//             print("llllllllllll222222222222333");
-
 //     } catch (e) {
 //       debugPrint('Location error: $e');
 //       if (mounted) {
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('Location error: ${e.toString()}'),
-//             backgroundColor: Colors.red,
+//             behavior: SnackBarBehavior.floating,
+//             shape: RoundedRectangleBorder(
+//               borderRadius: BorderRadius.circular(12),
+//             ),
 //           ),
 //         );
 //       }
@@ -388,6 +473,9 @@
 //   }
 
 //   Widget _buildCategorySkeleton() {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+
 //     return SizedBox(
 //       height: 120,
 //       child: ListView.builder(
@@ -403,13 +491,15 @@
 //                   width: 80,
 //                   height: 80,
 //                   decoration: BoxDecoration(
-//                     color: Colors.grey[300],
+//                     color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                     borderRadius: BorderRadius.circular(12),
 //                   ),
-//                   child: const Center(
+//                   child: Center(
 //                     child: CircularProgressIndicator(
 //                       strokeWidth: 2,
-//                       valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+//                       valueColor: AlwaysStoppedAnimation<Color>(
+//                         isDark ? Colors.grey[400]! : Colors.grey,
+//                       ),
 //                     ),
 //                   ),
 //                 ),
@@ -418,7 +508,7 @@
 //                   width: 60,
 //                   height: 12,
 //                   decoration: BoxDecoration(
-//                     color: Colors.grey[300],
+//                     color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                     borderRadius: BorderRadius.circular(6),
 //                   ),
 //                 ),
@@ -431,6 +521,9 @@
 //   }
 
 //   Widget _buildRestaurantSkeleton() {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+
 //     return SizedBox(
 //       height: 270,
 //       child: ListView.builder(
@@ -442,11 +535,11 @@
 //             margin: const EdgeInsets.only(right: 12),
 //             width: 176,
 //             decoration: BoxDecoration(
-//               color: Colors.white,
+//               color: isDark ? theme.cardColor : Colors.white,
 //               borderRadius: BorderRadius.circular(12),
 //               boxShadow: [
 //                 BoxShadow(
-//                   color: Colors.grey.withOpacity(0.1),
+//                   color: Colors.grey.withOpacity(isDark ? 0.3 : 0.1),
 //                   spreadRadius: 1,
 //                   blurRadius: 4,
 //                   offset: const Offset(0, 2),
@@ -459,14 +552,16 @@
 //                 Container(
 //                   height: 120,
 //                   decoration: BoxDecoration(
-//                     color: Colors.grey[300],
+//                     color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                     borderRadius:
 //                         const BorderRadius.vertical(top: Radius.circular(12)),
 //                   ),
-//                   child: const Center(
+//                   child: Center(
 //                     child: CircularProgressIndicator(
 //                       strokeWidth: 2,
-//                       valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+//                       valueColor: AlwaysStoppedAnimation<Color>(
+//                         isDark ? Colors.grey[400]! : Colors.grey,
+//                       ),
 //                     ),
 //                   ),
 //                 ),
@@ -479,7 +574,7 @@
 //                         width: 120,
 //                         height: 18,
 //                         decoration: BoxDecoration(
-//                           color: Colors.grey[300],
+//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -490,7 +585,7 @@
 //                             width: 20,
 //                             height: 20,
 //                             decoration: BoxDecoration(
-//                               color: Colors.grey[300],
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(10),
 //                             ),
 //                           ),
@@ -499,7 +594,7 @@
 //                             width: 30,
 //                             height: 16,
 //                             decoration: BoxDecoration(
-//                               color: Colors.grey[300],
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -510,7 +605,7 @@
 //                         width: 100,
 //                         height: 12,
 //                         decoration: BoxDecoration(
-//                           color: Colors.grey[300],
+//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -521,7 +616,7 @@
 //                             width: 16,
 //                             height: 16,
 //                             decoration: BoxDecoration(
-//                               color: Colors.grey[300],
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(8),
 //                             ),
 //                           ),
@@ -530,7 +625,7 @@
 //                             width: 60,
 //                             height: 12,
 //                             decoration: BoxDecoration(
-//                               color: Colors.grey[300],
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -547,17 +642,122 @@
 //     );
 //   }
 
+//   /// Vertical skeleton for Popular Restaurants
+//   Widget _buildVerticalRestaurantSkeleton() {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+
+//     return ListView.builder(
+//       shrinkWrap: true,
+//       physics: const NeverScrollableScrollPhysics(),
+//       itemCount: 4,
+//       itemBuilder: (context, index) {
+//         return Container(
+//           margin: const EdgeInsets.only(bottom: 12),
+//           decoration: BoxDecoration(
+//             color: isDark ? theme.cardColor : Colors.white,
+//             borderRadius: BorderRadius.circular(12),
+//             boxShadow: [
+//               BoxShadow(
+//                 color: Colors.grey.withOpacity(isDark ? 0.3 : 0.1),
+//                 spreadRadius: 1,
+//                 blurRadius: 4,
+//                 offset: const Offset(0, 2),
+//               ),
+//             ],
+//           ),
+//           child: Row(
+//             children: [
+//               Container(
+//                 height: 90,
+//                 width: 90,
+//                 decoration: BoxDecoration(
+//                   color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                   borderRadius: const BorderRadius.horizontal(
+//                     left: Radius.circular(12),
+//                   ),
+//                 ),
+//                 child: Center(
+//                   child: CircularProgressIndicator(
+//                     strokeWidth: 2,
+//                     valueColor: AlwaysStoppedAnimation<Color>(
+//                       isDark ? Colors.grey[400]! : Colors.grey,
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               Expanded(
+//                 child: Padding(
+//                   padding: const EdgeInsets.all(10),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Container(
+//                         height: 16,
+//                         width: 120,
+//                         decoration: BoxDecoration(
+//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           borderRadius: BorderRadius.circular(4),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Container(
+//                         height: 14,
+//                         width: 160,
+//                         decoration: BoxDecoration(
+//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           borderRadius: BorderRadius.circular(4),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Row(
+//                         children: [
+//                           Container(
+//                             height: 14,
+//                             width: 40,
+//                             decoration: BoxDecoration(
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               borderRadius: BorderRadius.circular(4),
+//                             ),
+//                           ),
+//                           const SizedBox(width: 6),
+//                           Container(
+//                             height: 14,
+//                             width: 60,
+//                             decoration: BoxDecoration(
+//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               borderRadius: BorderRadius.circular(4),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+
 //   Widget _buildBannerSkeleton() {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+
 //     return Container(
 //       height: 140,
 //       decoration: BoxDecoration(
-//         color: Colors.grey[300],
+//         color: isDark ? Colors.grey[700] : Colors.grey[300],
 //         borderRadius: BorderRadius.circular(12),
 //       ),
-//       child: const Center(
+//       child: Center(
 //         child: CircularProgressIndicator(
 //           strokeWidth: 2,
-//           valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+//           valueColor: AlwaysStoppedAnimation<Color>(
+//             isDark ? Colors.grey[400]! : Colors.grey,
+//           ),
 //         ),
 //       ),
 //     );
@@ -565,8 +765,14 @@
 
 //   @override
 //   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+
+//     final topPadding = MediaQuery.of(context).padding.top;
+
 //     return Scaffold(
-//       backgroundColor: Colors.white,
+//       // backgroundColor: theme.scaffoldBackgroundColor,
+//       backgroundColor: isDark ? Colors.black : Colors.white,
 //       body: Stack(
 //         children: [
 //           Column(
@@ -593,12 +799,14 @@
 //                         children: [
 //                           const SizedBox(height: 10),
 
-//                           // Show skeleton or animated header
+//                           // Header
 //                           _isInitializing
 //                               ? Container(
 //                                   height: 60,
 //                                   decoration: BoxDecoration(
-//                                     color: Colors.grey[300],
+//                                     color: isDark
+//                                         ? Colors.grey[700]
+//                                         : Colors.grey[300],
 //                                     borderRadius: BorderRadius.circular(8),
 //                                   ),
 //                                 )
@@ -623,29 +831,30 @@
 
 //                           const SizedBox(height: 16),
 
-//                           // Search Bar - always visible
+//                           // Search Bar (becomes invisible when pinned)
 //                           _isInitializing
 //                               ? Container(
 //                                   height: 50,
 //                                   decoration: BoxDecoration(
-//                                     color: Colors.grey[300],
+//                                     color: isDark
+//                                         ? Colors.grey[700]
+//                                         : Colors.grey[300],
 //                                     borderRadius: BorderRadius.circular(15),
 //                                   ),
 //                                 )
-//                               : _buildAnimatedSection(
-//                                   slideAnimation: _searchSlideAnimation,
-//                                   fadeAnimation: _searchFadeAnimation,
-//                                   child: const SearchBarWithVoice(),
+//                               : Opacity(
+//                                   opacity: _isSearchBarPinned ? 0.0 : 1.0,
+//                                   child: _buildAnimatedSection(
+//                                     slideAnimation: _searchSlideAnimation,
+//                                     fadeAnimation: _searchFadeAnimation,
+//                                     child: Container(
+//                                       key: _searchBarKey,
+//                                       child: const SearchBarWithVoice(),
+//                                     ),
+//                                   ),
 //                                 ),
 
-//                           // const SizedBox(height: 16),
-
-//                           // OfferVideoPlayerLazy(
-//                           //   videoUrl: 'https://www.youtube.com/watch?v=dsdckc1uEHE&list=RDdsdckc1uEHE&start_radio=1',
-//                           //   height: 220,
-//                           //   width: double.infinity,
-//                           //   assetVideo: 'assets/videos/home.mp4',
-//                           // ),
+//                           const SizedBox(height: 16),
 
 //                           // Categories Section
 //                           Column(
@@ -656,7 +865,9 @@
 //                                   Navigator.push(
 //                                     context,
 //                                     MaterialPageRoute(
-//                                       builder: (_) =>  CategoryScreen(userId:userId.toString()),
+//                                       builder: (_) => CategoryScreen(
+//                                         userId: userId.toString(),
+//                                       ),
 //                                     ),
 //                                   );
 //                                 },
@@ -685,7 +896,7 @@
 
 //                           const SizedBox(height: 16),
 
-//                           // Nearby Restaurants Section
+//                           // Nearby Restaurants Section (horizontal)
 //                           Column(
 //                             children: [
 //                               SectionHeader(
@@ -714,8 +925,9 @@
 
 //                           const SizedBox(height: 16),
 
-//                           // Top Restaurants Section
+//                           // Top Restaurants Section (VERTICAL)
 //                           Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
 //                             children: [
 //                               SectionHeader(
 //                                 title: 'Popular Restaurants',
@@ -732,7 +944,7 @@
 //                               ),
 //                               const SizedBox(height: 10),
 //                               _isInitializing
-//                                   ? _buildRestaurantSkeleton()
+//                                   ? _buildVerticalRestaurantSkeleton()
 //                                   : _buildAnimatedSection(
 //                                       slideAnimation:
 //                                           _topRestaurantsSlideAnimation,
@@ -752,6 +964,20 @@
 //               ),
 //             ],
 //           ),
+
+//           // Sticky Search Bar (overlay at top)
+//           if (!_isInitializing && _isSearchBarPinned)
+//             Positioned(
+//               top: topPadding + 8,
+//               left: 16,
+//               right: 16,
+//               child: Material(
+//                 elevation: 4,
+//                 borderRadius: BorderRadius.circular(15),
+//                 color: theme.cardColor,
+//                 child: const SearchBarWithVoice(),
+//               ),
+//             ),
 //         ],
 //       ),
 //     );
@@ -764,9 +990,17 @@
 //           return _buildCategorySkeleton();
 //         }
 //         if (provider.categories.isEmpty) {
-//           return const SizedBox(
+//           final theme = Theme.of(context);
+//           return SizedBox(
 //             height: 120,
-//             child: Center(child: Text('No categories available')),
+//             child: Center(
+//               child: Text(
+//                 'No categories available',
+//                 style: theme.textTheme.bodyMedium?.copyWith(
+//                   color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                 ),
+//               ),
+//             ),
 //           );
 //         }
 //         return SizedBox(
@@ -793,6 +1027,8 @@
 //   }
 
 //   Widget _buildRestaurantList() {
+//     final theme = Theme.of(context);
+
 //     return Consumer<RestaurantProvider>(
 //       builder: (context, provider, _) {
 //         if (provider.isLoading) {
@@ -809,27 +1045,25 @@
 //                   'https://cdn.dribbble.com/users/107759/screenshots/16839013/media/87e30b30c8d92a4b1826c74e6e0ee938.png',
 //                   height: 160,
 //                   fit: BoxFit.contain,
-//                   errorBuilder: (context, error, stackTrace) => const Icon(
-//                       Icons.restaurant_menu,
-//                       size: 80,
-//                       color: Colors.orange),
+//                   errorBuilder: (context, error, stackTrace) => Icon(
+//                     Icons.restaurant_menu,
+//                     size: 80,
+//                     color: theme.colorScheme.primary,
+//                   ),
 //                 ),
 //                 const SizedBox(height: 24),
-//                 const Text(
+//                 Text(
 //                   'No restaurants nearby',
-//                   style: TextStyle(
-//                     fontSize: 18,
+//                   style: theme.textTheme.titleMedium?.copyWith(
 //                     fontWeight: FontWeight.w600,
-//                     color: Colors.black87,
 //                   ),
 //                 ),
 //                 const SizedBox(height: 8),
-//                 const Text(
+//                 Text(
 //                   'Looks like there arent any restaurants around your location.',
 //                   textAlign: TextAlign.center,
-//                   style: TextStyle(
-//                     fontSize: 14,
-//                     color: Colors.grey,
+//                   style: theme.textTheme.bodyMedium?.copyWith(
+//                     color: theme.colorScheme.onSurface.withOpacity(0.6),
 //                     height: 1.4,
 //                   ),
 //                 ),
@@ -839,7 +1073,7 @@
 //         }
 
 //         return SizedBox(
-//           height: 360,
+//           height: 200,
 //           child: ListView.builder(
 //             scrollDirection: Axis.horizontal,
 //             itemCount: provider.nearbyRestaurants.length,
@@ -852,7 +1086,8 @@
 //                 rating: restaurant.rating.toDouble(),
 //                 description: restaurant.description,
 //                 price: restaurant.startingPrice,
-//                 locationName: restaurant.locationName
+//                 locationName: restaurant.locationName,
+//                 status: restaurant.status,
 //               );
 //             },
 //           ),
@@ -862,10 +1097,12 @@
 //   }
 
 //   Widget _buildTopRestaurants() {
+//     final theme = Theme.of(context);
+
 //     return Consumer<TopRestaurantsProvider>(
 //       builder: (context, provider, _) {
 //         if (provider.isLoading) {
-//           return _buildRestaurantSkeleton();
+//           return _buildVerticalRestaurantSkeleton();
 //         }
 
 //         if (provider.topRestaurants.isEmpty) {
@@ -878,28 +1115,25 @@
 //                   'https://cdn.dribbble.com/users/107759/screenshots/16839013/media/87e30b30c8d92a4b1826c74e6e0ee938.png',
 //                   height: 160,
 //                   fit: BoxFit.contain,
-//                   errorBuilder: (context, error, stackTrace) => const Icon(
+//                   errorBuilder: (context, error, stackTrace) => Icon(
 //                     Icons.restaurant_menu,
 //                     size: 80,
-//                     color: Colors.orange,
+//                     color: theme.colorScheme.primary,
 //                   ),
 //                 ),
 //                 const SizedBox(height: 24),
-//                 const Text(
+//                 Text(
 //                   'No restaurants nearby',
-//                   style: TextStyle(
-//                     fontSize: 18,
+//                   style: theme.textTheme.titleMedium?.copyWith(
 //                     fontWeight: FontWeight.w600,
-//                     color: Colors.black87,
 //                   ),
 //                 ),
 //                 const SizedBox(height: 8),
-//                 const Text(
+//                 Text(
 //                   'Looks like there aren\'t any restaurants around your location.',
 //                   textAlign: TextAlign.center,
-//                   style: TextStyle(
-//                     fontSize: 14,
-//                     color: Colors.grey,
+//                   style: theme.textTheme.bodyMedium?.copyWith(
+//                     color: theme.colorScheme.onSurface.withOpacity(0.6),
 //                     height: 1.4,
 //                   ),
 //                 ),
@@ -908,26 +1142,60 @@
 //           );
 //         }
 
-//         // ✅ Return restaurant list if available
-//         return SizedBox(
-//           height: 320,
-//           child: ListView.builder(
-//             scrollDirection: Axis.horizontal,
-//             itemCount: provider.topRestaurants.length,
-//             itemBuilder: (context, index) {
-//               final restaurant = provider.topRestaurants[index];
-//               return TopRestaurantCard(
-//                 id: restaurant.id,
-//                 imagePath: restaurant.imageUrl,
-//                 name: restaurant.restaurantName,
-//                 rating: restaurant.rating.toDouble(),
-//                 description: restaurant.description,
-//                 price: restaurant.startingPrice,
-//                                 locationName: restaurant.locationName
+//         // Pagination logic: show items in pages, with loading indicator between
+//         final total = provider.topRestaurants.length;
+//         final visibleCount = math.min(
+//           total,
+//           _currentTopRestaurantsPage * _topRestaurantsPerPage,
+//         );
 
+//         return ListView.builder(
+//           shrinkWrap: true,
+//           physics: const NeverScrollableScrollPhysics(),
+//           itemCount: visibleCount + 1, // +1 for bottom loader placeholder
+//           itemBuilder: (context, index) {
+//             if (index < visibleCount) {
+//               final restaurant = provider.topRestaurants[index];
+//               return Padding(
+//                 padding: const EdgeInsets.only(bottom: 12),
+//                 child: TicketRestaurantCard(
+//                   id: restaurant.id,
+//                   imagePath: restaurant.imageUrl,
+//                   name: restaurant.restaurantName,
+//                   rating: restaurant.rating.toDouble(),
+//                   description: restaurant.description,
+//                   price: restaurant.startingPrice,
+//                   locationName: restaurant.locationName,
+//                   status: restaurant.status,
+//                 ),
 //               );
-//             },
-//           ),
+//             } else {
+//               // Bottom "load more" indicator
+//               if (_isTopRestaurantsLoadingMore && _canLoadMoreTopRestaurants) {
+//                 return Padding(
+//                   padding: const EdgeInsets.symmetric(vertical: 16.0),
+//                   child: Center(
+//                     child: SizedBox(
+//                       height: 28,
+//                       width: 28,
+//                       child: CircularProgressIndicator(
+//                         strokeWidth: 2.5,
+//                         valueColor: AlwaysStoppedAnimation<Color>(
+//                           theme.colorScheme.primary,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 );
+//               } else if (_canLoadMoreTopRestaurants) {
+//                 // Placeholder space when more data is available but not loading yet
+//                 return const SizedBox(height: 16);
+//               } else {
+//                 // No more data
+//                 return const SizedBox.shrink();
+//               }
+//             }
+//           },
 //         );
 //       },
 //     );
@@ -949,10 +1217,8 @@
 
 
 
-
-
-
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/BannerProvider/banner_provider.dart';
@@ -960,6 +1226,7 @@ import 'package:veegify/provider/CategoryProvider/category_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/nearby_restaurants_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/top_restaurants_provider.dart';
+import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Category/top_restaurants_screen.dart';
 import 'package:veegify/views/LocationScreen/location_search_screen.dart';
 import 'package:veegify/views/Category/category_screen.dart';
@@ -975,7 +1242,7 @@ import 'package:veegify/widgets/home/nearby_restaurant.dart';
 import 'package:veegify/widgets/home/search.dart';
 import 'package:veegify/widgets/home/section_header.dart';
 import 'package:veegify/widgets/home/top_restaurants.dart';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:veegify/widgets/home/video.dart';
 
@@ -1012,6 +1279,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showAdsBanner = true;
   double _adsBannerHeight = 200.0;
 
+  // Sticky search bar
+  final GlobalKey _searchBarKey = GlobalKey();
+  bool _isSearchBarPinned = false;
+
   // Animation controllers for different sections
   late AnimationController _headerController;
   late AnimationController _searchController;
@@ -1040,6 +1311,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _giftAnimationController;
   late Animation<double> _giftAnimation;
 
+  // Pagination for Popular Restaurants
+  final int _topRestaurantsPerPage = 2;
+  int _currentTopRestaurantsPage = 1;
+  bool _isTopRestaurantsLoadingMore = false;
+
   @override
   void initState() {
     super.initState();
@@ -1064,6 +1340,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _adsBannerController.reverse();
       }
     }
+
+    // Sticky search bar logic
+    if (_searchBarKey.currentContext != null) {
+      final box =
+          _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
+      if (box != null) {
+        final offsetPosition = box.localToGlobal(Offset.zero);
+        final topPadding = MediaQuery.of(context).padding.top;
+        final shouldPin = offsetPosition.dy <= topPadding + 8;
+
+        if (shouldPin != _isSearchBarPinned) {
+          setState(() {
+            _isSearchBarPinned = shouldPin;
+          });
+        }
+      }
+    }
+
+    // Infinite scroll for Popular Restaurants (vertical section)
+    if (!_isTopRestaurantsLoadingMore &&
+        !_isInitializing &&
+        _canLoadMoreTopRestaurants) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        _loadMoreTopRestaurantsPage();
+      }
+    }
+  }
+
+  bool get _canLoadMoreTopRestaurants {
+    try {
+      final provider = context.read<TopRestaurantsProvider>();
+      if (provider.topRestaurants.isEmpty) return false;
+
+      final total = provider.topRestaurants.length;
+      final visible = _currentTopRestaurantsPage * _topRestaurantsPerPage;
+      return visible < total;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _loadMoreTopRestaurantsPage() async {
+    if (!_canLoadMoreTopRestaurants) return;
+
+    setState(() {
+      _isTopRestaurantsLoadingMore = true;
+    });
+
+    // Show EasyLoading while "loading" more
+    EasyLoading.show(status: 'Loading more restaurants...');
+
+    // Simulate delay – in real case you can trigger API call here
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    if (!mounted) {
+      EasyLoading.dismiss();
+      return;
+    }
+
+    setState(() {
+      _currentTopRestaurantsPage++;
+      _isTopRestaurantsLoadingMore = false;
+    });
+
+    EasyLoading.dismiss();
   }
 
   void _initializeAnimations() {
@@ -1236,9 +1578,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _initializeData() async {
     try {
-      print("6556565656565666");
+      // EasyLoading for overall initial load / refresh
+      EasyLoading.show(status: 'Loading...');
+
       await _loadUserId();
-      print("8888888888888888888888");
       await _handleCurrentLocation();
       Provider.of<CategoryProvider>(context, listen: false).fetchCategories();
       Provider.of<RestaurantProvider>(context, listen: false)
@@ -1246,11 +1589,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       Provider.of<TopRestaurantsProvider>(context, listen: false)
           .getTopRestaurants(userId.toString());
       Provider.of<BannerProvider>(context, listen: false).fetchBanners();
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final locationProvider =
             Provider.of<LocationProvider>(context, listen: false);
         locationProvider.addListener(_onLocationChanged);
       });
+
+      // Reset pagination when reloading data
+      _currentTopRestaurantsPage = 1;
+      _isTopRestaurantsLoadingMore = false;
     } catch (e) {
       debugPrint('Initialization error: $e');
     } finally {
@@ -1258,6 +1606,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() => _isInitializing = false);
         _startAnimations(); // Start animations after data is loaded
       }
+      EasyLoading.dismiss();
     }
   }
 
@@ -1272,6 +1621,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             .getNearbyRestaurants(userId!);
         Provider.of<TopRestaurantsProvider>(context, listen: false)
             .getTopRestaurants(userId!);
+
+        // Reset pagination when location changes
+        setState(() {
+          _currentTopRestaurantsPage = 1;
+          _isTopRestaurantsLoadingMore = false;
+        });
       }
     }
   }
@@ -1287,12 +1642,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _handleCurrentLocation() async {
     try {
-      print("llllllllllll222222222222");
       final locationProvider =
           Provider.of<LocationProvider>(context, listen: false);
-      print("llllllllllll22222222222211");
       await locationProvider.initLocation(userId.toString());
-      print("llllllllllll222222222222333");
     } catch (e) {
       debugPrint('Location error: $e');
       if (mounted) {
@@ -1343,7 +1695,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildCategorySkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return SizedBox(
       height: 120,
       child: ListView.builder(
@@ -1391,7 +1743,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildRestaurantSkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return SizedBox(
       height: 270,
       child: ListView.builder(
@@ -1442,7 +1794,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: 120,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color:
+                              isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1453,7 +1806,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -1462,7 +1817,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 30,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1473,7 +1830,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: 100,
                         height: 12,
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          color:
+                              isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1484,7 +1842,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
@@ -1493,7 +1853,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 60,
                             height: 12,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1510,10 +1872,116 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  /// Vertical skeleton for Popular Restaurants
+  Widget _buildVerticalRestaurantSkeleton() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: isDark ? theme.cardColor : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(isDark ? 0.3 : 0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 90,
+                width: 90,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(12),
+                  ),
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDark ? Colors.grey[400]! : Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 16,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 14,
+                        width: 160,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            height: 14,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            height: 14,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildBannerSkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       height: 140,
       decoration: BoxDecoration(
@@ -1535,9 +2003,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    final isMobile = Responsive.isMobile(context);
+    final isTablet = Responsive.isTablet(context);
+    final isDesktop = Responsive.isDesktop(context);
+
+    final horizontalPadding =
+        isMobile ? 16.0 : (isTablet ? 24.0 : 32.0);
+    const double maxContentWidth = 720;
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: isDark ? Colors.black : Colors.white,
       body: Stack(
         children: [
           Column(
@@ -1558,155 +2035,194 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     },
                     child: SingleChildScrollView(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: maxContentWidth,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
 
-                          // Show skeleton or animated header
-                          _isInitializing
-                              ? Container(
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[700] : Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                )
-                              : _buildAnimatedSection(
-                                  slideAnimation: _headerSlideAnimation,
-                                  fadeAnimation: _headerFadeAnimation,
-                                  child: HomeHeader(
-                                    userId: userId ?? 'unknown',
-                                    onLocationTap: () async {
-                                      await Navigator.push(
+                              // Header
+                              _isInitializing
+                                  ? Container(
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.grey[700]
+                                            : Colors.grey[300],
+                                        borderRadius:
+                                            BorderRadius.circular(8),
+                                      ),
+                                    )
+                                  : _buildAnimatedSection(
+                                      slideAnimation:
+                                          _headerSlideAnimation,
+                                      fadeAnimation: _headerFadeAnimation,
+                                      child: HomeHeader(
+                                        userId: userId ?? 'unknown',
+                                        onLocationTap: () async {
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  LocationPickerScreen(
+                                                isEditing: false,
+                                                userId: userId.toString(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                              const SizedBox(height: 16),
+
+                              // Search Bar (becomes invisible when pinned)
+                              _isInitializing
+                                  ? Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.grey[700]
+                                            : Colors.grey[300],
+                                        borderRadius:
+                                            BorderRadius.circular(15),
+                                      ),
+                                    )
+                                  : Opacity(
+                                      opacity:
+                                          _isSearchBarPinned ? 0.0 : 1.0,
+                                      child: _buildAnimatedSection(
+                                        slideAnimation:
+                                            _searchSlideAnimation,
+                                        fadeAnimation:
+                                            _searchFadeAnimation,
+                                        child: Container(
+                                          key: _searchBarKey,
+                                          child:
+                                              const SearchBarWithVoice(),
+                                        ),
+                                      ),
+                                    ),
+
+                              const SizedBox(height: 16),
+
+                              // Categories Section
+                              Column(
+                                children: [
+                                  SectionHeader(
+                                    title: 'Categories',
+                                    onSeeAll: () {
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => LocationPickerScreen(
-                                            isEditing: false,
+                                          builder: (_) => CategoryScreen(
                                             userId: userId.toString(),
                                           ),
                                         ),
                                       );
                                     },
                                   ),
-                                ),
-
-                          const SizedBox(height: 16),
-
-                          // Search Bar - always visible
-                          _isInitializing
-                              ? Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey[700] : Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                )
-                              : _buildAnimatedSection(
-                                  slideAnimation: _searchSlideAnimation,
-                                  fadeAnimation: _searchFadeAnimation,
-                                  child: const SearchBarWithVoice(),
-                                ),
-
-                          // Categories Section
-                          Column(
-                            children: [
-                              SectionHeader(
-                                title: 'Categories',
-                                onSeeAll: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>  CategoryScreen(userId:userId.toString()),
-                                    ),
-                                  );
-                                },
+                                  const SizedBox(height: 10),
+                                  _isInitializing
+                                      ? _buildCategorySkeleton()
+                                      : _buildAnimatedSection(
+                                          slideAnimation:
+                                              _categoriesSlideAnimation,
+                                          fadeAnimation:
+                                              _categoriesFadeAnimation,
+                                          child: _buildCategories(),
+                                        ),
+                                ],
                               ),
-                              const SizedBox(height: 10),
+
+                              const SizedBox(height: 16),
+
+                              // Banner
                               _isInitializing
-                                  ? _buildCategorySkeleton()
-                                  : _buildAnimatedSection(
-                                      slideAnimation: _categoriesSlideAnimation,
-                                      fadeAnimation: _categoriesFadeAnimation,
-                                      child: _buildCategories(),
-                                    ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Banner
-                          _isInitializing
-                              ? _buildBannerSkeleton()
-                              : _buildAnimatedSection(
-                                  slideAnimation: _bannerSlideAnimation,
-                                  fadeAnimation: _bannerFadeAnimation,
-                                  child: const PromoBanner(),
-                                ),
-
-                          const SizedBox(height: 16),
-
-                          // Nearby Restaurants Section
-                          Column(
-                            children: [
-                              SectionHeader(
-                                title: 'Nearby restaurants',
-                                onSeeAll: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => NearbyScreen(
-                                        userId: userId.toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              _isInitializing
-                                  ? _buildRestaurantSkeleton()
-                                  : _buildAnimatedSection(
-                                      slideAnimation: _nearbySlideAnimation,
-                                      fadeAnimation: _nearbyFadeAnimation,
-                                      child: _buildRestaurantList(),
-                                    ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Top Restaurants Section
-                          Column(
-                            children: [
-                              SectionHeader(
-                                title: 'Popular Restaurants',
-                                onSeeAll: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => TopRestaurantsScreen(
-                                        userId: userId.toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              _isInitializing
-                                  ? _buildRestaurantSkeleton()
+                                  ? _buildBannerSkeleton()
                                   : _buildAnimatedSection(
                                       slideAnimation:
-                                          _topRestaurantsSlideAnimation,
-                                      fadeAnimation:
-                                          _topRestaurantsFadeAnimation,
-                                      child: _buildTopRestaurants(),
+                                          _bannerSlideAnimation,
+                                      fadeAnimation: _bannerFadeAnimation,
+                                      child: const PromoBanner(),
                                     ),
+
+                              const SizedBox(height: 16),
+
+                              // Nearby Restaurants Section (horizontal)
+                              Column(
+                                children: [
+                                  SectionHeader(
+                                    title: 'Nearby restaurants',
+                                    onSeeAll: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => NearbyScreen(
+                                            userId: userId.toString(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _isInitializing
+                                      ? _buildRestaurantSkeleton()
+                                      : _buildAnimatedSection(
+                                          slideAnimation:
+                                              _nearbySlideAnimation,
+                                          fadeAnimation:
+                                              _nearbyFadeAnimation,
+                                          child: _buildRestaurantList(),
+                                        ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Top Restaurants Section (VERTICAL)
+                              Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  SectionHeader(
+                                    title: 'Popular Restaurants',
+                                    onSeeAll: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              TopRestaurantsScreen(
+                                            userId: userId.toString(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _isInitializing
+                                      ? _buildVerticalRestaurantSkeleton()
+                                      : _buildAnimatedSection(
+                                          slideAnimation:
+                                              _topRestaurantsSlideAnimation,
+                                          fadeAnimation:
+                                              _topRestaurantsFadeAnimation,
+                                          child: _buildTopRestaurants(),
+                                        ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 20),
                             ],
                           ),
-
-                          const SizedBox(height: 20),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -1714,6 +2230,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
+
+          // Sticky Search Bar (overlay at top)
+          if (!_isInitializing && _isSearchBarPinned)
+            Positioned(
+              top: topPadding + 8,
+              left: horizontalPadding,
+              right: horizontalPadding,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: maxContentWidth,
+                  ),
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(15),
+                    color: theme.cardColor,
+                    child: const SearchBarWithVoice(),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -1733,7 +2270,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Text(
                 'No categories available',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color:
+                      theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ),
@@ -1764,7 +2302,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildRestaurantList() {
     final theme = Theme.of(context);
-    
+
     return Consumer<RestaurantProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
@@ -1799,7 +2337,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   'Looks like there arent any restaurants around your location.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color:
+                        theme.colorScheme.onSurface.withOpacity(0.6),
                     height: 1.4,
                   ),
                 ),
@@ -1809,7 +2348,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
 
         return SizedBox(
-          height: 360,
+          height: 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: provider.nearbyRestaurants.length,
@@ -1823,7 +2362,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 description: restaurant.description,
                 price: restaurant.startingPrice,
                 locationName: restaurant.locationName,
-                status: restaurant.status
+                status: restaurant.status,
               );
             },
           ),
@@ -1834,11 +2373,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildTopRestaurants() {
     final theme = Theme.of(context);
-    
+
     return Consumer<TopRestaurantsProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
-          return _buildRestaurantSkeleton();
+          return _buildVerticalRestaurantSkeleton();
         }
 
         if (provider.topRestaurants.isEmpty) {
@@ -1869,7 +2408,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   'Looks like there aren\'t any restaurants around your location.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    color:
+                        theme.colorScheme.onSurface.withOpacity(0.6),
                     height: 1.4,
                   ),
                 ),
@@ -1878,26 +2418,62 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
         }
 
-        // ✅ Return restaurant list if available
-        return SizedBox(
-          height: 320,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: provider.topRestaurants.length,
-            itemBuilder: (context, index) {
+        // Pagination logic: show items in pages, with loading indicator between
+        final total = provider.topRestaurants.length;
+        final visibleCount = math.min(
+          total,
+          _currentTopRestaurantsPage * _topRestaurantsPerPage,
+        );
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: visibleCount + 1, // +1 for bottom loader placeholder
+          itemBuilder: (context, index) {
+            if (index < visibleCount) {
               final restaurant = provider.topRestaurants[index];
-              return TopRestaurantCard(
-                id: restaurant.id,
-                imagePath: restaurant.imageUrl,
-                name: restaurant.restaurantName,
-                rating: restaurant.rating.toDouble(),
-                description: restaurant.description,
-                price: restaurant.startingPrice,
-                locationName: restaurant.locationName,
-                status: restaurant.status, 
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TicketRestaurantCard(
+                  id: restaurant.id,
+                  imagePath: restaurant.imageUrl,
+                  name: restaurant.restaurantName,
+                  rating: restaurant.rating.toDouble(),
+                  description: restaurant.description,
+                  price: restaurant.startingPrice,
+                  locationName: restaurant.locationName,
+                  status: restaurant.status,
+                ),
               );
-            },
-          ),
+            } else {
+              // Bottom "load more" indicator
+              if (_isTopRestaurantsLoadingMore &&
+                  _canLoadMoreTopRestaurants) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      height: 28,
+                      width: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              } else if (_canLoadMoreTopRestaurants) {
+                // Placeholder space when more data is available but not loading yet
+                return const SizedBox(height: 16);
+              } else {
+                // No more data
+                return const SizedBox.shrink();
+              }
+            }
+          },
         );
       },
     );

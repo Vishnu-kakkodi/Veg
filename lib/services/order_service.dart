@@ -38,7 +38,8 @@ class OrderService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        
+print("Order ID: ${responseData['data']['_id']}");
+
         return {
           'success': true,
           'data': responseData,

@@ -345,6 +345,10 @@ class CartModel {
   final dynamic totalDiscount;
   final dynamic platformCharge;
   final dynamic gstAmount;
+    final dynamic gstOnDelivery;
+        final dynamic packingCharges;
+
+
 
   CartModel({
     required this.id,
@@ -360,7 +364,11 @@ class CartModel {
     required this.restaurantId,
     required this.gstAmount,
     required this.platformCharge,
-    required this.totalDiscount
+    required this.totalDiscount,
+        required this.gstOnDelivery,
+                required this.packingCharges
+
+
   });
 
   /// Safe double parser (int / double / string / null)
@@ -407,8 +415,12 @@ class CartModel {
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ??
           DateTime.now(),
       restaurantId: json['restaurantId'] ?? '',
-      gstAmount: _toDouble(json['gstAmount']),
+      gstAmount: _toDouble(json['gstCharges']),
+            gstOnDelivery: _toDouble(json['gstOnDelivery']),
+                        packingCharges: _toDouble(json['packingCharges']),
+
             totalDiscount: _toDouble(json['totalDiscount']),
+            
 
       platformCharge: _toDouble(json['platformCharge']),
 

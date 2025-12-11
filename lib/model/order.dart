@@ -898,6 +898,10 @@ class Order {
   final DateTime? acceptedAt;
   final String? paymentType;
   final String? transactionId;
+    final dynamic packingCharges;
+
+  final dynamic gstOnDelivery;
+
 
   Order({
     required this.id,
@@ -927,6 +931,10 @@ class Order {
     this.acceptedAt,
     this.paymentType,
     this.transactionId,
+        this.packingCharges,
+
+    this.gstOnDelivery,
+
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -987,7 +995,11 @@ class Order {
       couponDiscount:
           (json['couponDiscount'] as num?)?.toDouble() ?? 0.0,
       gstAmount:
-          (json['gstAmount'] as num?)?.toDouble() ?? 0.0,
+          (json['gstCharges'] as num?)?.toDouble() ?? 0.0,
+                gstOnDelivery:
+          (json['gstOnDelivery'] as num?)?.toDouble() ?? 0.0,
+                packingCharges:
+          (json['packingCharges'] as num?)?.toDouble() ?? 0.0,
       platformCharge:
           (json['platformCharge'] as num?)?.toDouble() ?? 0.0,
       totalPayable:
