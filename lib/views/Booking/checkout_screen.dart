@@ -61,8 +61,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _loadAddresses() async {
-    final addressProvider =
-        Provider.of<AddressProvider>(context, listen: false);
+    final addressProvider = Provider.of<AddressProvider>(
+      context,
+      listen: false,
+    );
     await addressProvider.loadAddresses();
   }
 
@@ -98,20 +100,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // Razorpay Payment Handlers
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     print("Payment Success: ${response.paymentId}");
-    
+
     // Payment successful, now create the order with transaction ID
     await _createOrder(transactionId: response.paymentId);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
     setState(() => _isProcessingOrder = false);
-    
+
     _showSnackBar(
       'Payment Failed: ${"User Close the Payment" ?? "Unknown error"}',
       Colors.red,
     );
-    
-    print("Payment Error: Code: ${response.code}, Message: ${response.message}");
+
+    print(
+      "Payment Error: Code: ${response.code}, Message: ${response.message}",
+    );
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
@@ -145,7 +149,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   void _initiateRazorpayPayment() {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    
+
     var options = {
       'key': 'rzp_test_RgqXPvDLbgEIVv', // Replace with your Razorpay key
       'amount': (cartProvider.totalPayable * 100).toInt(), // Amount in paise
@@ -153,12 +157,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'description': 'Order Payment',
       'retry': {'enabled': true, 'max_count': 1},
       'send_sms_hash': true,
-      'prefill': {
-        'contact': "6282714883" ?? '',
-        'email': user?.email ?? '',
-      },
+      'prefill': {'contact': "6282714883" ?? '', 'email': user?.email ?? ''},
       'external': {
-        'wallets': ['paytm', 'phonepe', 'gpay']
+        'wallets': ['paytm', 'phonepe', 'gpay'],
       },
     };
 
@@ -176,7 +177,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       // Get cart items for order
       final cartItems = cartProvider.items;
-      
+
       print('=== ORDER DETAILS ===');
       print('Total Items: ${cartProvider.totalItems}');
       print('Subtotal: ${cartProvider.subtotal}');
@@ -188,7 +189,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       print('Transaction ID: $transactionId');
       print('Cart Items:');
       for (var item in cartItems) {
-        print('  - ${item.name} (Qty: ${item.quantity}, Price: ${item.totalPrice})');
+        print(
+          '  - ${item.name} (Qty: ${item.quantity}, Price: ${item.totalPrice})',
+        );
       }
 
       // Create order payload
@@ -196,16 +199,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         "userId": "${user?.userId.toString()}",
         "paymentMethod": _selectedPaymentMethod,
         "addressId": _selectedAddressId,
-        "transactionId": transactionId, // Include transaction ID for online payment
-        "items": cartItems.map((item) => {
-          "productId": item.id,
-          "name": item.name,
-          "quantity": item.quantity,
-          "price": item.basePrice,
-          "totalPrice": item.totalPrice,
-          "variation": item.addOn.variation,
-          "plateItems": item.addOn.plateitems,
-        }).toList(),
+        "transactionId":
+            transactionId, // Include transaction ID for online payment
+        "items": cartItems
+            .map(
+              (item) => {
+                "productId": item.id,
+                "name": item.name,
+                "quantity": item.quantity,
+                "price": item.basePrice,
+                "totalPrice": item.totalPrice,
+                "variation": item.addOn.variation,
+                "plateItems": item.addOn.plateitems,
+              },
+            )
+            .toList(),
         "subtotal": cartProvider.subtotal,
         "deliveryCharge": cartProvider.deliveryCharge,
         "couponDiscount": cartProvider.couponDiscount,
@@ -230,7 +238,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             MaterialPageRoute(
               builder: (context) => PaymentSuccessScreen(
                 userId: user?.userId.toString(),
-                orderId:orderId.toString()
+                orderId: orderId.toString(),
               ),
             ),
           );
@@ -285,7 +293,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Show loading if cart or address is loading
                 if (cartProvider.isLoading || addressProvider.isLoading) {
                   return Center(
-                    child: CircularProgressIndicator(color: colorScheme.primary),
+                    child: CircularProgressIndicator(
+                      color: colorScheme.primary,
+                    ),
                   );
                 }
 
@@ -411,7 +421,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildCartItemsSection(CartProvider cartProvider, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildCartItemsSection(
+    CartProvider cartProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -440,7 +454,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -474,7 +491,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildCartItemTile(CartProduct item, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildCartItemTile(
+    CartProduct item,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -489,10 +510,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               width: 60,
               height: 60,
               color: colorScheme.surfaceVariant,
-              child: Icon(
-                Icons.image,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              child: Icon(Icons.image, color: colorScheme.onSurfaceVariant),
             ),
           ),
         ),
@@ -550,7 +568,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildAddressSection(AddressProvider addressProvider, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildAddressSection(
+    AddressProvider addressProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -603,10 +625,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: colorScheme.error,
-                  ),
+                  Icon(Icons.info_outline, color: colorScheme.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -641,7 +660,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           : colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isSelected ? colorScheme.primary : colorScheme.outline.withOpacity(0.3),
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.outline.withOpacity(0.3),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -651,7 +672,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           isSelected
                               ? Icons.radio_button_checked
                               : Icons.radio_button_unchecked,
-                          color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -755,12 +778,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? colorScheme.primary.withOpacity(0.1)
                       : colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected ? colorScheme.primary : colorScheme.outline.withOpacity(0.3),
+                    color: isSelected
+                        ? colorScheme.primary
+                        : colorScheme.outline.withOpacity(0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -770,7 +795,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       isSelected
                           ? Icons.radio_button_checked
                           : Icons.radio_button_unchecked,
-                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                      color: isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 12),
                     Container(
@@ -815,7 +842,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildPriceSummary(CartProvider cartProvider, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildPriceSummary(
+    CartProvider cartProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -845,34 +876,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             theme,
             colorScheme,
           ),
-                    _buildPriceRow(
+          _buildPriceRow(
             'Platform Charge',
             '₹${cartProvider.platformCharge.toStringAsFixed(2)}',
             theme,
             colorScheme,
           ),
-                              _buildPriceRow(
+          _buildPriceRow(
             'GST Charge',
             '₹${cartProvider.gstAmount.toStringAsFixed(2)}',
             theme,
             colorScheme,
           ),
-                                        _buildPriceRow(
+          _buildPriceRow(
             'Delivery GST Charge',
             '₹${cartProvider.gstOnDelivery.toStringAsFixed(2)}',
             theme,
             colorScheme,
           ),
-                                        _buildPriceRow(
+          _buildPriceRow(
             'Packing Charge',
             '₹${cartProvider.packingCharges.toStringAsFixed(2)}',
             theme,
             colorScheme,
           ),
-          Divider(
-            height: 20,
-            color: colorScheme.outline.withOpacity(0.3),
+          _buildPriceRow(
+            'Your Saving',
+            '₹${cartProvider.amountSavedOnOrder.toStringAsFixed(2)}',
+            theme,
+            colorScheme,
           ),
+          Divider(height: 20, color: colorScheme.outline.withOpacity(0.3)),
           _buildPriceRow(
             'Total Payable',
             '₹${cartProvider.totalPayable.toStringAsFixed(2)}',
@@ -960,7 +994,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               : Text(
                   _canPlaceOrder ? 'Place Order' : 'Select Address & Payment',
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: _canPlaceOrder ? colorScheme.onPrimary : colorScheme.onSurface.withOpacity(0.6),
+                    color: _canPlaceOrder
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface.withOpacity(0.6),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -1719,16 +1719,16 @@ class _AcceptedOrderPollingScreenState
           // Bottom pill (fixed)
 
           // Loader overlay when no order yet
-          if (_loading && !_hasOrder)
-            Center(
-              child: SizedBox(
-                width: 48,
-                height: 48,
-                child: CircularProgressIndicator(
-                  color: colorScheme.primary,
-                ),
-              ),
-            ),
+          // if (_loading && !_hasOrder)
+          //   Center(
+          //     child: SizedBox(
+          //       width: 48,
+          //       height: 48,
+          //       child: CircularProgressIndicator(
+          //         color: colorScheme.primary,
+          //       ),
+          //     ),
+          //   ),
         ],
       ),
     );

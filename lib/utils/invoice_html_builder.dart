@@ -706,6 +706,8 @@ String buildInvoiceHtml(Order order) {
   // Optional charges: if null -> do NOT show that line
   final double? gst = order.gstAmount;
   final double? gstOnDelivery = order.gstOnDelivery;
+    final double? amountSavedOnOrder = order.amountSavedOnOrder;
+
   final double? packingCharges = order.packingCharges;
   final double? platformCharge = order.platformCharge;
   final double? deliveryCharge = order.deliveryCharge;
@@ -733,6 +735,7 @@ String buildInvoiceHtml(Order order) {
           </div>
         '''
       : '';
+
 
   final String packingLine = packingCharges != null
       ? '''
@@ -766,6 +769,15 @@ String buildInvoiceHtml(Order order) {
           <div class="summary-line muted">
             <span class="summary-label">Coupon Discount</span>
             <span class="summary-value negative">-₹${coupon.toStringAsFixed(2)}</span>
+          </div>
+        '''
+      : '';
+
+              final String amountSavedOnOrderr = amountSavedOnOrder != null
+      ? '''
+          <div class="summary-line">
+            <span class="summary-label">Your Saving</span>
+            <span class="summary-value">₹${amountSavedOnOrder.toStringAsFixed(2)}</span>
           </div>
         '''
       : '';
@@ -1261,6 +1273,7 @@ String buildInvoiceHtml(Order order) {
           $platformLine
           $deliveryLine
           $couponLine
+                    $amountSavedOnOrderr
           <div class="summary-line total">
             <span class="summary-label">Grand Total</span>
             <span class="summary-value">₹$grandTotalFormatted</span>

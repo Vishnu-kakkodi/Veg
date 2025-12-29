@@ -435,7 +435,7 @@ class TicketRestaurantCard extends StatelessWidget {
                     children: [
                       Image.network(
                         imagePath,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                         errorBuilder: (context, error, stackTrace) =>
                             Container(
                           color: isDark ? Colors.grey[800] : Colors.grey[300],

@@ -26,6 +26,8 @@ class CartProvider extends ChangeNotifier {
   double get couponDiscount => _cart?.couponDiscount ?? 0.0;
     double get gstOnDelivery => _cart?.gstOnDelivery ?? 0.0;
         double get packingCharges => _cart?.packingCharges ?? 0.0;
+                double get amountSavedOnOrder => _cart?.amountSavedOnOrder ?? 0.0;
+
 
     double get gstAmount => _cart?.gstAmount ?? 0.0;
 

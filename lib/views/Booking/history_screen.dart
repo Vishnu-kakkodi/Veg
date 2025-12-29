@@ -1782,7 +1782,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isNetwork ? Icons.wifi_off : Icons.error_outline,
+            isNetwork ? Icons.wifi_off : Icons.folder_off,
             size: 64,
             color: theme.colorScheme.onSurface.withOpacity(0.3),
           ),

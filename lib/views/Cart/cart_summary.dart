@@ -421,17 +421,6 @@
 //   colorScheme: theme.colorScheme,
 // )
 
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/utils/responsive.dart'; // ✅ add this
@@ -501,8 +490,9 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
     final isDesktop = Responsive.isDesktop(context);
 
     // Keep ticket narrow on big screens
-    final double maxWidth =
-        isDesktop ? 420 : (isTablet ? 380 : double.infinity);
+    final double maxWidth = isDesktop
+        ? 420
+        : (isTablet ? 380 : double.infinity);
 
     // Slightly adjust paddings
     final double horizontalPadding = isMobile ? 16 : 20;
@@ -548,8 +538,9 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary
-                              .withOpacity(_isDark ? 0.2 : 0.1),
+                          color: colorScheme.primary.withOpacity(
+                            _isDark ? 0.2 : 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -593,8 +584,9 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceVariant
-                                .withOpacity(_isDark ? 0.4 : 1),
+                            color: colorScheme.surfaceVariant.withOpacity(
+                              _isDark ? 0.4 : 1,
+                            ),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -634,8 +626,9 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                           _buildDetailRow(
                             icon: Icons.receipt,
                             label: 'Sub Total',
-                            value: widget.cartProvider.subtotal
-                                .toStringAsFixed(2),
+                            value: widget.cartProvider.subtotal.toStringAsFixed(
+                              2,
+                            ),
                           ),
                           if (widget.cartProvider.couponDiscount > 0) ...[
                             const SizedBox(height: 12),
@@ -693,12 +686,14 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: colorScheme.primary
-                              .withOpacity(_isDark ? 0.15 : 0.1),
+                          color: colorScheme.primary.withOpacity(
+                            _isDark ? 0.15 : 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: colorScheme.primary
-                                .withOpacity(_isDark ? 0.5 : 0.3),
+                            color: colorScheme.primary.withOpacity(
+                              _isDark ? 0.5 : 0.3,
+                            ),
                             width: 1,
                           ),
                         ),
@@ -715,8 +710,7 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                                 const SizedBox(width: 8),
                                 Text(
                                   'Total Payable',
-                                  style:
-                                      theme.textTheme.titleMedium?.copyWith(
+                                  style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: colorScheme.onSurface,
                                   ),
@@ -735,6 +729,18 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                         ),
                       ),
                     ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: _buildDetailRoww(
+                        icon: Icons.account_balance_wallet_outlined,
+                        label: 'Your Savings',
+                        value: widget.cartProvider.amountSavedOnOrder
+                            .toStringAsFixed(2),
+                        valueColor: Colors.green,
+                        emoji: '💰',
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -745,6 +751,59 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailRoww({
+    required IconData icon,
+    required String label,
+    required String value,
+    String? emoji,
+    Color? valueColor,
+    bool isNegative = false,
+    bool showCurrency = true,
+  }) {
+    final theme = widget.theme;
+    final colorScheme = widget.colorScheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Icon Container
+        // Container(
+        //   padding: const EdgeInsets.all(8),
+        //   decoration: BoxDecoration(
+        //     color: colorScheme.primary.withOpacity(0.1),
+        //     borderRadius: BorderRadius.circular(10),
+        //   ),
+        //   child: Icon(icon, size: 18, color: colorScheme.primary),
+        // ),
+
+        // const SizedBox(width: 12),
+
+        // Label + Emoji
+        Expanded(
+          child: Text(
+            '${emoji ?? ''} $label',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.2,
+              color: colorScheme.onSurface.withOpacity(0.75),
+            ),
+          ),
+        ),
+
+        // Value (Highlighted)
+        Text(
+          '${isNegative ? '-' : ''}${showCurrency ? '₹' : ''}$value',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+            color: valueColor ?? Colors.green.shade600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -766,13 +825,12 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceVariant
-                .withOpacity(_isDark ? 0.6 : 1),
+            color: colorScheme.surfaceVariant.withOpacity(_isDark ? 0.6 : 1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            size: 16,
+            size: 8,
             color: colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
@@ -804,50 +862,48 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
   /// Build ticket perforated edge
   Widget _buildTicketEdge({required bool isTop}) {
     final colorScheme = widget.colorScheme;
-    final baseColor =
-        colorScheme.surfaceVariant.withOpacity(_isDark ? 0.5 : 0.3);
+    final baseColor = colorScheme.surfaceVariant.withOpacity(
+      _isDark ? 0.5 : 0.3,
+    );
 
     return Row(
-      children: List.generate(
-        40,
-        (index) {
-          if (index == 0 || index == 39) {
-            return Expanded(
-              child: Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: baseColor,
-                  borderRadius: isTop
-                      ? (index == 0
+      children: List.generate(40, (index) {
+        if (index == 0 || index == 39) {
+          return Expanded(
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: baseColor,
+                borderRadius: isTop
+                    ? (index == 0
                           ? const BorderRadius.only(
                               topLeft: Radius.circular(16),
                             )
                           : const BorderRadius.only(
                               topRight: Radius.circular(16),
                             ))
-                      : (index == 0
+                    : (index == 0
                           ? const BorderRadius.only(
                               bottomLeft: Radius.circular(16),
                             )
                           : const BorderRadius.only(
                               bottomRight: Radius.circular(16),
                             )),
-                ),
-              ),
-            );
-          }
-          return Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              height: 8,
-              decoration: BoxDecoration(
-                color: baseColor,
-                borderRadius: BorderRadius.circular(2),
               ),
             ),
           );
-        },
-      ),
+        }
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            height: 8,
+            decoration: BoxDecoration(
+              color: baseColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -864,9 +920,7 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),
               height: 1,
-              color: colorScheme.outline.withOpacity(
-                _isDark ? 0.35 : 0.2,
-              ),
+              color: colorScheme.outline.withOpacity(_isDark ? 0.35 : 0.2),
             ),
           ),
         ),
