@@ -1,342 +1,12 @@
 
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-// import 'package:veegify/helper/storage_helper.dart';
-// import 'package:veegify/provider/AuthProvider/auth_provider.dart';
-// import 'package:veegify/views/Auth/signup_page.dart';
-// import 'package:veegify/views/ForgotPassword/forgot_password_screen.dart';
-// import 'package:flutter/services.dart';
-
-
-// class LoginPage extends StatefulWidget {
-//   const LoginPage({super.key});
-
-//   @override
-//   State<LoginPage> createState() => _LoginPageState();
-// }
-
-// class _LoginPageState extends State<LoginPage> {
-//   final _formKey = GlobalKey<FormState>();
-//   final _phoneController = TextEditingController();
-//   final _passwordController = TextEditingController();
-  
-//   bool _isPasswordVisible = false;
-//   bool _rememberMe = false;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _loadSavedCredentials();
-//   }
-
-//   void _loadSavedCredentials() {
-//     if (UserPreferences.getRememberMe()) {
-//       _phoneController.text = UserPreferences.getSavedPhoneNumber();
-//       _passwordController.text = UserPreferences.getSavedPassword();
-//       _rememberMe = true;
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _phoneController.dispose();
-//     _passwordController.dispose();
-//     super.dispose();
-//   }
-
-//   String? _validatePhoneNumber(String? value) {
-//     if (value == null || value.isEmpty) {
-//       return 'Phone number is required';
-//     }
-//     if (value.length < 10) {
-//       return 'Phone number must be at least 10 digits';
-//     }
-//     if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-//       return 'Phone number must contain only digits';
-//     }
-//     return null;
-//   }
-
-//   String? _validatePassword(String? value) {
-//     if (value == null || value.isEmpty) {
-//       return 'Password is required';
-//     }
-//     if (value.length < 6) {
-//       return 'Password must be at least 6 characters';
-//     }
-//     return null;
-//   }
-
-//   void _handleLogin() {
-//     if (_formKey.currentState!.validate()) {
-//       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-//       authProvider.login(
-//         phoneNumber: _phoneController.text.trim(),
-//         password: _passwordController.text,
-//         rememberMe: _rememberMe,
-//         context: context,
-//       );
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-//     final isDark = theme.brightness == Brightness.dark;
-    
-//     return Scaffold(
-//       backgroundColor: theme.scaffoldBackgroundColor,
-//       body: SafeArea(
-//         child: SingleChildScrollView(
-//           padding: const EdgeInsets.all(20),
-//           child: Form(
-//             key: _formKey,
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.center,
-//               children: [
-//                 const SizedBox(height: 30),
-//                 Image.asset(
-//                   "assets/images/login.png",
-//                   color: isDark ? null : null,
-//                 ),
-//                 const SizedBox(height: 30),
-//                 Text(
-//                   'Welcome back glad to see you',
-//                   style: theme.textTheme.headlineSmall?.copyWith(
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 Align(
-//                   alignment: Alignment.centerLeft,
-//                   child: RichText(
-//                     text: TextSpan(
-//                       text: 'Phone Number',
-//                       style: theme.textTheme.bodyLarge?.copyWith(
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                       children: const [
-//                         TextSpan(
-//                           text: '*',
-//                           style: TextStyle(color: Colors.red),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 5),
-// TextFormField(
-//   controller: _phoneController,
-//   keyboardType: TextInputType.phone,
-//   validator: _validatePhoneNumber,
-//   style: TextStyle(
-//     color: theme.colorScheme.onSurface,
-//   ),
-//   inputFormatters: [
-//     LengthLimitingTextInputFormatter(10), // ⬅️ limits to 10 digits
-//     FilteringTextInputFormatter.digitsOnly, // ⬅️ allows only numbers
-//   ],
-//   decoration: InputDecoration(
-//     hintText: 'Enter your phone number',
-//     hintStyle: TextStyle(
-//       color: theme.colorScheme.onSurface.withOpacity(0.6),
-//     ),
-//     border: OutlineInputBorder(
-//       borderRadius: BorderRadius.circular(12),
-//       borderSide: BorderSide.none,
-//     ),
-//     filled: true,
-//     fillColor: theme.inputDecorationTheme.fillColor,
-//     prefixIcon: Icon(
-//       Icons.phone,
-//       color: theme.colorScheme.onSurface.withOpacity(0.6),
-//     ),
-//   ),
-// ),
-
-//                 const SizedBox(height: 15),
-//                 Align(
-//                   alignment: Alignment.centerLeft,
-//                   child: RichText(
-//                     text: TextSpan(
-//                       text: 'Password',
-//                       style: theme.textTheme.bodyLarge?.copyWith(
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                       children: const [
-//                         TextSpan(
-//                           text: '*',
-//                           style: TextStyle(color: Colors.red),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 5),
-//                 TextFormField(
-//                   controller: _passwordController,
-//                   obscureText: !_isPasswordVisible,
-//                   validator: _validatePassword,
-//                   style: TextStyle(
-//                     color: theme.colorScheme.onSurface,
-//                   ),
-//                   decoration: InputDecoration(
-//                     hintText: 'Enter your password',
-//                     hintStyle: TextStyle(
-//                       color: theme.colorScheme.onSurface.withOpacity(0.6),
-//                     ),
-//                     border: OutlineInputBorder(
-//                       borderRadius: BorderRadius.circular(12),
-//                       borderSide: BorderSide.none,
-//                     ),
-//                     filled: true,
-//                     fillColor: theme.inputDecorationTheme.fillColor,
-//                     prefixIcon: Icon(
-//                       Icons.lock,
-//                       color: theme.colorScheme.onSurface.withOpacity(0.6),
-//                     ),
-//                     suffixIcon: IconButton(
-//                       icon: Icon(
-//                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-//                         color: theme.colorScheme.onSurface.withOpacity(0.6),
-//                       ),
-//                       onPressed: () {
-//                         setState(() {
-//                           _isPasswordVisible = !_isPasswordVisible;
-//                         });
-//                       },
-//                     ),
-//                   ),
-//                 ),
-//                 // const SizedBox(height: 10),
-//                 // Row(
-//                 //   children: [
-//                 //     Checkbox(
-//                 //       value: _rememberMe,
-//                 //       onChanged: (value) {
-//                 //         setState(() {
-//                 //           _rememberMe = value ?? false;
-//                 //         });
-//                 //       },
-//                 //     ),
-//                 //     Text(
-//                 //       'Remember me',
-//                 //       style: theme.textTheme.bodyMedium,
-//                 //     ),
-//                 //   ],
-//                 // ),
-//                 const SizedBox(height: 30),
-//                 Consumer<AuthProvider>(
-//                   builder: (context, authProvider, child) {
-//                     return SizedBox(
-//                       width: double.infinity,
-//                       height: 50,
-//                       child: ElevatedButton(
-//                         onPressed: authProvider.isLoading ? null : _handleLogin,
-//                         style: ElevatedButton.styleFrom(
-//                           backgroundColor: theme.colorScheme.primary,
-//                           foregroundColor: theme.colorScheme.onPrimary,
-//                           elevation: 5,
-//                           shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(12),
-//                           ),
-//                           textStyle: const TextStyle(
-//                             fontSize: 16,
-//                             fontWeight: FontWeight.w600,
-//                           ),
-//                         ),
-//                         child: authProvider.isLoading
-//                             ? CircularProgressIndicator(
-//                                 valueColor: AlwaysStoppedAnimation<Color>(
-//                                   theme.colorScheme.onPrimary,
-//                                 ),
-//                               )
-//                             : const Text('Log In'),
-//                       ),
-//                     );
-//                   },
-//                 ),
-//                 const SizedBox(height: 5),
-//                 Align(
-//                   alignment: Alignment.centerRight,
-//                   child: TextButton(
-//                     onPressed: () {
-//                       Navigator.push(
-//                         context, 
-//                         MaterialPageRoute(
-//                           builder: (context) => const ForgotPasswordScreen()
-//                         )
-//                       );
-//                     },
-//                     child: Text(
-//                       'Forgot Your Password?',
-//                       style: TextStyle(
-//                         color: theme.colorScheme.primary,
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Text(
-//                       "Don't have account? ",
-//                       style: theme.textTheme.bodyMedium,
-//                     ),
-//                     GestureDetector(
-//                       onTap: () {
-//                         Navigator.push(
-//                           context,
-//                           MaterialPageRoute(
-//                             builder: (context) => const SignupPage()
-//                           ),
-//                         );
-//                       },
-//                       child: Text(
-//                         'Register',
-//                         style: TextStyle(
-//                           color: theme.colorScheme.primary,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 const SizedBox(height: 20),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
-import 'package:veegify/utils/responsive.dart'; // ⬅️ add this
+import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Auth/signup_page.dart';
 import 'package:veegify/views/ForgotPassword/forgot_password_screen.dart';
 
@@ -413,266 +83,336 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Responsive.builder(
+          context: context,
+          mobile: _buildMobileLayout(),
+          tablet: _buildTabletLayout(),
+          desktop: _buildDesktopLayout(),
+        ),
+      ),
+    );
+  }
+
+  // Mobile Layout (< 600px)
+  Widget _buildMobileLayout() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: _buildFormContent(
+          imageHeight: 160,
+          titleFontSize: 24,
+          bodyFontSize: 14,
+          spacing: 16,
+          smallSpacing: 8,
+          buttonHeight: 50,
+          showCard: false,
+        ),
+      ),
+    );
+  }
+
+  // Tablet Layout (600px - 1024px)
+  Widget _buildTabletLayout() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: _buildFormContent(
+            imageHeight: 180,
+            titleFontSize: 26,
+            bodyFontSize: 15,
+            spacing: 20,
+            smallSpacing: 10,
+            buttonHeight: 52,
+            showCard: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Desktop Layout (> 1024px)
+  Widget _buildDesktopLayout() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    final isMobile = Responsive.isMobile(context);
-    final isTablet = Responsive.isTablet(context);
-    final isDesktop = Responsive.isDesktop(context);
-
-    // Common paddings by device
-    final horizontalPadding = isMobile ? 20.0 : (isTablet ? 40.0 : 80.0);
-    final verticalSpacingSmall = screenHeight * 0.015; // ~1.5%
-    final verticalSpacingMedium = screenHeight * 0.03; // ~3%
-
-    // Max width for form card on large screens
-    const double maxFormWidth = 420;
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: isMobile ? 10 : 24,
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 40),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
             ),
-            child: SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isMobile ? double.infinity : maxFormWidth,
-                ),
-                child: isDesktop
-                    ? _buildDesktopLayout(
-                        theme: theme,
-                        isDark: isDark,
-                        verticalSpacingMedium: verticalSpacingMedium,
-                        verticalSpacingSmall: verticalSpacingSmall,
-                      )
-                    : _buildFormCard(
-                        theme: theme,
-                        isDark: isDark,
-                        verticalSpacingMedium: verticalSpacingMedium,
-                        verticalSpacingSmall: verticalSpacingSmall,
-                        isTabletOrDesktop: isTablet || isDesktop,
+            child: Padding(
+              padding: const EdgeInsets.all(48.0),
+              child: Row(
+                children: [
+                  // Left side - Illustration
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 48.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/images/login.png",
+                            height: 280,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Welcome back!',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 32,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Login to continue using Veegify and enjoy\ndelicious food delivered to your doorstep.',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
+                              fontSize: 16,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// For desktop we can show a side illustration + form nicely.
-  Widget _buildDesktopLayout({
-    required ThemeData theme,
-    required bool isDark,
-    required double verticalSpacingMedium,
-    required double verticalSpacingSmall,
-  }) {
-    return Row(
-      children: [
-        // Left side illustration (expanded)
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 32.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  "assets/images/login.png",
-                  height: 260,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Welcome back!',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Login to continue using Veegify.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+
+                  // Vertical divider
+                  Container(
+                    width: 1,
+                    height: 400,
+                    color: theme.colorScheme.onSurface.withOpacity(0.1),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
 
-        // Right side form card
-        Expanded(
-          child: _buildFormCard(
-            theme: theme,
-            isDark: isDark,
-            verticalSpacingMedium: verticalSpacingMedium,
-            verticalSpacingSmall: verticalSpacingSmall,
-            isTabletOrDesktop: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Form wrapped in a Card (for tablet/desktop) or plain (for mobile)
-  Widget _buildFormCard({
-    required ThemeData theme,
-    required bool isDark,
-    required double verticalSpacingMedium,
-    required double verticalSpacingSmall,
-    required bool isTabletOrDesktop,
-  }) {
-    final formContent = _buildFormContent(
-      theme: theme,
-      isDark: isDark,
-      verticalSpacingMedium: verticalSpacingMedium,
-      verticalSpacingSmall: verticalSpacingSmall,
-    );
-
-    if (!isTabletOrDesktop) {
-      // Mobile: no card, full width
-      return formContent;
-    }
-
-    // Tablet / Desktop: show card
-    return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-        child: formContent,
-      ),
-    );
-  }
-
-  Widget _buildFormContent({
-    required ThemeData theme,
-    required bool isDark,
-    required double verticalSpacingMedium,
-    required double verticalSpacingSmall,
-  }) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // On mobile show the image here, on tablet/desktop card maybe smaller
-          Image.asset(
-            "assets/images/login.png",
-            height: Responsive.isMobile(context) ? 180 : 140,
-          ),
-          SizedBox(height: verticalSpacingMedium),
-          Text(
-            'Welcome back,\nGlad to see you 👋',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: verticalSpacingMedium),
-
-          // Phone label
-          Align(
-            alignment: Alignment.centerLeft,
-            child: RichText(
-              text: TextSpan(
-                text: 'Phone Number',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                children: const [
-                  TextSpan(
-                    text: '*',
-                    style: TextStyle(color: Colors.red),
+                  // Right side - Form
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 48.0),
+                      child: _buildFormContent(
+                        imageHeight: 0, // Don't show image on right side
+                        titleFontSize: 28,
+                        bodyFontSize: 15,
+                        spacing: 24,
+                        smallSpacing: 12,
+                        buttonHeight: 54,
+                        showCard: false,
+                        showWelcomeImage: false,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: verticalSpacingSmall),
+        ),
+      ),
+    );
+  }
 
+
+
+  Widget _buildFormContent({
+    required double imageHeight,
+    required double titleFontSize,
+    required double bodyFontSize,
+    required double spacing,
+    required double smallSpacing,
+    required double buttonHeight,
+    required bool showCard,
+    bool showWelcomeImage = true,
+  }) {
+    final theme = Theme.of(context);
+    final content = Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Welcome Image
+          if (showWelcomeImage && imageHeight > 0)
+            Center(
+              child: Image.asset(
+                "assets/images/login.png",
+                height: imageHeight,
+                fit: BoxFit.contain,
+              ),
+            ),
+          if (showWelcomeImage && imageHeight > 0) SizedBox(height: spacing),
+
+          // Welcome Title
+          Text(
+            'Welcome back,\nGlad to see you 👋',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: titleFontSize,
+              height: 1.3,
+            ),
+          ),
+          SizedBox(height: spacing),
+
+          // Phone Number Label
+          RichText(
+            text: TextSpan(
+              text: 'Phone Number',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: bodyFontSize,
+              ),
+              children: const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: smallSpacing),
+
+          // Phone Number Field
           TextFormField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             validator: _validatePhoneNumber,
             style: TextStyle(
               color: theme.colorScheme.onSurface,
+              fontSize: bodyFontSize,
             ),
-            inputFormatters:  [
+            inputFormatters: [
               LengthLimitingTextInputFormatter(10),
               FilteringTextInputFormatter.digitsOnly,
             ],
             decoration: InputDecoration(
               hintText: 'Enter your phone number',
               hintStyle: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                fontSize: bodyFontSize,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.onSurface.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 1,
+                ),
+              ),
               filled: true,
               fillColor: theme.inputDecorationTheme.fillColor,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
               prefixIcon: Icon(
                 Icons.phone,
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+                size: 22,
               ),
             ),
           ),
 
-          SizedBox(height: verticalSpacingMedium),
+          SizedBox(height: spacing),
 
-          // Password label
-          Align(
-            alignment: Alignment.centerLeft,
-            child: RichText(
-              text: TextSpan(
-                text: 'Password',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+          // Password Label
+          RichText(
+            text: TextSpan(
+              text: 'Password',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: bodyFontSize,
+              ),
+              children: const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red),
                 ),
-                children: const [
-                  TextSpan(
-                    text: '*',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
-          SizedBox(height: verticalSpacingSmall),
+          SizedBox(height: smallSpacing),
 
+          // Password Field
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
             validator: _validatePassword,
             style: TextStyle(
               color: theme.colorScheme.onSurface,
+              fontSize: bodyFontSize,
             ),
             decoration: InputDecoration(
               hintText: 'Enter your password',
               hintStyle: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                fontSize: bodyFontSize,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.onSurface.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: theme.colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 1,
+                ),
+              ),
               filled: true,
               fillColor: theme.inputDecorationTheme.fillColor,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
               prefixIcon: Icon(
                 Icons.lock,
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+                size: 22,
               ),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -680,6 +420,7 @@ class _LoginPageState extends State<LoginPage> {
                       ? Icons.visibility
                       : Icons.visibility_off,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  size: 22,
                 ),
                 onPressed: () {
                   setState(() {
@@ -690,31 +431,39 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          SizedBox(height: verticalSpacingMedium),
+          SizedBox(height: spacing),
 
+          // Login Button
           Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               return SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: buttonHeight,
                 child: ElevatedButton(
                   onPressed: authProvider.isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,
-                    elevation: 5,
+                    elevation: authProvider.isLoading ? 0 : 3,
+                    shadowColor: theme.colorScheme.primary.withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
+                    textStyle: TextStyle(
+                      fontSize: bodyFontSize + 1,
                       fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   child: authProvider.isLoading
-                      ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            theme.colorScheme.onPrimary,
+                      ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              theme.colorScheme.onPrimary,
+                            ),
+                            strokeWidth: 2.5,
                           ),
                         )
                       : const Text('Log In'),
@@ -723,7 +472,9 @@ class _LoginPageState extends State<LoginPage> {
             },
           ),
 
-          SizedBox(height: verticalSpacingSmall),
+          SizedBox(height: smallSpacing),
+
+          // Forgot Password
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -735,22 +486,34 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 );
               },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+              ),
               child: Text(
                 'Forgot Your Password?',
                 style: TextStyle(
                   color: theme.colorScheme.primary,
+                  fontSize: bodyFontSize,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ),
 
-          SizedBox(height: verticalSpacingSmall),
+          SizedBox(height: smallSpacing),
+
+          // Register Link
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Don't have account? ",
-                style: theme.textTheme.bodyMedium,
+                "Don't have an account? ",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: bodyFontSize,
+                ),
               ),
               GestureDetector(
                 onTap: () {
@@ -766,13 +529,70 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
+                    fontSize: bodyFontSize,
                   ),
                 ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+
+                    Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+            onTap: () async {
+        final uri = Uri.parse("https://pixelmindsolutions.com");
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+                child:RichText(
+          text: TextSpan(
+            style: const TextStyle(fontSize: 12),
+            children: [
+              TextSpan(
+                text: "Powered by ",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextSpan(
+                text: "Pixelmindsolutions Pvt Ltd",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      
               ),
             ],
           ),
         ],
       ),
     );
+
+    // Wrap in card if needed
+    if (showCard) {
+      return Card(
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(spacing + 8),
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 }

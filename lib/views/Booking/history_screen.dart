@@ -1351,7 +1351,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
                 onTap: () {
                   final orderIdText = order.id ?? "N/A";
                   final message =
-                      "Hello Vegiffyy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
+                      "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
 
                   openWhatsApp("9961593179", message: message);
                 },

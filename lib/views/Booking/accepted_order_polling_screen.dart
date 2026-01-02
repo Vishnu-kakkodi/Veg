@@ -1181,7 +1181,7 @@ class _AcceptedOrderPollingScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Once a Vegiffyy Green Partner accepts your order,\n'
+            'Once a Vegiffy Green Partner accepts your order,\n'
             'you will see all the order details here.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.7),
@@ -1222,7 +1222,7 @@ class _AcceptedOrderPollingScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Vegiffyy Green Partner Accepted',
+                      'Vegiffy Green Partner Accepted',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

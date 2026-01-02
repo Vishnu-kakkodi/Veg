@@ -14,7 +14,7 @@
         tools:node="remove" />
 
     <application
-        android:label="VEGIFFYY"
+        android:label="VEGIFFY"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <meta-data

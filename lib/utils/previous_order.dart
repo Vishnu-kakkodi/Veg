@@ -550,13 +550,13 @@ String buildInvoiceHtml(Order order) {
       <div class="brand">
         <div class="brand-logo">
           <img 
-            src="https://vegiffyy.com/static/media/veggifylogo.3fc4c1893871f095e27e.jpeg" 
+            src="http://31.97.206.144:3043/static/media/veggifylogo.3095c463519a84ad6d6c.jpeg" 
             alt="Veegify Logo" 
             class="brand-logo-img"
           />
         </div>
         <div class="brand-text">
-          <div class="brand-title">Vegiffyy</div>
+          <div class="brand-title">Vegiffy</div>
           <div class="brand-subtitle">
             <span>Pure Veg Delivery</span>
             <span class="veg-icon">
@@ -660,7 +660,7 @@ String buildInvoiceHtml(Order order) {
       </div>
 
       <div class="footer-note">
-        Thank you for ordering with <span class="footer-brand">Vegiffyy</span>.<br/>
+        Thank you for ordering with <span class="footer-brand">Vegiffy</span>.<br/>
         For help with this order, contact support with your invoice ID.
       </div>
     </div>

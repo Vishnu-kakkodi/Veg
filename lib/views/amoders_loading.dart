@@ -55,10 +55,10 @@ class _AmodersLoadingState extends State<AmodersLoading>
                 child: Opacity(
                   opacity: opacity,
                   child: Container(
-                    width: 6,
-                    height: 6,
+                    width: 9,
+                    height: 9,
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 32, 234, 14),
                       shape: BoxShape.circle,
                     ),
                   ),

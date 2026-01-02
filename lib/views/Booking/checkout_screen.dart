@@ -153,7 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     var options = {
       'key': 'rzp_test_RgqXPvDLbgEIVv', // Replace with your Razorpay key
       'amount': (cartProvider.totalPayable * 100).toInt(), // Amount in paise
-      'name': 'Vegiffyy',
+      'name': 'Vegiffy',
       'description': 'Order Payment',
       'retry': {'enabled': true, 'max_count': 1},
       'send_sms_hash': true,
@@ -882,18 +882,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             theme,
             colorScheme,
           ),
-          _buildPriceRow(
-            'GST Charge',
-            '₹${cartProvider.gstAmount.toStringAsFixed(2)}',
-            theme,
-            colorScheme,
-          ),
-          _buildPriceRow(
-            'Delivery GST Charge',
-            '₹${cartProvider.gstOnDelivery.toStringAsFixed(2)}',
-            theme,
-            colorScheme,
-          ),
+_buildGstPriceRow(cartProvider, theme, colorScheme),
+
           _buildPriceRow(
             'Packing Charge',
             '₹${cartProvider.packingCharges.toStringAsFixed(2)}',
@@ -919,6 +909,209 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
+
+
+//   Widget _buildPriceSummary(
+//   CartProvider cartProvider,
+//   ThemeData theme,
+//   ColorScheme colorScheme,
+// ) {
+//   return Container(
+//     margin: const EdgeInsets.symmetric(horizontal: 16),
+//     padding: const EdgeInsets.all(16),
+//     decoration: BoxDecoration(
+//       color: colorScheme.surfaceVariant,
+//       borderRadius: BorderRadius.circular(12),
+//     ),
+//     child: Column(
+//       children: [
+//         _buildPriceRow(
+//           'Sub Total',
+//           '₹${cartProvider.subtotal.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//         ),
+
+//         if (cartProvider.couponDiscount > 0)
+//           _buildPriceRow(
+//             'Coupon Discount',
+//             '-₹${cartProvider.couponDiscount.toStringAsFixed(2)}',
+//             theme,
+//             colorScheme,
+//             valueColor: Colors.green,
+//           ),
+
+//         _buildPriceRow(
+//           'Delivery Charge',
+//           '₹${cartProvider.deliveryCharge.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//         ),
+
+//         _buildPriceRow(
+//           'Platform Charge',
+//           '₹${cartProvider.platformCharge.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//         ),
+
+//         /// ✅ SINGLE GST ROW WITH LINK
+//         _buildGstPriceRow(cartProvider, theme, colorScheme),
+
+//         _buildPriceRow(
+//           'Packing Charge',
+//           '₹${cartProvider.packingCharges.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//         ),
+
+//         _buildPriceRow(
+//           'Your Saving',
+//           '₹${cartProvider.amountSavedOnOrder.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//           valueColor: Colors.green,
+//         ),
+
+//         Divider(height: 20, color: colorScheme.outline.withOpacity(0.3)),
+
+//         _buildPriceRow(
+//           'Total Payable',
+//           '₹${cartProvider.totalPayable.toStringAsFixed(2)}',
+//           theme,
+//           colorScheme,
+//           valueColor: colorScheme.primary,
+//           isBold: true,
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+Widget _buildGstPriceRow(
+  CartProvider cartProvider,
+  ThemeData theme,
+  ColorScheme colorScheme,
+) {
+  final totalGst =
+      cartProvider.gstAmount + cartProvider.gstOnDelivery;
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        GestureDetector(
+          onTap: () => _showGstBreakupModal(cartProvider, theme, colorScheme),
+          child: RichText(
+            text: TextSpan(
+              text: 'GST ',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.7),
+              ),
+              children: [
+                TextSpan(
+                  text: '(View breakup)',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Text(
+          '₹${totalGst.toStringAsFixed(2)}',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+void _showGstBreakupModal(
+  CartProvider cartProvider,
+  ThemeData theme,
+  ColorScheme colorScheme,
+) {
+  final totalGst =
+      cartProvider.gstAmount + cartProvider.gstOnDelivery;
+
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'GST Breakup',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            _gstRow('Items GST', cartProvider.gstAmount, theme),
+            const SizedBox(height: 12),
+            _gstRow('Delivery GST', cartProvider.gstOnDelivery, theme),
+
+            const Divider(height: 32),
+
+            _gstRow('Total GST', totalGst, theme, isBold: true),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
+Widget _gstRow(
+  String label,
+  double value,
+  ThemeData theme, {
+  bool isBold = false,
+}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        label,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      Text(
+        '₹${value.toStringAsFixed(2)}',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+        ),
+      ),
+    ],
+  );
+}
+
 
   Widget _buildPriceRow(
     String label,

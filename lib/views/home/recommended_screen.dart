@@ -9,6 +9,7 @@ import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/restaurant_products_provider.dart';
 import 'package:veegify/provider/WishListProvider/wishlist_provider.dart';
 import 'package:veegify/views/Cart/cart_screen.dart';
+import 'package:veegify/views/Navbar/navbar_screen.dart';
 import 'package:veegify/views/home/detail_screen.dart';
 import 'package:veegify/widgets/Restaurants/swinging_closed_banner.dart';
 
@@ -1848,6 +1849,7 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                                     ),
                                   ),
                                 );
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=>NavbarScreen(initialIndex: 2,)));
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
