@@ -1,7 +1,7 @@
 name: veegify
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.6+10
+version: 1.0.8+12
 
 environment:
   sdk: ^3.8.1
@@ -73,6 +73,7 @@ flutter:
     - assets/images/destination.png
     - assets/images/wattsapp.png
     - assets/images/vegsplash.png
+    - assets/images/websplash.png
     - assets/lottie/food_preparing.json
 
 # <-- IMPORTANT: flutter_icons must be a top-level key (not under flutter:)

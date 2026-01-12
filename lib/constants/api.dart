@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://31.97.206.144:5051/api';
+  static const String baseUrl = 'https://api.vegiffyy.com/api';
 
   // Auth Endpoints
   static const String register = '$baseUrl/register';

@@ -15,7 +15,7 @@ class ProfileProvider extends ChangeNotifier {
   String? _error;
 
   // Base API host - change if needed
-  static const String baseHost = "http://31.97.206.144:5051";
+  static const String baseHost = "https://api.vegiffyy.com";
 
   User? get user => _user;
   String? get imageUrl => _imageUrl;

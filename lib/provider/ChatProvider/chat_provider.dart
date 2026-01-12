@@ -56,7 +56,7 @@ class ChatProvider extends ChangeNotifier {
       print("kkkkkkkkkkkkkkkkkkkkkkkkrrrrererkkkkkkkk$deliveryBoyId");
             print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk$userId");
 
-      final url = Uri.parse('http://31.97.206.144:5051/api/getchat/$deliveryBoyId/$userId');
+      final url = Uri.parse('https://api.vegiffyy.com/api/getchat/$deliveryBoyId/$userId');
             print("uuuuuuuuuuu$url");
 
       final resp = await http.get(url).timeout(const Duration(seconds: 10));
@@ -98,7 +98,7 @@ class ChatProvider extends ChangeNotifier {
     _scrollToBottomHelper();
 
     // 1) POST to server to save message -> server will emit to room
-    final url = Uri.parse('http://31.97.206.144:5051/api/sendchat/$deliveryBoyId/$userId');
+    final url = Uri.parse('https://api.vegiffyy.com/api/sendchat/$deliveryBoyId/$userId');
     try {
       final body = json.encode({'message': trimmed, 'senderType': 'user'});
       final resp = await http.post(url, headers: {'Content-Type': 'application/json'}, body: body).timeout(const Duration(seconds: 10));

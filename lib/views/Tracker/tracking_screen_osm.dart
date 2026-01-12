@@ -56,7 +56,7 @@ class _TrackingScreenGoogleState extends State<TrackingScreenGoogle>
   LatLngTween? _latLngTween;
 
   // server urls
-  static const String _apiBase = 'http://31.97.206.144:5051';
+  static const String _apiBase = 'https://api.vegiffyy.com';
 
   // marker icons loaded from assets
   BitmapDescriptor? _riderIcon;

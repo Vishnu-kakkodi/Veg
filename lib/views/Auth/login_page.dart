@@ -537,44 +537,44 @@ class _LoginPageState extends State<LoginPage> {
           ),
           SizedBox(height: 20),
 
-                    Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-            onTap: () async {
-        final uri = Uri.parse("https://pixelmindsolutions.com");
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      },
-                child:RichText(
-          text: TextSpan(
-            style: const TextStyle(fontSize: 12),
-            children: [
-              TextSpan(
-                text: "Powered by ",
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.6),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              TextSpan(
-                text: "Pixelmindsolutions Pvt Ltd",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
+      //               Row(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         GestureDetector(
+      //       onTap: () async {
+      //   final uri = Uri.parse("https://pixelmindsolutions.com");
+      //   if (await canLaunchUrl(uri)) {
+      //     await launchUrl(uri, mode: LaunchMode.externalApplication);
+      //   }
+      // },
+      //           child:RichText(
+      //     text: TextSpan(
+      //       style: const TextStyle(fontSize: 12),
+      //       children: [
+      //         TextSpan(
+      //           text: "Powered by ",
+      //           style: TextStyle(
+      //             color: Theme.of(context)
+      //                 .colorScheme
+      //                 .onSurface
+      //                 .withOpacity(0.6),
+      //             fontWeight: FontWeight.w500,
+      //           ),
+      //         ),
+      //         TextSpan(
+      //           text: "Pixelmindsolutions Pvt Ltd",
+      //           style: TextStyle(
+      //             color: Theme.of(context).colorScheme.primary,
+      //             fontWeight: FontWeight.bold,
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
       
-              ),
-            ],
-          ),
+      //         ),
+      //       ],
+      //     ),
         ],
       ),
     );

@@ -509,7 +509,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
             print("sijffjdfklfjd;ffsk;fsaf${widget.orderId}");
 
       final url = Uri.parse(
-        'http://31.97.206.144:5051/api/cancel-order/${widget.userId}/${widget.orderId}',
+        'https://api.vegiffyy.com/api/cancel-order/${widget.userId}/${widget.orderId}',
       );
 
       final response = await http.put(

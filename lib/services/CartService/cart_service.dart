@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:veegify/model/CartModel/cart_model.dart';
 
 class CartService {
-  static const String baseUrl = 'http://31.97.206.144:5051/api';
+  static const String baseUrl = 'https://api.vegiffyy.com/api';
 
   // Get cart by user ID
   static Future<CartResponse?> getCart(String userId) async {

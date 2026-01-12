@@ -90,10 +90,10 @@
 
 //       if (widget.orderId != null && widget.userId != null) {
 //         url = Uri.parse(
-//             'http://31.97.206.144:5051/api/acceptedorders/${widget.userId}/${widget.orderId}');
+//             'https://api.vegiffyy.com/api/acceptedorders/${widget.userId}/${widget.orderId}');
 //       } else {
 //         url = Uri.parse(
-//             'http://31.97.206.144:5051/api/acceptedorders/${widget.userId ?? ''}');
+//             'https://api.vegiffyy.com/api/acceptedorders/${widget.userId ?? ''}');
 //       }
 
 //       final resp = await http.get(url).timeout(const Duration(seconds: 10));
@@ -1049,11 +1049,11 @@ class _AcceptedOrderPollingScreenState
 
       if (widget.orderId != null && widget.userId != null) {
         url = Uri.parse(
-          'http://31.97.206.144:5051/api/acceptedorders/${widget.userId}/${widget.orderId}',
+          'https://api.vegiffyy.com/api/acceptedorders/${widget.userId}/${widget.orderId}',
         );
       } else {
         url = Uri.parse(
-          'http://31.97.206.144:5051/api/acceptedorders/${widget.userId ?? ''}',
+          'https://api.vegiffyy.com/api/acceptedorders/${widget.userId ?? ''}',
         );
       }
 

@@ -502,6 +502,7 @@ import 'package:veegify/provider/BannerProvider/home_layout_provider.dart';
 import 'package:veegify/provider/BookingProvider/booking_provider.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/provider/CategoryProvider/category_provider.dart';
+import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/provider/MaintenanceProvider/maintenance_provider.dart';
 import 'package:veegify/provider/ProfileProvider.dart/profile_provider.dart';
@@ -534,7 +535,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orderService = OrderService(baseUrl: 'http://31.97.206.144:5051');
+    final orderService = OrderService(baseUrl: 'https://api.vegiffyy.com');
 
     return MultiProvider(
       providers: [
@@ -557,6 +558,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MaintenanceProvider()),
         ChangeNotifierProvider(create: (_) => VersionProvider()),
         ChangeNotifierProvider(create: (_) => HomeLayoutProvider()),
+                ChangeNotifierProvider(create: (_) => CredentialProvider()),
+
       ],
       child: const _AppBootstrapper(),
     );

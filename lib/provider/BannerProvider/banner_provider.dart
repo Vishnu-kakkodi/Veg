@@ -16,7 +16,7 @@ class BannerProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('http://31.97.206.144:5051/api/banners'),
+        Uri.parse('https://api.vegiffyy.com/api/banners'),
       );
 
       if (response.statusCode == 200) {

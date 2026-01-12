@@ -7,6 +7,7 @@
 // import 'package:veegify/provider/LocationProvider/location_provider.dart';
 // import 'package:veegify/provider/RestaurantProvider/nearby_restaurants_provider.dart';
 // import 'package:veegify/provider/RestaurantProvider/top_restaurants_provider.dart';
+// import 'package:veegify/utils/responsive.dart';
 // import 'package:veegify/views/Category/top_restaurants_screen.dart';
 // import 'package:veegify/views/LocationScreen/location_search_screen.dart';
 // import 'package:veegify/views/Category/category_screen.dart';
@@ -574,7 +575,8 @@
 //                         width: 120,
 //                         height: 18,
 //                         decoration: BoxDecoration(
-//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           color:
+//                               isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -585,7 +587,9 @@
 //                             width: 20,
 //                             height: 20,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(10),
 //                             ),
 //                           ),
@@ -594,7 +598,9 @@
 //                             width: 30,
 //                             height: 16,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -605,7 +611,8 @@
 //                         width: 100,
 //                         height: 12,
 //                         decoration: BoxDecoration(
-//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           color:
+//                               isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -616,7 +623,9 @@
 //                             width: 16,
 //                             height: 16,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(8),
 //                             ),
 //                           ),
@@ -625,7 +634,9 @@
 //                             width: 60,
 //                             height: 12,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -696,7 +707,8 @@
 //                         height: 16,
 //                         width: 120,
 //                         decoration: BoxDecoration(
-//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           color:
+//                               isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -705,7 +717,8 @@
 //                         height: 14,
 //                         width: 160,
 //                         decoration: BoxDecoration(
-//                           color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                           color:
+//                               isDark ? Colors.grey[700] : Colors.grey[300],
 //                           borderRadius: BorderRadius.circular(4),
 //                         ),
 //                       ),
@@ -716,7 +729,9 @@
 //                             height: 14,
 //                             width: 40,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -725,7 +740,9 @@
 //                             height: 14,
 //                             width: 60,
 //                             decoration: BoxDecoration(
-//                               color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                               color: isDark
+//                                   ? Colors.grey[700]
+//                                   : Colors.grey[300],
 //                               borderRadius: BorderRadius.circular(4),
 //                             ),
 //                           ),
@@ -767,11 +784,17 @@
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
-
 //     final topPadding = MediaQuery.of(context).padding.top;
 
+//     final isMobile = Responsive.isMobile(context);
+//     final isTablet = Responsive.isTablet(context);
+//     final isDesktop = Responsive.isDesktop(context);
+
+//     final horizontalPadding =
+//         isMobile ? 16.0 : (isTablet ? 24.0 : 32.0);
+//     const double maxContentWidth = 720;
+
 //     return Scaffold(
-//       // backgroundColor: theme.scaffoldBackgroundColor,
 //       backgroundColor: isDark ? Colors.black : Colors.white,
 //       body: Stack(
 //         children: [
@@ -793,170 +816,194 @@
 //                     },
 //                     child: SingleChildScrollView(
 //                       controller: _scrollController,
-//                       padding: const EdgeInsets.symmetric(horizontal: 16),
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           const SizedBox(height: 10),
+//                       padding: EdgeInsets.symmetric(
+//                         horizontal: horizontalPadding,
+//                       ),
+//                       child: Center(
+//                         child: ConstrainedBox(
+//                           constraints: const BoxConstraints(
+//                             maxWidth: maxContentWidth,
+//                           ),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               const SizedBox(height: 10),
 
-//                           // Header
-//                           _isInitializing
-//                               ? Container(
-//                                   height: 60,
-//                                   decoration: BoxDecoration(
-//                                     color: isDark
-//                                         ? Colors.grey[700]
-//                                         : Colors.grey[300],
-//                                     borderRadius: BorderRadius.circular(8),
-//                                   ),
-//                                 )
-//                               : _buildAnimatedSection(
-//                                   slideAnimation: _headerSlideAnimation,
-//                                   fadeAnimation: _headerFadeAnimation,
-//                                   child: HomeHeader(
-//                                     userId: userId ?? 'unknown',
-//                                     onLocationTap: () async {
-//                                       await Navigator.push(
+//                               // Header
+//                               _isInitializing
+//                                   ? Container(
+//                                       height: 60,
+//                                       decoration: BoxDecoration(
+//                                         color: isDark
+//                                             ? Colors.grey[700]
+//                                             : Colors.grey[300],
+//                                         borderRadius:
+//                                             BorderRadius.circular(8),
+//                                       ),
+//                                     )
+//                                   : _buildAnimatedSection(
+//                                       slideAnimation:
+//                                           _headerSlideAnimation,
+//                                       fadeAnimation: _headerFadeAnimation,
+//                                       child: HomeHeader(
+//                                         userId: userId ?? 'unknown',
+//                                         onLocationTap: () async {
+//                                           await Navigator.push(
+//                                             context,
+//                                             MaterialPageRoute(
+//                                               builder: (_) =>
+//                                                   LocationPickerScreen(
+//                                                 isEditing: false,
+//                                                 userId: userId.toString(),
+//                                               ),
+//                                             ),
+//                                           );
+//                                         },
+//                                       ),
+//                                     ),
+
+//                               const SizedBox(height: 16),
+
+//                               // Search Bar (becomes invisible when pinned)
+//                               _isInitializing
+//                                   ? Container(
+//                                       height: 50,
+//                                       decoration: BoxDecoration(
+//                                         color: isDark
+//                                             ? Colors.grey[700]
+//                                             : Colors.grey[300],
+//                                         borderRadius:
+//                                             BorderRadius.circular(15),
+//                                       ),
+//                                     )
+//                                   : Opacity(
+//                                       opacity:
+//                                           _isSearchBarPinned ? 0.0 : 1.0,
+//                                       child: _buildAnimatedSection(
+//                                         slideAnimation:
+//                                             _searchSlideAnimation,
+//                                         fadeAnimation:
+//                                             _searchFadeAnimation,
+//                                         child: Container(
+//                                           key: _searchBarKey,
+//                                           child:
+//                                               const SearchBarWithVoice(),
+//                                         ),
+//                                       ),
+//                                     ),
+
+//                               const SizedBox(height: 16),
+
+//                               // Categories Section
+//                               Column(
+//                                 children: [
+//                                   SectionHeader(
+//                                     title: 'Categories',
+//                                     onSeeAll: () {
+//                                       Navigator.push(
 //                                         context,
 //                                         MaterialPageRoute(
-//                                           builder: (_) => LocationPickerScreen(
-//                                             isEditing: false,
+//                                           builder: (_) => CategoryScreen(
 //                                             userId: userId.toString(),
 //                                           ),
 //                                         ),
 //                                       );
 //                                     },
 //                                   ),
-//                                 ),
-
-//                           const SizedBox(height: 16),
-
-//                           // Search Bar (becomes invisible when pinned)
-//                           _isInitializing
-//                               ? Container(
-//                                   height: 50,
-//                                   decoration: BoxDecoration(
-//                                     color: isDark
-//                                         ? Colors.grey[700]
-//                                         : Colors.grey[300],
-//                                     borderRadius: BorderRadius.circular(15),
-//                                   ),
-//                                 )
-//                               : Opacity(
-//                                   opacity: _isSearchBarPinned ? 0.0 : 1.0,
-//                                   child: _buildAnimatedSection(
-//                                     slideAnimation: _searchSlideAnimation,
-//                                     fadeAnimation: _searchFadeAnimation,
-//                                     child: Container(
-//                                       key: _searchBarKey,
-//                                       child: const SearchBarWithVoice(),
-//                                     ),
-//                                   ),
-//                                 ),
-
-//                           const SizedBox(height: 16),
-
-//                           // Categories Section
-//                           Column(
-//                             children: [
-//                               SectionHeader(
-//                                 title: 'Categories',
-//                                 onSeeAll: () {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (_) => CategoryScreen(
-//                                         userId: userId.toString(),
-//                                       ),
-//                                     ),
-//                                   );
-//                                 },
+//                                   const SizedBox(height: 10),
+//                                   _isInitializing
+//                                       ? _buildCategorySkeleton()
+//                                       : _buildAnimatedSection(
+//                                           slideAnimation:
+//                                               _categoriesSlideAnimation,
+//                                           fadeAnimation:
+//                                               _categoriesFadeAnimation,
+//                                           child: _buildCategories(),
+//                                         ),
+//                                 ],
 //                               ),
-//                               const SizedBox(height: 10),
+
+//                               const SizedBox(height: 16),
+
+//                               // Banner
 //                               _isInitializing
-//                                   ? _buildCategorySkeleton()
-//                                   : _buildAnimatedSection(
-//                                       slideAnimation: _categoriesSlideAnimation,
-//                                       fadeAnimation: _categoriesFadeAnimation,
-//                                       child: _buildCategories(),
-//                                     ),
-//                             ],
-//                           ),
-
-//                           const SizedBox(height: 16),
-
-//                           // Banner
-//                           _isInitializing
-//                               ? _buildBannerSkeleton()
-//                               : _buildAnimatedSection(
-//                                   slideAnimation: _bannerSlideAnimation,
-//                                   fadeAnimation: _bannerFadeAnimation,
-//                                   child: const PromoBanner(),
-//                                 ),
-
-//                           const SizedBox(height: 16),
-
-//                           // Nearby Restaurants Section (horizontal)
-//                           Column(
-//                             children: [
-//                               SectionHeader(
-//                                 title: 'Nearby restaurants',
-//                                 onSeeAll: () {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (_) => NearbyScreen(
-//                                         userId: userId.toString(),
-//                                       ),
-//                                     ),
-//                                   );
-//                                 },
-//                               ),
-//                               const SizedBox(height: 10),
-//                               _isInitializing
-//                                   ? _buildRestaurantSkeleton()
-//                                   : _buildAnimatedSection(
-//                                       slideAnimation: _nearbySlideAnimation,
-//                                       fadeAnimation: _nearbyFadeAnimation,
-//                                       child: _buildRestaurantList(),
-//                                     ),
-//                             ],
-//                           ),
-
-//                           const SizedBox(height: 16),
-
-//                           // Top Restaurants Section (VERTICAL)
-//                           Column(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             children: [
-//                               SectionHeader(
-//                                 title: 'Popular Restaurants',
-//                                 onSeeAll: () {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (_) => TopRestaurantsScreen(
-//                                         userId: userId.toString(),
-//                                       ),
-//                                     ),
-//                                   );
-//                                 },
-//                               ),
-//                               const SizedBox(height: 10),
-//                               _isInitializing
-//                                   ? _buildVerticalRestaurantSkeleton()
+//                                   ? _buildBannerSkeleton()
 //                                   : _buildAnimatedSection(
 //                                       slideAnimation:
-//                                           _topRestaurantsSlideAnimation,
-//                                       fadeAnimation:
-//                                           _topRestaurantsFadeAnimation,
-//                                       child: _buildTopRestaurants(),
+//                                           _bannerSlideAnimation,
+//                                       fadeAnimation: _bannerFadeAnimation,
+//                                       child: const PromoBanner(),
 //                                     ),
+
+//                               const SizedBox(height: 16),
+
+//                               // Nearby Restaurants Section (horizontal)
+//                               Column(
+//                                 children: [
+//                                   SectionHeader(
+//                                     title: 'Nearby restaurants',
+//                                     onSeeAll: () {
+//                                       Navigator.push(
+//                                         context,
+//                                         MaterialPageRoute(
+//                                           builder: (_) => NearbyScreen(
+//                                             userId: userId.toString(),
+//                                           ),
+//                                         ),
+//                                       );
+//                                     },
+//                                   ),
+//                                   const SizedBox(height: 10),
+//                                   _isInitializing
+//                                       ? _buildRestaurantSkeleton()
+//                                       : _buildAnimatedSection(
+//                                           slideAnimation:
+//                                               _nearbySlideAnimation,
+//                                           fadeAnimation:
+//                                               _nearbyFadeAnimation,
+//                                           child: _buildRestaurantList(),
+//                                         ),
+//                                 ],
+//                               ),
+
+//                               const SizedBox(height: 16),
+
+//                               // Top Restaurants Section (VERTICAL)
+//                               Column(
+//                                 crossAxisAlignment:
+//                                     CrossAxisAlignment.start,
+//                                 children: [
+//                                   SectionHeader(
+//                                     title: 'Popular Restaurants',
+//                                     onSeeAll: () {
+//                                       Navigator.push(
+//                                         context,
+//                                         MaterialPageRoute(
+//                                           builder: (_) =>
+//                                               TopRestaurantsScreen(
+//                                             userId: userId.toString(),
+//                                           ),
+//                                         ),
+//                                       );
+//                                     },
+//                                   ),
+//                                   const SizedBox(height: 10),
+//                                   _isInitializing
+//                                       ? _buildVerticalRestaurantSkeleton()
+//                                       : _buildAnimatedSection(
+//                                           slideAnimation:
+//                                               _topRestaurantsSlideAnimation,
+//                                           fadeAnimation:
+//                                               _topRestaurantsFadeAnimation,
+//                                           child: _buildTopRestaurants(),
+//                                         ),
+//                                 ],
+//                               ),
+
+//                               const SizedBox(height: 20),
 //                             ],
 //                           ),
-
-//                           const SizedBox(height: 20),
-//                         ],
+//                         ),
 //                       ),
 //                     ),
 //                   ),
@@ -969,13 +1016,20 @@
 //           if (!_isInitializing && _isSearchBarPinned)
 //             Positioned(
 //               top: topPadding + 8,
-//               left: 16,
-//               right: 16,
-//               child: Material(
-//                 elevation: 4,
-//                 borderRadius: BorderRadius.circular(15),
-//                 color: theme.cardColor,
-//                 child: const SearchBarWithVoice(),
+//               left: horizontalPadding,
+//               right: horizontalPadding,
+//               child: Center(
+//                 child: ConstrainedBox(
+//                   constraints: const BoxConstraints(
+//                     maxWidth: maxContentWidth,
+//                   ),
+//                   child: Material(
+//                     elevation: 4,
+//                     borderRadius: BorderRadius.circular(15),
+//                     color: theme.cardColor,
+//                     child: const SearchBarWithVoice(),
+//                   ),
+//                 ),
 //               ),
 //             ),
 //         ],
@@ -997,7 +1051,8 @@
 //               child: Text(
 //                 'No categories available',
 //                 style: theme.textTheme.bodyMedium?.copyWith(
-//                   color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                   color:
+//                       theme.colorScheme.onSurface.withOpacity(0.6),
 //                 ),
 //               ),
 //             ),
@@ -1063,7 +1118,8 @@
 //                   'Looks like there arent any restaurants around your location.',
 //                   textAlign: TextAlign.center,
 //                   style: theme.textTheme.bodyMedium?.copyWith(
-//                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                     color:
+//                         theme.colorScheme.onSurface.withOpacity(0.6),
 //                     height: 1.4,
 //                   ),
 //                 ),
@@ -1133,7 +1189,8 @@
 //                   'Looks like there aren\'t any restaurants around your location.',
 //                   textAlign: TextAlign.center,
 //                   style: theme.textTheme.bodyMedium?.copyWith(
-//                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                     color:
+//                         theme.colorScheme.onSurface.withOpacity(0.6),
 //                     height: 1.4,
 //                   ),
 //                 ),
@@ -1171,9 +1228,11 @@
 //               );
 //             } else {
 //               // Bottom "load more" indicator
-//               if (_isTopRestaurantsLoadingMore && _canLoadMoreTopRestaurants) {
+//               if (_isTopRestaurantsLoadingMore &&
+//                   _canLoadMoreTopRestaurants) {
 //                 return Padding(
-//                   padding: const EdgeInsets.symmetric(vertical: 16.0),
+//                   padding:
+//                       const EdgeInsets.symmetric(vertical: 16.0),
 //                   child: Center(
 //                     child: SizedBox(
 //                       height: 28,
@@ -1217,12 +1276,21 @@
 
 
 
+
+
+
+
+
+
+
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/BannerProvider/banner_provider.dart';
 import 'package:veegify/provider/CategoryProvider/category_provider.dart';
+import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/nearby_restaurants_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/top_restaurants_provider.dart';
@@ -1312,7 +1380,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _giftAnimation;
 
   // Pagination for Popular Restaurants
-  final int _topRestaurantsPerPage = 2;
+  final int _topRestaurantsPerPage = 6; // Increased for desktop
   int _currentTopRestaurantsPage = 1;
   bool _isTopRestaurantsLoadingMore = false;
 
@@ -1327,7 +1395,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _onScroll() {
     final offset = _scrollController.offset;
-    final shouldShow = offset < 50; // Hide banner after scrolling 50px
+    final shouldShow = offset < 50;
 
     if (shouldShow != _showAdsBanner) {
       setState(() {
@@ -1343,8 +1411,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Sticky search bar logic
     if (_searchBarKey.currentContext != null) {
-      final box =
-          _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
+      final box = _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
       if (box != null) {
         final offsetPosition = box.localToGlobal(Offset.zero);
         final topPadding = MediaQuery.of(context).padding.top;
@@ -1358,7 +1425,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     }
 
-    // Infinite scroll for Popular Restaurants (vertical section)
+    // Infinite scroll for Popular Restaurants
     if (!_isTopRestaurantsLoadingMore &&
         !_isInitializing &&
         _canLoadMoreTopRestaurants) {
@@ -1389,10 +1456,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _isTopRestaurantsLoadingMore = true;
     });
 
-    // Show EasyLoading while "loading" more
     EasyLoading.show(status: 'Loading more restaurants...');
-
-    // Simulate delay – in real case you can trigger API call here
     await Future.delayed(const Duration(milliseconds: 600));
 
     if (!mounted) {
@@ -1409,7 +1473,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _initializeAnimations() {
-    // Initialize animation controllers with shorter durations for better UX
     _headerController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -1439,7 +1502,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    // Initialize slide animations (from left to right)
     _headerSlideAnimation = Tween<Offset>(
       begin: const Offset(-1.0, 0.0),
       end: Offset.zero,
@@ -1465,7 +1527,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ));
 
     _bannerSlideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0), // Banner slides from right
+      begin: const Offset(1.0, 0.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _bannerController,
@@ -1488,7 +1550,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeOutCubic,
     ));
 
-    // Initialize fade animations
     _headerFadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -1519,7 +1580,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(_topRestaurantsController);
 
-    // Ads banner slide animation (slides up/down)
     _adsBannerAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -1528,7 +1588,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeInOut,
     ));
 
-    // Start with ads banner visible
     _adsBannerController.forward();
 
     _giftAnimationController = AnimationController(
@@ -1552,7 +1611,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _startAnimations() {
-    // Faster, tighter animation sequence
     _headerController.forward();
 
     Future.delayed(const Duration(milliseconds: 50), () {
@@ -1578,7 +1636,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _initializeData() async {
     try {
-      // EasyLoading for overall initial load / refresh
       EasyLoading.show(status: 'Loading...');
 
       await _loadUserId();
@@ -1596,7 +1653,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         locationProvider.addListener(_onLocationChanged);
       });
 
-      // Reset pagination when reloading data
+          context.read<CredentialProvider>().fetchCredentials();
+
+
       _currentTopRestaurantsPage = 1;
       _isTopRestaurantsLoadingMore = false;
     } catch (e) {
@@ -1604,7 +1663,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     } finally {
       if (mounted) {
         setState(() => _isInitializing = false);
-        _startAnimations(); // Start animations after data is loaded
+        _startAnimations();
       }
       EasyLoading.dismiss();
     }
@@ -1622,7 +1681,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Provider.of<TopRestaurantsProvider>(context, listen: false)
             .getTopRestaurants(userId!);
 
-        // Reset pagination when location changes
         setState(() {
           _currentTopRestaurantsPage = 1;
           _isTopRestaurantsLoadingMore = false;
@@ -1695,21 +1753,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildCategorySkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
 
     return SizedBox(
-      height: 120,
+      height: isDesktop ? 140 : 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: 5,
+        itemCount: isDesktop ? 8 : (isTablet ? 6 : 5),
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: EdgeInsets.only(right: isDesktop ? 16 : 12),
             child: Column(
               children: [
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: isDesktop ? 100 : 80,
+                  height: isDesktop ? 100 : 80,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[700] : Colors.grey[300],
                     borderRadius: BorderRadius.circular(12),
@@ -1743,17 +1803,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildRestaurantSkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
 
     return SizedBox(
-      height: 270,
+      height: isDesktop ? 300 : 270,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: 3,
+        itemCount: isDesktop ? 4 : (isTablet ? 3 : 2),
         itemBuilder: (context, index) {
           return Container(
-            margin: const EdgeInsets.only(right: 12),
-            width: 176,
+            margin: EdgeInsets.only(right: isDesktop ? 16 : 12),
+            width: isDesktop ? 220 : 176,
             decoration: BoxDecoration(
               color: isDark ? theme.cardColor : Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -1770,7 +1832,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 120,
+                  height: isDesktop ? 140 : 120,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[700] : Colors.grey[300],
                     borderRadius:
@@ -1794,8 +1856,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: 120,
                         height: 18,
                         decoration: BoxDecoration(
-                          color:
-                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1806,9 +1867,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
+                              color: isDark ? Colors.grey[700] : Colors.grey[300],
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -1817,9 +1876,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 30,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
+                              color: isDark ? Colors.grey[700] : Colors.grey[300],
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1830,36 +1887,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         width: 100,
                         height: 12,
                         decoration: BoxDecoration(
-                          color:
-                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            width: 16,
-                            height: 16,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 60,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -1872,11 +1902,96 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  /// Vertical skeleton for Popular Restaurants
   Widget _buildVerticalRestaurantSkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
 
+    // For desktop/tablet, use grid layout
+    if (isDesktop || isTablet) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isDesktop ? 3 : 2,
+          childAspectRatio: isDesktop ? 1.2 : 1.1,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: isDark ? theme.cardColor : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(isDark ? 0.3 : 0.1),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isDark ? Colors.grey[400]! : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 16,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[700] : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 14,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[700] : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    // Mobile layout (list)
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1926,8 +2041,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: 16,
                         width: 120,
                         decoration: BoxDecoration(
-                          color:
-                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1936,36 +2050,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: 14,
                         width: 160,
                         decoration: BoxDecoration(
-                          color:
-                              isDark ? Colors.grey[700] : Colors.grey[300],
+                          color: isDark ? Colors.grey[700] : Colors.grey[300],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            height: 14,
-                            width: 40,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            height: 14,
-                            width: 60,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey[700]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
@@ -1981,9 +2068,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildBannerSkeleton() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = Responsive.isDesktop(context);
 
     return Container(
-      height: 140,
+      height: isDesktop ? 180 : 140,
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[700] : Colors.grey[300],
         borderRadius: BorderRadius.circular(12),
@@ -2009,12 +2097,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isTablet = Responsive.isTablet(context);
     final isDesktop = Responsive.isDesktop(context);
 
-    final horizontalPadding =
-        isMobile ? 16.0 : (isTablet ? 24.0 : 32.0);
-    const double maxContentWidth = 720;
+    // Responsive padding and max width
+    final horizontalPadding = Responsive.spacing(
+      context,
+      mobile: 16.0,
+      tablet: 32.0,
+      desktop: 48.0,
+    );
+
+    final maxContentWidth = Responsive.value(
+      context,
+      mobile: double.infinity,
+      tablet: 900.0,
+      desktop: double.infinity,
+    );
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.white,
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF5F5F5),
       body: Stack(
         children: [
           Column(
@@ -2035,18 +2134,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     },
                     child: SingleChildScrollView(
                       controller: _scrollController,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalPadding,
-                      ),
                       child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
+                        child: Container(
+                          constraints: BoxConstraints(
                             maxWidth: maxContentWidth,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: horizontalPadding,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 10),
+                              SizedBox(height: isDesktop ? 20 : 10),
 
                               // Header
                               _isInitializing
@@ -2056,13 +2155,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         color: isDark
                                             ? Colors.grey[700]
                                             : Colors.grey[300],
-                                        borderRadius:
-                                            BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     )
                                   : _buildAnimatedSection(
-                                      slideAnimation:
-                                          _headerSlideAnimation,
+                                      slideAnimation: _headerSlideAnimation,
                                       fadeAnimation: _headerFadeAnimation,
                                       child: HomeHeader(
                                         userId: userId ?? 'unknown',
@@ -2081,9 +2178,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       ),
                                     ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: isDesktop ? 24 : 16),
 
-                              // Search Bar (becomes invisible when pinned)
+                              // Search Bar
                               _isInitializing
                                   ? Container(
                                       height: 50,
@@ -2091,27 +2188,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         color: isDark
                                             ? Colors.grey[700]
                                             : Colors.grey[300],
-                                        borderRadius:
-                                            BorderRadius.circular(15),
+                                        borderRadius: BorderRadius.circular(15),
                                       ),
                                     )
                                   : Opacity(
-                                      opacity:
-                                          _isSearchBarPinned ? 0.0 : 1.0,
+                                      opacity: _isSearchBarPinned ? 0.0 : 1.0,
                                       child: _buildAnimatedSection(
-                                        slideAnimation:
-                                            _searchSlideAnimation,
-                                        fadeAnimation:
-                                            _searchFadeAnimation,
+                                        slideAnimation: _searchSlideAnimation,
+                                        fadeAnimation: _searchFadeAnimation,
                                         child: Container(
                                           key: _searchBarKey,
-                                          child:
-                                              const SearchBarWithVoice(),
+                                          child: const SearchBarWithVoice(),
                                         ),
                                       ),
                                     ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: isDesktop ? 32 : 16),
 
                               // Categories Section
                               Column(
@@ -2129,34 +2221,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       );
                                     },
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: isDesktop ? 16 : 10),
                                   _isInitializing
                                       ? _buildCategorySkeleton()
                                       : _buildAnimatedSection(
-                                          slideAnimation:
-                                              _categoriesSlideAnimation,
-                                          fadeAnimation:
-                                              _categoriesFadeAnimation,
+                                          slideAnimation: _categoriesSlideAnimation,
+                                          fadeAnimation: _categoriesFadeAnimation,
                                           child: _buildCategories(),
                                         ),
                                 ],
                               ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: isDesktop ? 32 : 16),
 
                               // Banner
                               _isInitializing
                                   ? _buildBannerSkeleton()
                                   : _buildAnimatedSection(
-                                      slideAnimation:
-                                          _bannerSlideAnimation,
+                                      slideAnimation: _bannerSlideAnimation,
                                       fadeAnimation: _bannerFadeAnimation,
                                       child: const PromoBanner(),
                                     ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: isDesktop ? 32 : 16),
 
-                              // Nearby Restaurants Section (horizontal)
+                              // Nearby Restaurants Section
                               Column(
                                 children: [
                                   SectionHeader(
@@ -2172,25 +2261,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       );
                                     },
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: isDesktop ? 16 : 10),
                                   _isInitializing
                                       ? _buildRestaurantSkeleton()
                                       : _buildAnimatedSection(
-                                          slideAnimation:
-                                              _nearbySlideAnimation,
-                                          fadeAnimation:
-                                              _nearbyFadeAnimation,
+                                          slideAnimation: _nearbySlideAnimation,
+                                          fadeAnimation: _nearbyFadeAnimation,
                                           child: _buildRestaurantList(),
                                         ),
                                 ],
                               ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: isDesktop ? 32 : 16),
 
-                              // Top Restaurants Section (VERTICAL)
+                              // Popular Restaurants Section
                               Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SectionHeader(
                                     title: 'Popular Restaurants',
@@ -2198,28 +2284,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) =>
-                                              TopRestaurantsScreen(
+                                          builder: (_) => TopRestaurantsScreen(
                                             userId: userId.toString(),
                                           ),
                                         ),
                                       );
                                     },
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: isDesktop ? 16 : 10),
                                   _isInitializing
                                       ? _buildVerticalRestaurantSkeleton()
                                       : _buildAnimatedSection(
-                                          slideAnimation:
-                                              _topRestaurantsSlideAnimation,
-                                          fadeAnimation:
-                                              _topRestaurantsFadeAnimation,
+                                          slideAnimation: _topRestaurantsSlideAnimation,
+                                          fadeAnimation: _topRestaurantsFadeAnimation,
                                           child: _buildTopRestaurants(),
                                         ),
                                 ],
                               ),
 
-                              const SizedBox(height: 20),
+                              SizedBox(height: isDesktop ? 40 : 20),
                             ],
                           ),
                         ),
@@ -2231,17 +2314,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
 
-          // Sticky Search Bar (overlay at top)
+          // Sticky Search Bar
           if (!_isInitializing && _isSearchBarPinned)
             Positioned(
               top: topPadding + 8,
-              left: horizontalPadding,
-              right: horizontalPadding,
+              left: 0,
+              right: 0,
               child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
+                child: Container(
+                  constraints: BoxConstraints(
                     maxWidth: maxContentWidth,
                   ),
+                  margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: Material(
                     elevation: 4,
                     borderRadius: BorderRadius.circular(15),
@@ -2257,6 +2341,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildCategories() {
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
+
     return Consumer<CategoryProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
@@ -2270,22 +2357,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Text(
                 'No categories available',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color:
-                      theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ),
           );
         }
         return SizedBox(
-          height: 120,
+          height: isDesktop ? 140 : 120,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: provider.categories.length,
             itemBuilder: (context, index) {
               final category = provider.categories[index];
               return Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: EdgeInsets.only(right: isDesktop ? 16 : 12),
                 child: CategoryCard(
                   id: category.id,
                   imagePath: category.imageUrl,
@@ -2302,6 +2388,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildRestaurantList() {
     final theme = Theme.of(context);
+    final isDesktop = Responsive.isDesktop(context);
 
     return Consumer<RestaurantProvider>(
       builder: (context, provider, _) {
@@ -2334,11 +2421,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Looks like there arent any restaurants around your location.',
+                  'Looks like there aren\'t any restaurants around your location.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color:
-                        theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                     height: 1.4,
                   ),
                 ),
@@ -2348,7 +2434,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
 
         return SizedBox(
-          height: 200,
+          height: isDesktop ? 300 : 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: provider.nearbyRestaurants.length,
@@ -2373,6 +2459,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildTopRestaurants() {
     final theme = Theme.of(context);
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
 
     return Consumer<TopRestaurantsProvider>(
       builder: (context, provider, _) {
@@ -2408,8 +2496,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   'Looks like there aren\'t any restaurants around your location.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color:
-                        theme.colorScheme.onSurface.withOpacity(0.6),
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                     height: 1.4,
                   ),
                 ),
@@ -2418,17 +2505,65 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
         }
 
-        // Pagination logic: show items in pages, with loading indicator between
         final total = provider.topRestaurants.length;
         final visibleCount = math.min(
           total,
           _currentTopRestaurantsPage * _topRestaurantsPerPage,
         );
 
+        // Desktop/Tablet: Grid layout
+        if (isDesktop || isTablet) {
+          return Column(
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isDesktop ? 3 : 2,
+                  childAspectRatio: isDesktop ? 1.2 : 1.1,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: visibleCount,
+                itemBuilder: (context, index) {
+                  final restaurant = provider.topRestaurants[index];
+                  return TicketRestaurantCard(
+                    id: restaurant.id,
+                    imagePath: restaurant.imageUrl,
+                    name: restaurant.restaurantName,
+                    rating: restaurant.rating.toDouble(),
+                    description: restaurant.description,
+                    price: restaurant.startingPrice,
+                    locationName: restaurant.locationName,
+                    status: restaurant.status,
+                  );
+                },
+              ),
+              if (_isTopRestaurantsLoadingMore && _canLoadMoreTopRestaurants)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: SizedBox(
+                      height: 28,
+                      width: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }
+
+        // Mobile: List layout
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: visibleCount + 1, // +1 for bottom loader placeholder
+          itemCount: visibleCount + 1,
           itemBuilder: (context, index) {
             if (index < visibleCount) {
               final restaurant = provider.topRestaurants[index];
@@ -2446,12 +2581,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               );
             } else {
-              // Bottom "load more" indicator
-              if (_isTopRestaurantsLoadingMore &&
-                  _canLoadMoreTopRestaurants) {
+              if (_isTopRestaurantsLoadingMore && _canLoadMoreTopRestaurants) {
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
                     child: SizedBox(
                       height: 28,
@@ -2466,10 +2598,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 );
               } else if (_canLoadMoreTopRestaurants) {
-                // Placeholder space when more data is available but not loading yet
                 return const SizedBox(height: 16);
               } else {
-                // No more data
                 return const SizedBox.shrink();
               }
             }

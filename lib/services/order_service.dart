@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OrderService {
-  static const String baseUrl = 'http://31.97.206.144:5051/api';
+  static const String baseUrl = 'https://api.vegiffyy.com/api';
 
   /// Create a new order
   /// 

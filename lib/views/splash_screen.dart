@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
+import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Auth/login_page.dart';
 import 'package:veegify/views/Navbar/navbar_screen.dart';
 import 'amoders_loading.dart';
@@ -116,14 +117,19 @@ class _SplashScreenState extends State<SplashScreen> {
         fit: StackFit.expand,
         children: [
           // 🔥 FULL SCREEN BACKGROUND IMAGE
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/vegsplash.png'),
-                fit: BoxFit.fill, // ✅ DO NOT use fill
-              ),
-            ),
-          ),
+Container(
+  decoration: BoxDecoration(
+    image: DecorationImage(
+      image: AssetImage(
+        Responsive.isDesktop(context)
+            ? 'assets/images/vegsplash.png'
+            : 'assets/images/vegsplash.png',
+      ),
+      fit: BoxFit.fill,
+    ),
+  ),
+),
+
 
           // OPTIONAL DARK OVERLAY
           Container(
@@ -144,9 +150,14 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
 
           // ✅ BRANDING ON TOP OF EVERYTHING
-          _poweredByBranding(),
+          // _poweredByBranding(),
         ],
       ),
     );
   }
 }
+
+
+
+
+

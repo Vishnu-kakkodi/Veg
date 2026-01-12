@@ -21,16 +21,24 @@ class LocationProvider extends ChangeNotifier {
   // Initialize location (get current location)
   Future<void> initLocation(String userId) async {
     try {
+      print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk$userId");
       _isLoading = true;
       _hasError = false;
       _errorMessage = '';
       notifyListeners();
+      print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk11111111111$userId");
 
       // Get coordinates first
       final coords = await LocationService.getCurrentCoordinates();
+
+            print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk22222222222$userId");
+
       if (coords == null) {
         throw Exception('Failed to get coordinates');
       }
+
+                  print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk222222222223333333$userId");
+
       _coordinates = coords;
 
       // Get address
@@ -48,6 +56,8 @@ class LocationProvider extends ChangeNotifier {
       }
 
       _address = _formatAddress(fullAddress);
+
+      print("ppppppppppppppppppppppppppppppppppppp$_address");
 
       print("latitude: ${_coordinates![0].toString()}");
       print("longitude: ${_coordinates![1].toString()}");

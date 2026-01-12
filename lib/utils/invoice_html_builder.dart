@@ -1173,7 +1173,7 @@ String buildInvoiceHtml(Order order) {
       <div class="brand">
         <div class="brand-logo">
           <img 
-            src="http://31.97.206.144:3043/static/media/veggifylogo.3095c463519a84ad6d6c.jpeg" 
+            src="https://res.cloudinary.com/dwmna13fi/image/upload/v1768208708/profile_images/mlgift5pzj8pexnllo7s.jpg" 
             alt="Veegify Logo" 
             class="brand-logo-img"
           />

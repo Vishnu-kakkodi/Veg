@@ -62,7 +62,7 @@
 
 //   final Map<String, bool> _favorites = {}; // Track favorites by product ID
 
-//   static const String _apiHost = "http://31.97.206.144:5051";
+//   static const String _apiHost = "https://api.vegiffyy.com";
 
 //   @override
 //   void initState() {
@@ -928,6 +928,7 @@ import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/model/previous_order.dart';
 import 'package:veegify/model/user_model.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
+import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/utils/previous_order.dart';
 import 'package:veegify/views/ProfileScreen/help_screen.dart';
 import 'package:veegify/views/Booking/booking_screen.dart';
@@ -983,7 +984,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
 
   final Map<String, bool> _favorites = {}; // Track favorites by product ID
 
-  static const String _apiHost = "http://31.97.206.144:5051";
+  static const String _apiHost = "https://api.vegiffyy.com";
 
   @override
   void initState() {
@@ -1348,13 +1349,24 @@ class _HystoryScreenState extends State<HystoryScreen> {
 
               // 🚀 WHATSAPP BUTTON
               GestureDetector(
-                onTap: () {
-                  final orderIdText = order.id ?? "N/A";
-                  final message =
-                      "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
+     onTap: () {
+    final supportPhone = context.read<CredentialProvider>().getWhatsappByType('user');
+    
+    if (supportPhone != null && supportPhone.isNotEmpty) {
+      final orderIdText = order.id ?? "N/A";
+      final message =
+          "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
 
-                  openWhatsApp("9961593179", message: message);
-                },
+      openWhatsApp(supportPhone, message: message);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Support contact not available'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  },
                 child: Container(
                   width: double.infinity,
                   padding:

@@ -17,7 +17,7 @@ class WalletScreen extends StatefulWidget {
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  static const String _apiHost = "http://31.97.206.144:5051";
+  static const String _apiHost = "https://api.vegiffyy.com";
 
   User? _user;
   bool _isLoading = true;

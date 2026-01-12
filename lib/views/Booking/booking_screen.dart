@@ -1197,7 +1197,7 @@
 
 
 //         final response = await http.post(
-//           Uri.parse('http://31.97.206.144:5051/api/addreview'),
+//           Uri.parse('https://api.vegiffyy.com/api/addreview'),
 //           headers: {
 //             'Content-Type': 'application/json',
 //           },
@@ -3573,9 +3573,9 @@ class _ReviewDialogState extends State<ReviewDialog> {
 
       final uri = _restaurantReviewId == null
           ? Uri.parse(
-              'http://31.97.206.144:5051/api/addrestureview')
+              'https://api.vegiffyy.com/api/addrestureview')
           : Uri.parse(
-              'http://31.97.206.144:5051/api/editrestureview');
+              'https://api.vegiffyy.com/api/editrestureview');
 
       final payload = {
         "restaurantId": restaurantId,
@@ -3653,7 +3653,7 @@ class _ReviewDialogState extends State<ReviewDialog> {
           widget.order.restaurant.id;
 
       final uri = Uri.parse(
-          'http://31.97.206.144:5051/api/deleterestureview');
+          'https://api.vegiffyy.com/api/deleterestureview');
 
       final payload = {
         "restaurantId": restaurantId,
@@ -3786,7 +3786,7 @@ class _ReviewDialogState extends State<ReviewDialog> {
 
         final response = await http.post(
           Uri.parse(
-              'http://31.97.206.144:5051/api/addreview'),
+              'https://api.vegiffyy.com/api/addreview'),
           headers: {
             'Content-Type': 'application/json',
           },

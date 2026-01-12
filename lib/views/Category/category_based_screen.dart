@@ -174,7 +174,7 @@
 //       print("Category ID: ${widget.categoryId}");
 //       final response = await http.get(
 //         Uri.parse(
-//             'http://31.97.206.144:5051/api/resturentbycat/${widget.userId}?categoryName=${Uri.encodeComponent(widget.title)}'),
+//             'https://api.vegiffyy.com/api/resturentbycat/${widget.userId}?categoryName=${Uri.encodeComponent(widget.title)}'),
 //       );
 //       print("Response status: ${response.statusCode}");
 //       print("Response body: ${response.body}");
@@ -722,7 +722,7 @@ class _CategoryBasedScreenState extends State<CategoryBasedScreen> {
       debugPrint("Category ID: ${widget.categoryId}");
       final response = await http.get(
         Uri.parse(
-          'http://31.97.206.144:5051/api/resturentbycat/${widget.userId}?categoryName=${Uri.encodeComponent(widget.title)}',
+          'https://api.vegiffyy.com/api/resturentbycat/${widget.userId}?categoryName=${Uri.encodeComponent(widget.title)}',
         ),
       );
       debugPrint("Response status: ${response.statusCode}");

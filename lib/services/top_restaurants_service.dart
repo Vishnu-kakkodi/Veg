@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:veegify/model/nearby_restaurants_model.dart';
 
 class TopRestaurantsService {
-  static const String baseUrl = 'http://31.97.206.144:5051/api/top-nearby';
+  static const String baseUrl = 'https://api.vegiffyy.com/api/top-nearby';
 
   static Future<List<NearbyRestaurantModel>> fetchTopNearbyRestaurants(String userId) async {
     final url = Uri.parse('$baseUrl/$userId');

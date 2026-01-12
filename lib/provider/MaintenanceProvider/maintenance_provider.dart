@@ -32,7 +32,7 @@
 
 //     try {
 //       final uri =
-//           Uri.parse('http://31.97.206.144:5051/api/maintenance-status'); // <- your API
+//           Uri.parse('https://api.vegiffyy.com/api/maintenance-status'); // <- your API
 //       final res = await http.get(uri);
 
 //       if (res.statusCode == 200) {
@@ -124,7 +124,7 @@ class MaintenanceProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final uri = Uri.parse(
-        'http://31.97.206.144:5051/api/maintenance-status',
+        'https://api.vegiffyy.com/api/maintenance-status',
       );
       final res = await http.get(uri);
       if (res.statusCode == 200) {

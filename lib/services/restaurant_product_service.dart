@@ -4,7 +4,7 @@ import 'package:veegify/model/restaurant_product_model.dart';
 import 'package:http/http.dart' as http;
 
 class RestaurantService {
-  static const String _baseUrl = 'http://31.97.206.144:5051/api';
+  static const String _baseUrl = 'https://api.vegiffyy.com/api';
 
   static Future<RestaurantProductResponse> getRestaurantProducts(String restaurantId, String? categoryName) async {
     try {
