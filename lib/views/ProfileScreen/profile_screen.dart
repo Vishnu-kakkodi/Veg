@@ -674,7 +674,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _launchAboutUsUrl() async {
-    final Uri url = Uri.parse('https://vegiffyy.com/');
+    final Uri url = Uri.parse('https://vegiffy.com/');
     try {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         debugPrint('Could not launch $url');
@@ -1130,6 +1130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     return Container(
       margin: EdgeInsets.all(isWeb ? 0 : 16),
+      height: isWeb ? 700 : 400,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,

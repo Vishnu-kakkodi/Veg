@@ -1242,7 +1242,7 @@ class DesktopSideNavbar extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Veegify',
+                  'Veegiffy',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -1296,7 +1296,7 @@ class DesktopSideNavbar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              '© 2026 Veegify',
+              '© 2026 Veegiffy',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.5),
               ),
