@@ -1,4 +1,3 @@
-
 // // cart_screen.dart
 // import 'dart:async'; // 👈 for Timer
 
@@ -917,24 +916,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // cart_screen.dart
 import 'dart:async';
 
@@ -959,10 +940,7 @@ import 'package:veegify/utils/responsive.dart';
 class CartScreenWithController extends StatelessWidget {
   final ScrollController scrollController;
 
-  const CartScreenWithController({
-    super.key,
-    required this.scrollController,
-  });
+  const CartScreenWithController({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -1052,8 +1030,7 @@ class _CartScreenState extends State<CartScreen> {
         return;
       }
 
-      final cartProvider =
-          Provider.of<CartProvider>(context, listen: false);
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
       debugPrint("🔄 [Cart Poll] loadCart for user: ${user?.userId}");
       await cartProvider.loadCart(user?.userId.toString());
@@ -1083,9 +1060,7 @@ class _CartScreenState extends State<CartScreen> {
         content: Text(message),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -1100,8 +1075,9 @@ class _CartScreenState extends State<CartScreen> {
     setState(() => _isCouponLoading = true);
 
     try {
-      final success =
-          await cartProvider.applyCoupon(_couponController.text.trim());
+      final success = await cartProvider.applyCoupon(
+        _couponController.text.trim(),
+      );
 
       if (!mounted) return;
       setState(() => _isCouponLoading = false);
@@ -1145,10 +1121,7 @@ class _CartScreenState extends State<CartScreen> {
         return;
       }
       if (cartProvider.hasInactiveProducts) {
-        _showSnackBar(
-          'Remove unavailable items before checkout.',
-          Colors.red,
-        );
+        _showSnackBar('Remove unavailable items before checkout.', Colors.red);
         return;
       }
 
@@ -1157,9 +1130,7 @@ class _CartScreenState extends State<CartScreen> {
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const CheckoutScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const CheckoutScreen()),
         );
       }
     } catch (e) {
@@ -1200,10 +1171,7 @@ class _CartScreenState extends State<CartScreen> {
 
       await cartProvider.clearCart();
       if (mounted) {
-        _showSnackBar(
-          'Restaurant is closed. Cart cleared.',
-          Colors.red,
-        );
+        _showSnackBar('Restaurant is closed. Cart cleared.', Colors.red);
       }
       return;
     }
@@ -1248,16 +1216,10 @@ class _CartScreenState extends State<CartScreen> {
 
       if (remove == true) {
         for (final p in inactiveProducts) {
-          await cartProvider.removeItem(
-            p.id,
-            user?.userId.toString(),
-          );
+          await cartProvider.removeItem(p.id, user?.userId.toString());
         }
         if (mounted) {
-          _showSnackBar(
-            'Unavailable items removed from cart.',
-            Colors.orange,
-          );
+          _showSnackBar('Unavailable items removed from cart.', Colors.orange);
         }
       } else {
         // user cancelled, allow showing dialog again later
@@ -1275,9 +1237,25 @@ class _CartScreenState extends State<CartScreen> {
     final isTablet = Responsive.isTablet(context);
     final isDesktop = Responsive.isDesktop(context);
 
-    final double horizontalPadding = isMobile ? 16 : 24;
-    final double maxWidth =
-        isDesktop ? 1100 : (isTablet ? 900 : double.infinity);
+    final width = MediaQuery.of(context).size.width;
+
+    final double horizontalPadding = width >= 1200
+        ? 40
+        : width >= 900
+        ? 24
+        : 16;
+
+    final double maxWidth = width >= 1400
+        ? 1200
+        : width >= 1100
+        ? 1100
+        : width >= 900
+        ? 900
+        : double.infinity;
+
+    // final double horizontalPadding = isMobile ? 16 : 24;
+    // final double maxWidth =
+    //     isDesktop ? 1100 : (isTablet ? 900 : double.infinity);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1307,8 +1285,11 @@ class _CartScreenState extends State<CartScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline,
-                        size: 64, color: colorScheme.error),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: colorScheme.error,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Error: ${cartProvider.error}',
@@ -1334,8 +1315,7 @@ class _CartScreenState extends State<CartScreen> {
             }
 
             return RefreshIndicator(
-              onRefresh: () =>
-                  cartProvider.loadCart(user?.userId.toString()),
+              onRefresh: () => cartProvider.loadCart(user?.userId.toString()),
               color: colorScheme.primary,
               child: SingleChildScrollView(
                 controller: widget.scrollController,
@@ -1370,10 +1350,19 @@ class _CartScreenState extends State<CartScreen> {
                           // 📱 Mobile: stacked layout
                           // 💻 Tablet/Desktop: 2-column layout
                           if (isMobile) ...[
-                            _buildCartList(
-                              cartProvider,
-                              theme,
-                              colorScheme,
+                            // _buildCartList(
+                            //   cartProvider,
+                            //   theme,
+                            //   colorScheme,
+                            // ),
+                            _buildSectionCard(
+                              theme: theme,
+                              colorScheme: colorScheme,
+                              child: _buildCartList(
+                                cartProvider,
+                                theme,
+                                colorScheme,
+                              ),
                             ),
                             // const SizedBox(height: 20),
                             // _buildCouponSection(
@@ -1383,10 +1372,20 @@ class _CartScreenState extends State<CartScreen> {
                             //   colorScheme,
                             // ),
                             const SizedBox(height: 10),
-                            TicketPricingSummary(
-                              cartProvider: cartProvider,
+
+                            // TicketPricingSummary(
+                            //   cartProvider: cartProvider,
+                            //   theme: theme,
+                            //   colorScheme: colorScheme,
+                            // ),
+                            _buildSectionCard(
                               theme: theme,
                               colorScheme: colorScheme,
+                              child: TicketPricingSummary(
+                                cartProvider: cartProvider,
+                                theme: theme,
+                                colorScheme: colorScheme,
+                              ),
                             ),
                             const SizedBox(height: 20),
                             _buildCheckoutButton(
@@ -1400,49 +1399,91 @@ class _CartScreenState extends State<CartScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Cart list
+                                // Expanded(
+                                //   flex: isDesktop ? 3 : 4,
+                                //   // flex: 3,
+                                //   child: Column(
+                                //     crossAxisAlignment:
+                                //         CrossAxisAlignment.start,
+                                //     children: [
+                                //       _buildCartList(
+                                //         cartProvider,
+                                //         theme,
+                                //         colorScheme,
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
                                 Expanded(
                                   flex: 3,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildCartList(
-                                        cartProvider,
-                                        theme,
-                                        colorScheme,
-                                      ),
-                                    ],
+                                  child: _buildSectionCard(
+                                    theme: theme,
+                                    colorScheme: colorScheme,
+                                    child: _buildCartList(
+                                      cartProvider,
+                                      theme,
+                                      colorScheme,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 24),
-                                // Summary and coupon
+
                                 Expanded(
                                   flex: 2,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      // _buildCouponSection(
-                                      //   context,
-                                      //   cartProvider,
-                                      //   theme,
-                                      //   colorScheme,
-                                      // ),
-                                      // const SizedBox(height: 12),
-                                      TicketPricingSummary(
-                                        cartProvider: cartProvider,
-                                        theme: theme,
-                                        colorScheme: colorScheme,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      _buildCheckoutButton(
-                                        cartProvider,
-                                        theme,
-                                        colorScheme,
-                                      ),
-                                    ],
+                                  child: _StickySummaryCard(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _buildSectionCard(
+                                          theme: theme,
+                                          colorScheme: colorScheme,
+                                          child: TicketPricingSummary(
+                                            cartProvider: cartProvider,
+                                            theme: theme,
+                                            colorScheme: colorScheme,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 14),
+                                        _buildCheckoutButton(
+                                          cartProvider,
+                                          theme,
+                                          colorScheme,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
+
+                                // Summary and coupon
+                                // Expanded(
+                                //   flex: isDesktop ? 2 : 3,
+                                //   // flex: 2,
+                                //   child: Column(
+                                //     crossAxisAlignment:
+                                //         CrossAxisAlignment.stretch,
+                                //     children: [
+                                //       // _buildCouponSection(
+                                //       //   context,
+                                //       //   cartProvider,
+                                //       //   theme,
+                                //       //   colorScheme,
+                                //       // ),
+                                //       // const SizedBox(height: 12),
+                                //       TicketPricingSummary(
+                                //         cartProvider: cartProvider,
+                                //         theme: theme,
+                                //         colorScheme: colorScheme,
+                                //       ),
+                                //       const SizedBox(height: 16),
+                                //       _buildCheckoutButton(
+                                //         cartProvider,
+                                //         theme,
+                                //         colorScheme,
+                                //       ),
+                                //     ],
+                                //   ),
+                                // ),
                               ],
                             ),
                             const SizedBox(height: 20),
@@ -1492,9 +1533,7 @@ class _CartScreenState extends State<CartScreen> {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
       ),
       child: isMobile
           ? Column(
@@ -1511,8 +1550,7 @@ class _CartScreenState extends State<CartScreen> {
                   controller: _couponController,
                   decoration: InputDecoration(
                     hintText: 'Enter coupon code',
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -1569,8 +1607,9 @@ class _CartScreenState extends State<CartScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -1614,10 +1653,14 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartList(
-      CartProvider cartProvider, ThemeData theme, ColorScheme colorScheme) {
+    CartProvider cartProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     for (var item in cartProvider.items) {
       debugPrint(
-          "🛒 Cart Item -> ID: ${item.id}, Name: ${item.name}, Qty: ${item.quantity}");
+        "🛒 Cart Item -> ID: ${item.id}, Name: ${item.name}, Qty: ${item.quantity}",
+      );
     }
 
     return ListView.builder(
@@ -1650,10 +1693,7 @@ class _CartScreenState extends State<CartScreen> {
           },
           onRemove: () async {
             try {
-              await cartProvider.removeItem(
-                item.id,
-                user?.userId.toString(),
-              );
+              await cartProvider.removeItem(item.id, user?.userId.toString());
               _showSnackBar('Item removed', Colors.green);
             } catch (e) {
               _showSnackBar('Failed to remove: $e', Colors.red);
@@ -1667,8 +1707,12 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCheckoutButton(
-      CartProvider cartProvider, ThemeData theme, ColorScheme colorScheme) {
-    final isDisabled = cartProvider.isLoading ||
+    CartProvider cartProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    final isDisabled =
+        cartProvider.isLoading ||
         !cartProvider.hasItems ||
         !cartProvider.isVendorActive ||
         cartProvider.hasInactiveProducts; // 👈 disable if any issue
@@ -1676,15 +1720,12 @@ class _CartScreenState extends State<CartScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed:
-            isDisabled ? null : () => _handleCheckout(cartProvider),
+        onPressed: isDisabled ? null : () => _handleCheckout(cartProvider),
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          disabledBackgroundColor:
-              colorScheme.onSurface.withOpacity(0.12),
-          disabledForegroundColor:
-              colorScheme.onSurface.withOpacity(0.38),
+          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
+          disabledForegroundColor: colorScheme.onSurface.withOpacity(0.38),
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -1701,8 +1742,30 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildVendorClosedBanner(
-      ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildSectionCard({
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildVendorClosedBanner(ThemeData theme, ColorScheme colorScheme) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
@@ -1713,8 +1776,7 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.store_mall_directory,
-              color: colorScheme.onErrorContainer),
+          Icon(Icons.store_mall_directory, color: colorScheme.onErrorContainer),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1731,9 +1793,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildInactiveProductsBanner(
-      CartProvider cartProvider,
-      ThemeData theme,
-      ColorScheme colorScheme) {
+    CartProvider cartProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
@@ -1744,8 +1807,7 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline,
-              color: colorScheme.onTertiaryContainer),
+          Icon(Icons.info_outline, color: colorScheme.onTertiaryContainer),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1758,8 +1820,10 @@ class _CartScreenState extends State<CartScreen> {
           ),
           TextButton(
             onPressed: () async {
-              final provider =
-                  Provider.of<CartProvider>(context, listen: false);
+              final provider = Provider.of<CartProvider>(
+                context,
+                listen: false,
+              );
               await _handleStatusChanges(provider);
             },
             child: const Text('FIX'),
@@ -2078,6 +2142,20 @@ class RowItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StickySummaryCard extends StatelessWidget {
+  final Widget child;
+
+  const _StickySummaryCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Align(alignment: Alignment.topCenter, child: child),
     );
   }
 }

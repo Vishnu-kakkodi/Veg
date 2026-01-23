@@ -1261,29 +1261,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
@@ -1318,10 +1295,7 @@ import 'package:veegify/widgets/home/video.dart';
 class HomeScreenWithController extends StatelessWidget {
   final ScrollController scrollController;
 
-  const HomeScreenWithController({
-    super.key,
-    required this.scrollController,
-  });
+  const HomeScreenWithController({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -1341,6 +1315,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isInitializing = true;
   String? userId;
+
+  int _getGridCount(double width) {
+    if (width >= 1400) return 4;
+    if (width >= 1100) return 3;
+    if (width >= 800) return 2;
+    return 1;
+  }
 
   // Scroll controller and banner visibility
   late ScrollController _scrollController;
@@ -1411,7 +1392,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     // Sticky search bar logic
     if (_searchBarKey.currentContext != null) {
-      final box = _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
+      final box =
+          _searchBarKey.currentContext!.findRenderObject() as RenderBox?;
       if (box != null) {
         final offsetPosition = box.localToGlobal(Offset.zero);
         final topPadding = MediaQuery.of(context).padding.top;
@@ -1502,53 +1484,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _headerSlideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _headerController,
-      curve: Curves.easeOutCubic,
-    ));
+    _headerSlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _headerController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _searchSlideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _searchController,
-      curve: Curves.easeOutCubic,
-    ));
+    _searchSlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _searchController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _categoriesSlideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _categoriesController,
-      curve: Curves.easeOutCubic,
-    ));
+    _categoriesSlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _categoriesController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _bannerSlideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _bannerController,
-      curve: Curves.easeOutCubic,
-    ));
+    _bannerSlideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _bannerController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _nearbySlideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _nearbyController,
-      curve: Curves.easeOutCubic,
-    ));
+    _nearbySlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _nearbyController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
-    _topRestaurantsSlideAnimation = Tween<Offset>(
-      begin: const Offset(-1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _topRestaurantsController,
-      curve: Curves.easeOutCubic,
-    ));
+    _topRestaurantsSlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _topRestaurantsController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     _headerFadeAnimation = Tween<double>(
       begin: 0.0,
@@ -1580,13 +1562,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(_topRestaurantsController);
 
-    _adsBannerAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _adsBannerController,
-      curve: Curves.easeInOut,
-    ));
+    _adsBannerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _adsBannerController, curve: Curves.easeInOut),
+    );
 
     _adsBannerController.forward();
 
@@ -1595,13 +1573,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _giftAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _giftAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _giftAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _giftAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _startGiftAnimation();
   }
@@ -1641,20 +1618,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       await _loadUserId();
       await _handleCurrentLocation();
       Provider.of<CategoryProvider>(context, listen: false).fetchCategories();
-      Provider.of<RestaurantProvider>(context, listen: false)
-          .getNearbyRestaurants(userId.toString());
-      Provider.of<TopRestaurantsProvider>(context, listen: false)
-          .getTopRestaurants(userId.toString());
+      Provider.of<RestaurantProvider>(
+        context,
+        listen: false,
+      ).getNearbyRestaurants(userId.toString());
+      Provider.of<TopRestaurantsProvider>(
+        context,
+        listen: false,
+      ).getTopRestaurants(userId.toString());
       Provider.of<BannerProvider>(context, listen: false).fetchBanners();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final locationProvider =
-            Provider.of<LocationProvider>(context, listen: false);
+        final locationProvider = Provider.of<LocationProvider>(
+          context,
+          listen: false,
+        );
         locationProvider.addListener(_onLocationChanged);
       });
 
-          context.read<CredentialProvider>().fetchCredentials();
-
+      context.read<CredentialProvider>().fetchCredentials();
 
       _currentTopRestaurantsPage = 1;
       _isTopRestaurantsLoadingMore = false;
@@ -1670,16 +1652,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _onLocationChanged() {
-    final locationProvider =
-        Provider.of<LocationProvider>(context, listen: false);
+    final locationProvider = Provider.of<LocationProvider>(
+      context,
+      listen: false,
+    );
 
     if (locationProvider.hasLocation && !locationProvider.isLoading) {
       if (userId != null) {
         debugPrint("🔄 Location changed — refreshing restaurants...");
-        Provider.of<RestaurantProvider>(context, listen: false)
-            .getNearbyRestaurants(userId!);
-        Provider.of<TopRestaurantsProvider>(context, listen: false)
-            .getTopRestaurants(userId!);
+        Provider.of<RestaurantProvider>(
+          context,
+          listen: false,
+        ).getNearbyRestaurants(userId!);
+        Provider.of<TopRestaurantsProvider>(
+          context,
+          listen: false,
+        ).getTopRestaurants(userId!);
 
         setState(() {
           _currentTopRestaurantsPage = 1;
@@ -1700,8 +1688,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _handleCurrentLocation() async {
     try {
-      final locationProvider =
-          Provider.of<LocationProvider>(context, listen: false);
+      final locationProvider = Provider.of<LocationProvider>(
+        context,
+        listen: false,
+      );
       await locationProvider.initLocation(userId.toString());
     } catch (e) {
       debugPrint('Location error: $e');
@@ -1743,10 +1733,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }) {
     return SlideTransition(
       position: slideAnimation,
-      child: FadeTransition(
-        opacity: fadeAnimation,
-        child: child,
-      ),
+      child: FadeTransition(opacity: fadeAnimation, child: child),
     );
   }
 
@@ -1835,8 +1822,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   height: isDesktop ? 140 : 120,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[700] : Colors.grey[300],
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                   ),
                   child: Center(
                     child: CircularProgressIndicator(
@@ -1867,7 +1855,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -1876,7 +1866,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             width: 30,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[700] : Colors.grey[300],
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -2098,18 +2090,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isDesktop = Responsive.isDesktop(context);
 
     // Responsive padding and max width
+    // final horizontalPadding = Responsive.spacing(
+    //   context,
+    //   mobile: 16.0,
+    //   tablet: 32.0,
+    //   desktop: 48.0,
+    // );
+
     final horizontalPadding = Responsive.spacing(
       context,
       mobile: 16.0,
       tablet: 32.0,
-      desktop: 48.0,
+      desktop: 64.0, // Increased for desktop
     );
+
+    // final maxContentWidth = Responsive.value(
+    //   context,
+    //   mobile: double.infinity,
+    //   tablet: 900.0,
+    //   desktop: double.infinity,
+    // );
 
     final maxContentWidth = Responsive.value(
       context,
       mobile: double.infinity,
       tablet: 900.0,
-      desktop: double.infinity,
+      desktop: 1200.0, // 👈 limit width for web
     );
 
     return Scaffold(
@@ -2169,9 +2175,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                             MaterialPageRoute(
                                               builder: (_) =>
                                                   LocationPickerScreen(
-                                                isEditing: false,
-                                                userId: userId.toString(),
-                                              ),
+                                                    isEditing: false,
+                                                    userId: userId.toString(),
+                                                  ),
                                             ),
                                           );
                                         },
@@ -2225,8 +2231,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   _isInitializing
                                       ? _buildCategorySkeleton()
                                       : _buildAnimatedSection(
-                                          slideAnimation: _categoriesSlideAnimation,
-                                          fadeAnimation: _categoriesFadeAnimation,
+                                          slideAnimation:
+                                              _categoriesSlideAnimation,
+                                          fadeAnimation:
+                                              _categoriesFadeAnimation,
                                           child: _buildCategories(),
                                         ),
                                 ],
@@ -2295,8 +2303,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   _isInitializing
                                       ? _buildVerticalRestaurantSkeleton()
                                       : _buildAnimatedSection(
-                                          slideAnimation: _topRestaurantsSlideAnimation,
-                                          fadeAnimation: _topRestaurantsFadeAnimation,
+                                          slideAnimation:
+                                              _topRestaurantsSlideAnimation,
+                                          fadeAnimation:
+                                              _topRestaurantsFadeAnimation,
                                           child: _buildTopRestaurants(),
                                         ),
                                 ],
@@ -2322,9 +2332,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               right: 0,
               child: Center(
                 child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: maxContentWidth,
-                  ),
+                  constraints: BoxConstraints(maxWidth: maxContentWidth),
                   margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: Material(
                     elevation: 4,
@@ -2434,25 +2442,59 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         }
 
         return SizedBox(
-          height: isDesktop ? 300 : 200,
+          height: Responsive.value(
+            context,
+            mobile: 200,
+            tablet: 260,
+            desktop: 320,
+          ),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: provider.nearbyRestaurants.length,
             itemBuilder: (context, index) {
               final restaurant = provider.nearbyRestaurants[index];
-              return RestaurantCard(
-                id: restaurant.id,
-                imagePath: restaurant.imageUrl,
-                name: restaurant.restaurantName,
-                rating: restaurant.rating.toDouble(),
-                description: restaurant.description,
-                price: restaurant.startingPrice,
-                locationName: restaurant.locationName,
-                status: restaurant.status,
+              return SizedBox(
+                width: Responsive.value(
+                  context,
+                  mobile: 220,
+                  tablet: 260,
+                  desktop: 300,
+                ),
+                child: RestaurantCard(
+                  id: restaurant.id,
+                  imagePath: restaurant.imageUrl,
+                  name: restaurant.restaurantName,
+                  rating: restaurant.rating.toDouble(),
+                  description: restaurant.description,
+                  price: restaurant.startingPrice,
+                  locationName: restaurant.locationName,
+                  status: restaurant.status,
+                ),
               );
             },
           ),
         );
+
+        // return SizedBox(
+        //   height: isDesktop ? 300 : 200,
+        //   child: ListView.builder(
+        //     scrollDirection: Axis.horizontal,
+        //     itemCount: provider.nearbyRestaurants.length,
+        //     itemBuilder: (context, index) {
+        //       final restaurant = provider.nearbyRestaurants[index];
+        //       return RestaurantCard(
+        //         id: restaurant.id,
+        //         imagePath: restaurant.imageUrl,
+        //         name: restaurant.restaurantName,
+        //         rating: restaurant.rating.toDouble(),
+        //         description: restaurant.description,
+        //         price: restaurant.startingPrice,
+        //         locationName: restaurant.locationName,
+        //         status: restaurant.status,
+        //       );
+        //     },
+        //   ),
+        // );
       },
     );
   }
@@ -2515,30 +2557,62 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         if (isDesktop || isTablet) {
           return Column(
             children: [
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isDesktop ? 3 : 2,
-                  childAspectRatio: isDesktop ? 1.2 : 1.1,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: visibleCount,
-                itemBuilder: (context, index) {
-                  final restaurant = provider.topRestaurants[index];
-                  return TicketRestaurantCard(
-                    id: restaurant.id,
-                    imagePath: restaurant.imageUrl,
-                    name: restaurant.restaurantName,
-                    rating: restaurant.rating.toDouble(),
-                    description: restaurant.description,
-                    price: restaurant.startingPrice,
-                    locationName: restaurant.locationName,
-                    status: restaurant.status,
+              // GridView.builder(
+              //   shrinkWrap: true,
+              //   physics: const NeverScrollableScrollPhysics(),
+              //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              //     crossAxisCount: isDesktop ? 3 : 2,
+              //     childAspectRatio: isDesktop ? 1.2 : 1.1,
+              //     crossAxisSpacing: 16,
+              //     mainAxisSpacing: 16,
+              //   ),
+              //   itemCount: visibleCount,
+              //   itemBuilder: (context, index) {
+              //     final restaurant = provider.topRestaurants[index];
+              //     return TicketRestaurantCard(
+              //       id: restaurant.id,
+              //       imagePath: restaurant.imageUrl,
+              //       name: restaurant.restaurantName,
+              //       rating: restaurant.rating.toDouble(),
+              //       description: restaurant.description,
+              //       price: restaurant.startingPrice,
+              //       locationName: restaurant.locationName,
+              //       status: restaurant.status,
+              //     );
+              //   },
+              // ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final width = constraints.maxWidth;
+                  final crossAxisCount = _getGridCount(width);
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: width >= 1100 ? 1.25 : 1.1,
+                    ),
+                    itemCount: visibleCount,
+                    itemBuilder: (context, index) {
+                      final restaurant = provider.topRestaurants[index];
+                      return TicketRestaurantCard(
+                        id: restaurant.id,
+                        imagePath: restaurant.imageUrl,
+                        name: restaurant.restaurantName,
+                        rating: restaurant.rating.toDouble(),
+                        description: restaurant.description,
+                        price: restaurant.startingPrice,
+                        locationName: restaurant.locationName,
+                        status: restaurant.status,
+                      );
+                    },
                   );
                 },
               ),
+
               if (_isTopRestaurantsLoadingMore && _canLoadMoreTopRestaurants)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),

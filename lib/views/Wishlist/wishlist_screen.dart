@@ -4980,36 +4980,114 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   );
                 }
 
-                // Normal List
-                return RefreshIndicator(
-                  onRefresh: _refreshWishlist,
-                  color: theme.colorScheme.primary,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 12,
+
+
+return RefreshIndicator(
+  onRefresh: _refreshWishlist,
+  color: theme.colorScheme.primary,
+  child: LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
+
+      // Max content width for web
+      final maxWidth = width >= 1200 ? 1100.0 : double.infinity;
+
+      // Switch to grid in web
+      final isWebWide = width >= 900;
+      final crossAxisCount = width >= 1400
+          ? 3
+          : width >= 900
+              ? 2
+              : 1;
+
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isWebWide ? 16 : 8,
+              vertical: 12,
+            ),
+            child: isWebWide
+                ? GridView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: wishlistProvider.wishlist.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                      childAspectRatio: width >= 1200 ? 2.2 : 2.0,
                     ),
-                    child: ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: wishlistProvider.wishlist.length,
-                      separatorBuilder: (context, index) =>
-                          const Divider(height: 8, color: Colors.transparent),
-                      itemBuilder: (context, index) {
-                        final product = wishlistProvider.wishlist[index];
-                        return WishlistListItem(
-                          product: product,
-                          userId: userId!, // pass userId down
-                          onRemove: () => _showRemoveDialog(
-                            context,
-                            product,
-                            wishlistProvider,
-                          ),
-                          restaurantId: product.restaurantId,
-                        );
-                      },
-                    ),
+                    itemBuilder: (context, index) {
+                      final product = wishlistProvider.wishlist[index];
+                      return WishlistListItem(
+                        product: product,
+                        userId: userId!,
+                        onRemove: () => _showRemoveDialog(
+                          context,
+                          product,
+                          wishlistProvider,
+                        ),
+                        restaurantId: product.restaurantId,
+                      );
+                    },
+                  )
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: wishlistProvider.wishlist.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final product = wishlistProvider.wishlist[index];
+                      return WishlistListItem(
+                        product: product,
+                        userId: userId!,
+                        onRemove: () => _showRemoveDialog(
+                          context,
+                          product,
+                          wishlistProvider,
+                        ),
+                        restaurantId: product.restaurantId,
+                      );
+                    },
                   ),
-                );
+          ),
+        ),
+      );
+    },
+  ),
+);
+
+                // Normal List
+                // return RefreshIndicator(
+                //   onRefresh: _refreshWishlist,
+                //   color: theme.colorScheme.primary,
+                //   child: Padding(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 8.0,
+                //       vertical: 12,
+                //     ),
+                //     child: ListView.separated(
+                //       physics: const AlwaysScrollableScrollPhysics(),
+                //       itemCount: wishlistProvider.wishlist.length,
+                //       separatorBuilder: (context, index) =>
+                //           const Divider(height: 8, color: Colors.transparent),
+                //       itemBuilder: (context, index) {
+                //         final product = wishlistProvider.wishlist[index];
+                //         return WishlistListItem(
+                //           product: product,
+                //           userId: userId!, // pass userId down
+                //           onRemove: () => _showRemoveDialog(
+                //             context,
+                //             product,
+                //             wishlistProvider,
+                //           ),
+                //           restaurantId: product.restaurantId,
+                //         );
+                //       },
+                //     ),
+                //   ),
+                // );
               },
             ),
     );

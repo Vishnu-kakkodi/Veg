@@ -338,36 +338,115 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   );
                 }
 
-                return SingleChildScrollView(
-                  child: Column(
+                // return SingleChildScrollView(
+                //   child: Column(
+                //     children: [
+                //       // Cart Items Section
+                //       _buildCartItemsSection(cartProvider, theme, colorScheme),
+
+                //       const SizedBox(height: 16),
+
+                //       // Delivery Address Section
+                //       _buildAddressSection(addressProvider, theme, colorScheme),
+
+                //       const SizedBox(height: 16),
+
+                //       // Payment Method Section
+                //       _buildPaymentMethodSection(theme, colorScheme),
+
+                //       const SizedBox(height: 16),
+
+                //       // Price Summary
+                //       _buildPriceSummary(cartProvider, theme, colorScheme),
+
+                //       const SizedBox(height: 20),
+
+                //       // Place Order Button
+                //       _buildPlaceOrderButton(theme, colorScheme),
+
+                //       const SizedBox(height: 20),
+                //     ],
+                //   ),
+                // );
+
+
+                return LayoutBuilder(
+  builder: (context, constraints) {
+    final width = constraints.maxWidth;
+
+    final bool isMobile = width < 800;
+    final bool isTablet = width >= 800 && width < 1200;
+    final bool isDesktop = width >= 1200;
+
+    final double maxWidth = isDesktop ? 1200 : (isTablet ? 950 : double.infinity);
+    final double horizontalPadding = isDesktop ? 30 : (isTablet ? 20 : 16);
+
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 16,
+            ),
+            child: isMobile
+                ? Column(
                     children: [
-                      // Cart Items Section
                       _buildCartItemsSection(cartProvider, theme, colorScheme),
-
                       const SizedBox(height: 16),
-
-                      // Delivery Address Section
                       _buildAddressSection(addressProvider, theme, colorScheme),
-
                       const SizedBox(height: 16),
-
-                      // Payment Method Section
                       _buildPaymentMethodSection(theme, colorScheme),
-
                       const SizedBox(height: 16),
-
-                      // Price Summary
                       _buildPriceSummary(cartProvider, theme, colorScheme),
-
-                      const SizedBox(height: 20),
-
-                      // Place Order Button
+                      const SizedBox(height: 16),
                       _buildPlaceOrderButton(theme, colorScheme),
+                      const SizedBox(height: 30),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // LEFT SIDE (Main content)
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: [
+                            _buildCartItemsSection(cartProvider, theme, colorScheme),
+                            const SizedBox(height: 16),
+                            _buildAddressSection(addressProvider, theme, colorScheme),
+                            const SizedBox(height: 16),
+                            _buildPaymentMethodSection(theme, colorScheme),
+                            const SizedBox(height: 30),
+                          ],
+                        ),
+                      ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(width: 20),
+
+                      // RIGHT SIDE (Summary)
+                      Expanded(
+                        flex: 2,
+                        child: _StickyCheckoutSummary(
+                          child: Column(
+                            children: [
+                              _buildPriceSummary(cartProvider, theme, colorScheme),
+                              const SizedBox(height: 14),
+                              _buildPlaceOrderButton(theme, colorScheme),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                );
+          ),
+        ),
+      ),
+    );
+  },
+);
+
               },
             ),
 
@@ -1195,6 +1274,22 @@ Widget _gstRow(
                 ),
         ),
       ),
+    );
+  }
+}
+
+
+
+class _StickyCheckoutSummary extends StatelessWidget {
+  final Widget child;
+
+  const _StickyCheckoutSummary({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: child,
     );
   }
 }

@@ -1852,6 +1852,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   Timer? _availabilityTimer;
   bool _hasLoadedOnce = false;
 
+  
+
   @override
   void initState() {
     super.initState();
@@ -1943,16 +1945,39 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   bool _isDesktop(BuildContext context) =>
       MediaQuery.of(context).size.width >= 1024;
 
+  // int _getCrossAxisCount(BuildContext context) {
+  //   if (_isDesktop(context)) return 3;
+  //   if (_isTablet(context)) return 2;
+  //   return 1;
+  // }
+
+
   int _getCrossAxisCount(BuildContext context) {
-    if (_isDesktop(context)) return 3;
-    if (_isTablet(context)) return 2;
-    return 1;
-  }
+  final w = MediaQuery.of(context).size.width;
+
+  if (w >= 1600) return 5;
+  if (w >= 1300) return 4;
+  if (w >= 1024) return 3;
+  if (w >= 700) return 2;
+  return 1;
+}
+
+
+  // double _getMaxWidth(BuildContext context) {
+  //   if (_isDesktop(context)) return 1400;
+  //   return double.infinity;
+  // }
+
 
   double _getMaxWidth(BuildContext context) {
-    if (_isDesktop(context)) return 1400;
-    return double.infinity;
-  }
+  final w = MediaQuery.of(context).size.width;
+
+  if (w >= 1600) return 1300;
+  if (w >= 1200) return 1200;
+  if (w >= 1024) return 1100;
+  return double.infinity;
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -2449,7 +2474,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32 : 16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          childAspectRatio: isDesktop ? 0.75 : 0.7,
+          childAspectRatio: _isDesktop(context) ? 0.82 : 0.75,
+
+          // childAspectRatio: isDesktop ? 0.75 : 0.7,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
