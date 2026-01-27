@@ -239,17 +239,18 @@ class _PromoBannerState extends State<PromoBanner> {
     }
 
     if (bannerProvider.banners.isEmpty) {
-      return SizedBox(
-        height: bannerHeight,
-        child: Center(
-          child: Text(
-            'No offers available',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-        ),
-      );
+      // return SizedBox(
+      //   height: bannerHeight,
+      //   child: Center(
+      //     child: Text(
+      //       'No offers available',
+      //       style: theme.textTheme.bodyMedium?.copyWith(
+      //         color: theme.colorScheme.onSurface.withOpacity(0.6),
+      //       ),
+      //     ),
+      //   ),
+      // );
+      return SizedBox();
     }
 
     return Column(

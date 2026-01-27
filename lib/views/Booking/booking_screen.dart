@@ -2634,7 +2634,7 @@ Future<void> _downloadInvoice(Order order) async {
 
     if (kIsWeb) {
       // 🌐 WEB: generate PDF and download
-  openInvoiceHtml(htmlContent);
+  // openInvoiceHtml(htmlContent);
   return;
     } else {
       // 📱 MOBILE: print / preview
