@@ -10,7 +10,7 @@ Future<void> showUpgradeDialog({
   // Your store URLs
   final playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.veggify.veegify';
-  final appStoreUrl = 'https://apps.apple.com/app/idYOUR_APP_ID';
+  final appStoreUrl = 'https://apps.apple.com/in/app/vegiffyy/id6757138352';
 
   final url = Platform.isIOS ? appStoreUrl : playStoreUrl;
 
