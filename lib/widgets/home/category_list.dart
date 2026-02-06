@@ -1,5 +1,4 @@
 
-
 // import 'package:flutter/material.dart';
 // import 'package:veegify/utils/responsive.dart';
 // import 'package:veegify/views/Category/category_based_screen.dart';
@@ -23,17 +22,27 @@
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
 
-//     // 🔥 Responsive width based on screen size
-//     final screenWidth = MediaQuery.of(context).size.width;
-//     double cardWidth;
+//     /// ✅ FIX: Use fixed responsive widths
+//     final double cardWidth = Responsive.value(
+//       context,
+//       mobile: 84,   // 4–5 cards visible
+//       tablet: 100,  // balanced
+//       desktop: 110, // compact & clean
+//     );
 
-//     if (Responsive.isMobile(context)) {
-//       cardWidth = screenWidth * 0.24;   // ~4 cards on screen
-//     } else if (Responsive.isTablet(context)) {
-//       cardWidth = screenWidth * 0.18;   // ~5–6 cards
-//     } else {
-//       cardWidth = screenWidth * 0.12;   // desktop, more compact
-//     }
+//     final double avatarRadius = Responsive.value(
+//       context,
+//       mobile: 24,
+//       tablet: 26,
+//       desktop: 28,
+//     );
+
+//     final double verticalPadding = Responsive.value(
+//       context,
+//       mobile: 8,
+//       tablet: 10,
+//       desktop: 12,
+//     );
 
 //     return SizedBox(
 //       width: cardWidth,
@@ -42,7 +51,7 @@
 //           Navigator.push(
 //             context,
 //             MaterialPageRoute(
-//               builder: (context) => CategoryBasedScreen(
+//               builder: (_) => CategoryBasedScreen(
 //                 categoryId: id,
 //                 title: title,
 //                 userId: userId,
@@ -51,42 +60,40 @@
 //           );
 //         },
 //         child: Container(
-//           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+//           padding: EdgeInsets.symmetric(
+//             vertical: verticalPadding,
+//             horizontal: 6,
+//           ),
 //           decoration: BoxDecoration(
 //             color: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
 //             borderRadius: BorderRadius.circular(12),
 //             boxShadow: [
 //               if (!isDark)
 //                 BoxShadow(
-//                   color: Colors.grey.withOpacity(0.1),
-//                   spreadRadius: 1,
-//                   blurRadius: 4,
-//                   offset: const Offset(0, 2),
+//                   color: Colors.black.withOpacity(0.06),
+//                   blurRadius: 6,
+//                   offset: const Offset(0, 3),
 //                 ),
 //             ],
 //           ),
 //           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.center,
+//             mainAxisAlignment: MainAxisAlignment.center,
 //             children: [
 //               CircleAvatar(
-//                 radius: 26,
+//                 radius: avatarRadius,
 //                 backgroundColor: isDark ? Colors.grey[700] : Colors.white,
 //                 backgroundImage: NetworkImage(imagePath),
-//                 onBackgroundImageError: (exception, stackTrace) {
-//                   // TODO: handle image error if needed
-//                 },
+//                 onBackgroundImageError: (_, __) {},
 //               ),
 //               const SizedBox(height: 8),
-//               Flexible(
-//                 child: Text(
-//                   title,
-//                   textAlign: TextAlign.center,
-//                   style: theme.textTheme.bodyMedium?.copyWith(
-//                     fontWeight: FontWeight.bold,
-//                     color: theme.colorScheme.onSurface,
-//                   ),
-//                   maxLines: 2,
-//                   overflow: TextOverflow.ellipsis,
+//               Text(
+//                 title,
+//                 textAlign: TextAlign.center,
+//                 maxLines: 2,
+//                 overflow: TextOverflow.ellipsis,
+//                 style: theme.textTheme.bodySmall?.copyWith(
+//                   fontWeight: FontWeight.w600,
+//                   color: theme.colorScheme.onSurface,
 //                 ),
 //               ),
 //             ],
@@ -108,6 +115,139 @@
 
 
 
+// import 'package:flutter/material.dart';
+// import 'package:veegify/utils/responsive.dart';
+// import 'package:veegify/views/Category/category_based_screen.dart';
+
+
+
+
+// class CategoryCard extends StatelessWidget {
+//   final String id;
+//   final String imagePath;
+//   final String title;
+//   final String userId;
+
+//   const CategoryCard({
+//     super.key,
+//     required this.id,
+//     required this.imagePath,
+//     required this.title,
+//     required this.userId,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+//     final isDesktop = Responsive.isDesktop(context);
+//     final isTablet = Responsive.isTablet(context);
+
+//     // Sizes
+//     final double iconRadius = Responsive.value(
+//       context,
+//       mobile: 26,
+//       tablet: 32,
+//       desktop: 36,
+//     );
+
+//     final double cardWidth = Responsive.value(
+//       context,
+//       mobile: 84,
+//       tablet: 110,
+//       desktop: 120,
+//     );
+
+//     return SizedBox(
+//       width: cardWidth,
+//       child: GestureDetector(
+//         onTap: () {
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (_) => CategoryBasedScreen(
+//                 categoryId: id,
+//                 title: title,
+//                 userId: userId,
+//               ),
+//             ),
+//           );
+//         },
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             /// 🔵 Desktop / Tablet → Clean circular style (like image)
+//             if (isDesktop || isTablet)
+//               CircleAvatar(
+//                 radius: iconRadius,
+//                 backgroundColor:
+//                     isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+//                 child: CircleAvatar(
+//                   radius: iconRadius - 6,
+//                   backgroundColor: Colors.white,
+//                   backgroundImage: NetworkImage(imagePath),
+//                 ),
+//               )
+
+//             /// 📱 Mobile → Keep card look
+//             else
+//               Container(
+//                 padding: const EdgeInsets.all(8),
+//                 decoration: BoxDecoration(
+//                   color: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
+//                   borderRadius: BorderRadius.circular(12),
+//                   boxShadow: [
+//                     BoxShadow(
+//                       color: Colors.black.withOpacity(0.06),
+//                       blurRadius: 6,
+//                       offset: const Offset(0, 3),
+//                     ),
+//                   ],
+//                 ),
+//                 child: CircleAvatar(
+//                   radius: iconRadius,
+//                   backgroundColor: Colors.white,
+//                   backgroundImage: NetworkImage(imagePath),
+//                 ),
+//               ),
+
+//             const SizedBox(height: 8),
+
+//             /// Category title
+//             Text(
+//               title,
+//               textAlign: TextAlign.center,
+//               maxLines: 2,
+//               overflow: TextOverflow.ellipsis,
+//               style: theme.textTheme.bodySmall?.copyWith(
+//                 fontWeight: FontWeight.w600,
+//               ),
+//             ),
+
+//             /// Optional product count (matches screenshot look)
+//             if (isDesktop || isTablet)
+//               Padding(
+//                 padding: const EdgeInsets.only(top: 2),
+//                 child: Text(
+//                   'Products',
+//                   style: theme.textTheme.labelSmall?.copyWith(
+//                     color: theme.colorScheme.onSurface.withOpacity(0.5),
+//                   ),
+//                 ),
+//               ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
+
 
 
 
@@ -120,11 +260,12 @@ import 'package:flutter/material.dart';
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Category/category_based_screen.dart';
 
-class CategoryCard extends StatelessWidget {
+class CategoryCard extends StatefulWidget {
   final String id;
   final String imagePath;
   final String title;
   final String userId;
+  final int? productCount; // Optional product count
 
   const CategoryCard({
     super.key,
@@ -132,89 +273,179 @@ class CategoryCard extends StatelessWidget {
     required this.imagePath,
     required this.title,
     required this.userId,
+    this.productCount,
   });
+
+  @override
+  State<CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<CategoryCard> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isDesktop = Responsive.isDesktop(context);
+    final isTablet = Responsive.isTablet(context);
+    final isMobile = Responsive.isMobile(context);
 
-    /// ✅ FIX: Use fixed responsive widths
-    final double cardWidth = Responsive.value(
-      context,
-      mobile: 84,   // 4–5 cards visible
-      tablet: 100,  // balanced
-      desktop: 110, // compact & clean
-    );
+    // Use web design for desktop/tablet, mobile design for mobile
+    if (isMobile) {
+      return _buildMobileCard(theme, isDark);
+    } else {
+      return _buildWebCard(theme, isDark, isDesktop);
+    }
+  }
 
-    final double avatarRadius = Responsive.value(
-      context,
-      mobile: 24,
-      tablet: 26,
-      desktop: 28,
-    );
-
-    final double verticalPadding = Responsive.value(
-      context,
-      mobile: 8,
-      tablet: 10,
-      desktop: 12,
-    );
+  /// Original Mobile Card - Unchanged
+  Widget _buildMobileCard(ThemeData theme, bool isDark) {
+    final double iconRadius = 26.0;
+    final double cardWidth = 84.0;
 
     return SizedBox(
       width: cardWidth,
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CategoryBasedScreen(
-                categoryId: id,
-                title: title,
-                userId: userId,
+        onTap: () => _navigateToCategory(context),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: iconRadius,
+                backgroundColor: Colors.white,
+                backgroundImage: NetworkImage(widget.imagePath),
               ),
             ),
-          );
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            vertical: verticalPadding,
-            horizontal: 6,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: avatarRadius,
-                backgroundColor: isDark ? Colors.grey[700] : Colors.white,
-                backgroundImage: NetworkImage(imagePath),
-                onBackgroundImageError: (_, __) {},
+            const SizedBox(height: 8),
+            Text(
+              widget.title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Improved Web Card - Matches reference design
+Widget _buildWebCard(ThemeData theme, bool isDark, bool isDesktop) {
+  final double cardWidth = isDesktop ? 180 : 160;
+  final double imageSize = isDesktop ? 90 : 80;
+
+  return MouseRegion(
+    onEnter: (_) => setState(() => _isHovered = true),
+    onExit: (_) => setState(() => _isHovered = false),
+    child: GestureDetector(
+      onTap: () => _navigateToCategory(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: cardWidth,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? theme.cardColor : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _isHovered
+                ? theme.colorScheme.primary
+                : Colors.grey.withOpacity(0.15),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _isHovered
+                  ? theme.colorScheme.primary.withOpacity(0.18)
+                  : Colors.black.withOpacity(0.06),
+              blurRadius: _isHovered ? 18 : 12,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        transform: Matrix4.identity()..translate(0.0, _isHovered ? -6.0 : 0.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image
+            Container(
+              width: imageSize,
+              height: imageSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDark ? Colors.grey[800] : Colors.grey[100],
+              ),
+              child: ClipOval(
+                child: Image.network(
+                  widget.imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.category_rounded,
+                    size: imageSize * 0.6,
+                    color: theme.colorScheme.primary.withOpacity(0.6),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Title
+            Text(
+              widget.title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: isDesktop ? 15 : 14,
+                color: _isHovered
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
+              ),
+            ),
+
+            if (widget.productCount != null) ...[
+              const SizedBox(height: 6),
               Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                '${widget.productCount} products',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
-          ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+  void _navigateToCategory(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CategoryBasedScreen(
+          categoryId: widget.id,
+          title: widget.title,
+          userId: widget.userId,
         ),
       ),
     );

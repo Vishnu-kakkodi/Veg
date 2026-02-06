@@ -941,8 +941,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 // ↓↓↓ INVOICE RELATED ↓↓↓
-import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
+// import 'package:printing/printing.dart';
+// import 'package:pdf/pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 // ↑↑↑ INVOICE RELATED ↑↑↑
@@ -1474,15 +1474,15 @@ class _HystoryScreenState extends State<HystoryScreen> {
       final htmlContent = buildInvoiceHtml(orderModel);
       debugPrint("Invoice HTML: $htmlContent");
 
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async {
-          final pdfBytes = await Printing.convertHtml(
-            format: format,
-            html: htmlContent,
-          );
-          return pdfBytes;
-        },
-      );
+      // await Printing.layoutPdf(
+      //   onLayout: (PdfPageFormat format) async {
+      //     final pdfBytes = await Printing.convertHtml(
+      //       format: format,
+      //       html: htmlContent,
+      //     );
+      //     return pdfBytes;
+      //   },
+      // );
     } catch (e, st) {
       debugPrint('Invoice error: $e\n$st');
       if (!mounted) return;

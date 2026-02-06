@@ -2549,8 +2549,8 @@ import 'package:http/http.dart' as http;
 import 'package:veegify/utils/web_invoice.dart';
 import 'package:veegify/views/Booking/accepted_order_polling_screen.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
+// import 'package:printing/printing.dart';
+// import 'package:pdf/pdf.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:veegify/utils/invoice_html_builder.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -2638,14 +2638,14 @@ Future<void> _downloadInvoice(Order order) async {
   return;
     } else {
       // 📱 MOBILE: print / preview
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async {
-          return Printing.convertHtml(
-            format: format,
-            html: htmlContent,
-          );
-        },
-      );
+      // await Printing.layoutPdf(
+      //   onLayout: (PdfPageFormat format) async {
+      //     return Printing.convertHtml(
+      //       format: format,
+      //       html: htmlContent,
+      //     );
+      //   },
+      // );
     }
   } catch (e, st) {
     debugPrint('Invoice error: $e\n$st');
