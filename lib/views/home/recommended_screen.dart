@@ -1973,7 +1973,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   final w = MediaQuery.of(context).size.width;
 
   if (w >= 1600) return 1300;
-  if (w >= 1200) return 1200;
+  if (w >= 1200) return 1800;
   if (w >= 1024) return 1100;
   return double.infinity;
 }
@@ -2253,7 +2253,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     bool isMobile,
     bool isDesktop,
   ) {
-    final heroHeight = isDesktop ? 500.0 : (isMobile ? 400.0 : 450.0);
+    final heroHeight = isDesktop ? 500.0 : (isMobile ? 400.0 : 200.0);
 
     return Stack(
       children: [
@@ -2263,7 +2263,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(isDesktop ? 40 : 30),
+              bottom: Radius.circular(isDesktop ? 0 : 30),
             ),
             image: DecorationImage(
               image: NetworkImage(restaurantProvider.resImage),
@@ -2277,7 +2277,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           height: heroHeight,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(isDesktop ? 40 : 30),
+              bottom: Radius.circular(isDesktop ? 0 : 30),
             ),
             gradient: LinearGradient(
               begin: Alignment.topCenter,

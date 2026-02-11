@@ -3331,6 +3331,7 @@ Widget _desktopBannerFallback(ThemeData theme) {
                   price: restaurant.startingPrice,
                   locationName: restaurant.locationName,
                   status: restaurant.status,
+                  discount: restaurant.discount,
                 ),
               );
             },
@@ -3424,6 +3425,7 @@ Widget _desktopBannerFallback(ThemeData theme) {
                         price: restaurant.startingPrice,
                         locationName: restaurant.locationName,
                         status: restaurant.status,
+                        discount: restaurant.discount,
                       );
                     },
                   );
@@ -3469,6 +3471,7 @@ Widget _desktopBannerFallback(ThemeData theme) {
                   price: restaurant.startingPrice,
                   locationName: restaurant.locationName,
                   status: restaurant.status,
+                  discount: restaurant.discount,
                 ),
               );
             } else {

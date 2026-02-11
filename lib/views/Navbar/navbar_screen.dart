@@ -585,7 +585,7 @@ class DesktopTopNavbar extends StatelessWidget {
     return Container(
       height: 70,
       width: double.infinity,
-      color: const Color.fromARGB(255, 64, 255, 80), // 🌿 Light green
+      color: const Color.fromARGB(255, 176, 255, 183), // 🌿 Light green
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64),
         child: Row(

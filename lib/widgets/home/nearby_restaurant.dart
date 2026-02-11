@@ -259,6 +259,7 @@ class RestaurantCard extends StatelessWidget {
   final dynamic price;
   final String locationName;
   final String status; // "active" / "inactive"
+  final dynamic discount;
 
   const RestaurantCard({
     super.key,
@@ -270,6 +271,7 @@ class RestaurantCard extends StatelessWidget {
     required this.price,
     required this.locationName,
     required this.status,
+    required this.discount,
   });
 
   @override
@@ -364,61 +366,46 @@ class RestaurantCard extends StatelessWidget {
                     ),
 
                     /// ⭐ Rating Badge - Bottom Right
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: Responsive.value(
-                            context,
-                            mobile: 8.0,
-                            tablet: 10.0,
-                            desktop: 12.0,
+                   // Rating badge
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          vertical: Responsive.value(
-                            context,
-                            mobile: 4.0,
-                            tablet: 5.0,
-                            desktop: 6.0,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200.withOpacity(0.95),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(12),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: Responsive.value(
-                                context,
-                                mobile: 14.0,
-                                tablet: 16.0,
-                                desktop: 18.0,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                size: 14,
+                                color: Colors.amber,
                               ),
-                              color: const Color(0xFF1BA014),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              rating.toStringAsFixed(1),
-                              style: TextStyle(
-                                fontSize: Responsive.fontSize(
-                                  context,
-                                  mobile: 12.0,
-                                  tablet: 13.0,
-                                  desktop: 14.0,
+                              const SizedBox(width: 3),
+                              Text(
+                                rating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
                                 ),
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
+
+                                    if (discount.isNotEmpty)
+                      Positioned(
+                          bottom: 6,
+                          left: 6,
+                          child: _discountBadge()),
 
                     /// Vendor Closed overlay
                     if (!isActive)
@@ -562,6 +549,24 @@ class RestaurantCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+     Widget _discountBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient:
+            const LinearGradient(colors: [Colors.orange, Colors.deepOrange]),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        "FLAT $discount% OFF",
+        style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 11),
       ),
     );
   }
