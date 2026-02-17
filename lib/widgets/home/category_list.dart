@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Category/category_based_screen.dart';
 
-class CategoryCard extends StatefulWidget {
+class CategoryList extends StatefulWidget {
   final String id;
   final String imagePath;
   final String title;
   final String userId;
   final int? productCount; // Optional product count
 
-  const CategoryCard({
+  const CategoryList({
     super.key,
     required this.id,
     required this.imagePath,
@@ -20,10 +20,10 @@ class CategoryCard extends StatefulWidget {
   });
 
   @override
-  State<CategoryCard> createState() => _CategoryCardState();
+  State<CategoryList> createState() => _CategoryListState();
 }
 
-class _CategoryCardState extends State<CategoryCard> {
+class _CategoryListState extends State<CategoryList> {
   bool _isHovered = false;
 
   @override

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:veegify/helper/storage_helper.dart';
@@ -6,6 +5,7 @@ import 'package:veegify/provider/AuthProvider/auth_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/views/Auth/login_page.dart';
 import 'package:veegify/views/Navbar/navbar_screen.dart';
+import 'package:veegify/views/onboard/start.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (UserPreferences.isLoggedIn()) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => NavbarScreen()),
+        MaterialPageRoute(builder: (_) => Start()),
       );
     } else {
       Navigator.pushReplacement(
@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                                const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // OPERATED BY TEXT
                 const Text(

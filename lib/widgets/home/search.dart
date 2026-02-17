@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -18,11 +17,11 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
     with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   bool _isListening = false;
   String _recognizedText = '';
   bool _showSpeakPrompt = false;
-  
+
   // Speech to text instance
   late stt.SpeechToText _speech;
   bool _speechAvailable = false;
@@ -30,11 +29,11 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   // Animation controllers for voice listening
   late AnimationController _pulseAnimationController;
   late Animation<double> _pulseAnimation;
-  
+
   // Timer for showing "speak anything" prompt
   Timer? _silenceTimer;
   Timer? _autoCloseTimer;
-  
+
   // Search debouncer and results
   Timer? _debounceTimer;
   bool _isSearching = false;
@@ -43,17 +42,17 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize speech to text
     _speech = stt.SpeechToText();
     _initializeSpeech();
-    
+
     // Initialize pulse animation for listening state
     _pulseAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _pulseAnimation = Tween<double>(
       begin: 0.8,
       end: 1.2,
@@ -62,7 +61,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       curve: Curves.easeInOut,
     ));
   }
-  
+
   Future<void> _initializeSpeech() async {
     try {
       _speechAvailable = await _speech.initialize(
@@ -104,18 +103,18 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
     _debounceTimer?.cancel();
     super.dispose();
   }
-  
+
   void _startSilenceTimer() {
     _silenceTimer?.cancel();
     _autoCloseTimer?.cancel();
-    
+
     // Show "speak anything" after 3 seconds
     _silenceTimer = Timer(const Duration(seconds: 3), () {
       if (mounted && _recognizedText.isEmpty && _isListening) {
         setState(() {
           _showSpeakPrompt = true;
         });
-        
+
         // Auto-close after another 3 seconds if still nothing
         _autoCloseTimer = Timer(const Duration(seconds: 3), () {
           if (mounted && _recognizedText.isEmpty && _isListening) {
@@ -125,16 +124,16 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       }
     });
   }
-  
+
   void _cancelTimers() {
     _silenceTimer?.cancel();
     _autoCloseTimer?.cancel();
   }
-  
+
   // Search API call with debouncer
   void _performSearch(String query) {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    
+
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -142,17 +141,17 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       });
       return;
     }
-    
+
     setState(() {
       _isSearching = true;
     });
-    
+
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       try {
         final response = await http.get(
           Uri.parse('https://api.vegiffyy.com/api/searchpro?search=$query'),
         );
-        
+
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           if (mounted) {
@@ -184,7 +183,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   Future<void> _showVoiceInputModal() async {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Check microphone permission
     var status = await Permission.microphone.status;
     if (!status.isGranted) {
@@ -192,7 +191,8 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       if (!status.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Microphone permission is required for voice search'),
+            content: const Text(
+                'Microphone permission is required for voice search'),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -221,7 +221,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       _recognizedText = '';
       _showSpeakPrompt = false;
     });
-    
+
     // Start the silence timer
     _startSilenceTimer();
 
@@ -236,7 +236,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
             _cancelTimers();
           }
         });
-        
+
         // Auto-close when final result is received
         if (result.finalResult && _recognizedText.isNotEmpty) {
           Future.delayed(const Duration(milliseconds: 500), () {
@@ -285,7 +285,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.close, 
+                        Icons.close,
                         size: 24,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -293,18 +293,23 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Listening text
                 Text(
-                  _showSpeakPrompt ? "Please speak anything..." : "Hi, I'm listening...",
+                  _showSpeakPrompt
+                      ? "Please speak anything..."
+                      : "Hi, I'm listening...",
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: _showSpeakPrompt ? Colors.orange : theme.colorScheme.onSurface,
-                    fontWeight: _showSpeakPrompt ? FontWeight.w600 : FontWeight.normal,
+                    color: _showSpeakPrompt
+                        ? Colors.orange
+                        : theme.colorScheme.onSurface,
+                    fontWeight:
+                        _showSpeakPrompt ? FontWeight.w600 : FontWeight.normal,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                
+
                 // Recognized text display
                 Text(
                   _recognizedText.isEmpty ? '""' : '"$_recognizedText"',
@@ -315,7 +320,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
-                
+
                 // Animated mic icon
                 AnimatedBuilder(
                   animation: _pulseAnimation,
@@ -326,7 +331,9 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                         height: 100,
                         width: 100,
                         decoration: BoxDecoration(
-                          color: _showSpeakPrompt ? Colors.orange : theme.colorScheme.primary,
+                          color: _showSpeakPrompt
+                              ? Colors.orange
+                              : theme.colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -351,7 +358,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
         _isListening = false;
         _showSpeakPrompt = false;
       });
-      
+
       // Update search bar with recognized text and show search modal
       if (_recognizedText.isNotEmpty) {
         _searchController.text = _recognizedText;
@@ -363,12 +370,12 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   Future<void> _showSearchModal(BuildContext context) async {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Perform initial search if there's text
     if (_searchController.text.isNotEmpty) {
       _performSearch(_searchController.text);
     }
-    
+
     await showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -414,26 +421,32 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                             ),
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
+                              fillColor: isDark
+                                  ? theme.cardColor
+                                  : const Color(0xFFEBF4F1),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
                                 borderSide: BorderSide.none,
                               ),
                               hintText: "Search for restaurants, dishes...",
                               hintStyle: TextStyle(
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                              contentPadding:
+                                  const EdgeInsets.symmetric(vertical: 0),
                               prefixIcon: Icon(
                                 Icons.search,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
                                 size: 20,
                               ),
                               suffixIcon: _searchController.text.isNotEmpty
                                   ? IconButton(
                                       icon: Icon(
                                         Icons.close,
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
                                       ),
                                       onPressed: () {
                                         _searchController.clear();
@@ -485,17 +498,20 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.search, 
-                                      size: 30, 
-                                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                      Icons.search,
+                                      size: 30,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.5),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      _searchController.text.isEmpty 
+                                      _searchController.text.isEmpty
                                           ? 'Start typing to search...'
                                           : 'No results found for "${_searchController.text}"',
-                                      style: theme.textTheme.bodyLarge?.copyWith(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                      style:
+                                          theme.textTheme.bodyLarge?.copyWith(
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
                                       ),
                                     ),
                                   ],
@@ -508,29 +524,34 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                   final result = _searchResults[index];
                                   final restaurant = result['restaurant'];
                                   final products = result['products'] as List;
-                                  
+
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       if (index > 0) const SizedBox(height: 24),
                                       // Restaurant header
                                       Padding(
-                                        padding: const EdgeInsets.only(bottom: 12),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 12),
                                         child: Row(
                                           children: [
                                             ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               child: Image.network(
                                                 restaurant['image']['url'],
                                                 width: 50,
                                                 height: 50,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) {
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
                                                   return Container(
                                                     width: 50,
                                                     height: 50,
                                                     color: Colors.grey[300],
-                                                    child: const Icon(Icons.restaurant),
+                                                    child: const Icon(
+                                                        Icons.restaurant),
                                                   );
                                                 },
                                               ),
@@ -538,12 +559,17 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                             const SizedBox(width: 12),
                                             Expanded(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    restaurant['restaurantName'],
-                                                    style: theme.textTheme.titleMedium?.copyWith(
-                                                      fontWeight: FontWeight.bold,
+                                                    restaurant[
+                                                        'restaurantName'],
+                                                    style: theme
+                                                        .textTheme.titleMedium
+                                                        ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 4),
@@ -556,14 +582,21 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                                       ),
                                                       const SizedBox(width: 4),
                                                       Text(
-                                                        restaurant['rating'].toString(),
-                                                        style: theme.textTheme.bodySmall,
+                                                        restaurant['rating']
+                                                            .toString(),
+                                                        style: theme.textTheme
+                                                            .bodySmall,
                                                       ),
                                                       const SizedBox(width: 8),
                                                       Text(
                                                         '• ${restaurant['locationName']}',
-                                                        style: theme.textTheme.bodySmall?.copyWith(
-                                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                                        style: theme
+                                                            .textTheme.bodySmall
+                                                            ?.copyWith(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .onSurface
+                                                              .withOpacity(0.6),
                                                         ),
                                                       ),
                                                     ],
@@ -576,7 +609,8 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                       ),
                                       // Products
                                       ...products.map((product) {
-                                        final recommended = product['recommended'] as List;
+                                        final recommended =
+                                            product['recommended'] as List;
                                         return Column(
                                           children: recommended.map((item) {
                                             return GestureDetector(
@@ -585,36 +619,49 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                    builder: (context) => DetailScreen(
+                                                    builder: (context) =>
+                                                        DetailScreen(
                                                       productId: item['_id'],
-                                                      currentUserId: '68ef35a7447e0771c2b4aac4', // Replace with actual current user ID
-                                                      restaurantId: restaurant['_id'],
+                                                      currentUserId:
+                                                          '68ef35a7447e0771c2b4aac4', // Replace with actual current user ID
+                                                      restaurantId:
+                                                          restaurant['_id'],
                                                     ),
                                                   ),
                                                 );
                                               },
                                               child: Container(
-                                                margin: const EdgeInsets.only(bottom: 12),
-                                                padding: const EdgeInsets.all(12),
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 12),
+                                                padding:
+                                                    const EdgeInsets.all(12),
                                                 decoration: BoxDecoration(
-                                                  color: isDark ? theme.cardColor : Colors.grey[100],
-                                                  borderRadius: BorderRadius.circular(12),
+                                                  color: isDark
+                                                      ? theme.cardColor
+                                                      : Colors.grey[100],
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
                                                 ),
                                                 child: Row(
                                                   children: [
                                                     ClipRRect(
-                                                      borderRadius: BorderRadius.circular(8),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
                                                       child: Image.network(
                                                         item['image'],
                                                         width: 80,
                                                         height: 80,
                                                         fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) {
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
                                                           return Container(
                                                             width: 80,
                                                             height: 80,
-                                                            color: Colors.grey[300],
-                                                            child: const Icon(Icons.fastfood),
+                                                            color: Colors
+                                                                .grey[300],
+                                                            child: const Icon(
+                                                                Icons.fastfood),
                                                           );
                                                         },
                                                       ),
@@ -622,71 +669,128 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                                     const SizedBox(width: 12),
                                                     Expanded(
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Text(
                                                             item['name'],
-                                                            style: theme.textTheme.titleSmall?.copyWith(
-                                                              fontWeight: FontWeight.w600,
+                                                            style: theme
+                                                                .textTheme
+                                                                .titleSmall
+                                                                ?.copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
                                                             ),
                                                           ),
-                                                          const SizedBox(height: 4),
+                                                          const SizedBox(
+                                                              height: 4),
                                                           Text(
-                                                            item['content'] ?? '',
-                                                            style: theme.textTheme.bodySmall?.copyWith(
-                                                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                                            item['content'] ??
+                                                                '',
+                                                            style: theme
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.copyWith(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurface
+                                                                  .withOpacity(
+                                                                      0.6),
                                                             ),
                                                             maxLines: 2,
-                                                            overflow: TextOverflow.ellipsis,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
                                                           ),
-                                                          const SizedBox(height: 8),
+                                                          const SizedBox(
+                                                              height: 8),
                                                           Row(
-                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
                                                             children: [
                                                               Row(
                                                                 children: [
                                                                   Text(
                                                                     '₹${item['price']}',
-                                                                    style: theme.textTheme.titleMedium?.copyWith(
-                                                                      fontWeight: FontWeight.bold,
-                                                                      color: theme.colorScheme.primary,
+                                                                    style: theme
+                                                                        .textTheme
+                                                                        .titleMedium
+                                                                        ?.copyWith(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      color: theme
+                                                                          .colorScheme
+                                                                          .primary,
                                                                     ),
                                                                   ),
-                                                                  if (item['discount'] > 0) ...[
-                                                                    const SizedBox(width: 8),
+                                                                  if (item[
+                                                                          'discount'] >
+                                                                      0) ...[
+                                                                    const SizedBox(
+                                                                        width:
+                                                                            8),
                                                                     Container(
-                                                                      padding: const EdgeInsets.symmetric(
-                                                                        horizontal: 6,
-                                                                        vertical: 2,
+                                                                      padding:
+                                                                          const EdgeInsets
+                                                                              .symmetric(
+                                                                        horizontal:
+                                                                            6,
+                                                                        vertical:
+                                                                            2,
                                                                       ),
-                                                                      decoration: BoxDecoration(
-                                                                        color: Colors.green,
-                                                                        borderRadius: BorderRadius.circular(4),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        color: Colors
+                                                                            .green,
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(4),
                                                                       ),
-                                                                      child: Text(
+                                                                      child:
+                                                                          Text(
                                                                         '${item['discount']}% OFF',
-                                                                        style: const TextStyle(
-                                                                          color: Colors.white,
-                                                                          fontSize: 10,
-                                                                          fontWeight: FontWeight.bold,
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          color:
+                                                                              Colors.white,
+                                                                          fontSize:
+                                                                              10,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
                                                                         ),
                                                                       ),
                                                                     ),
                                                                   ],
                                                                 ],
                                                               ),
-                                                              if (item['reviews'] != null && (item['reviews'] as List).isNotEmpty)
+                                                              if (item['reviews'] !=
+                                                                      null &&
+                                                                  (item['reviews']
+                                                                          as List)
+                                                                      .isNotEmpty)
                                                                 Row(
                                                                   children: [
                                                                     const Icon(
-                                                                      Icons.star,
+                                                                      Icons
+                                                                          .star,
                                                                       size: 14,
-                                                                      color: Colors.amber,
+                                                                      color: Colors
+                                                                          .amber,
                                                                     ),
-                                                                    const SizedBox(width: 4),
+                                                                    const SizedBox(
+                                                                        width:
+                                                                            4),
                                                                     Text(
-                                                                      item['reviews'][0]['stars'].toString(),
-                                                                      style: theme.textTheme.bodySmall,
+                                                                      item['reviews'][0]
+                                                                              [
+                                                                              'stars']
+                                                                          .toString(),
+                                                                      style: theme
+                                                                          .textTheme
+                                                                          .bodySmall,
                                                                     ),
                                                                   ],
                                                                 ),
@@ -714,7 +818,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
         );
       },
     );
-    
+
     if (!_isListening) {
       _searchController.clear();
       setState(() {
@@ -727,7 +831,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Row(
       children: [
         Expanded(
@@ -737,10 +841,12 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
               child: TextField(
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
+                  // fillColor: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(8),
+                    // borderSide: BorderSide(
+                    //   color: Colors.black, // 👈 border color
+                    // ),
                   ),
                   hintText: "Search...",
                   hintStyle: TextStyle(
@@ -757,22 +863,22 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
             ),
           ),
         ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          onTap: _showVoiceInputModal,
-          child: Container(
-            height: 46,
-            width: 46,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.mic_none,
-              color: theme.colorScheme.onPrimary,
-            ),
-          ),
-        ),
+        // const SizedBox(width: 10),
+        // GestureDetector(
+        //   onTap: _showVoiceInputModal,
+        //   child: Container(
+        //     height: 46,
+        //     width: 46,
+        //     decoration: BoxDecoration(
+        //       color: theme.colorScheme.primary,
+        //       shape: BoxShape.circle,
+        //     ),
+        //     child: Icon(
+        //       Icons.mic_none,
+        //       color: theme.colorScheme.onPrimary,
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

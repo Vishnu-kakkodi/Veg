@@ -6,6 +6,7 @@ import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Auth/login_page.dart';
 import 'package:veegify/views/Navbar/navbar_screen.dart';
+import 'package:veegify/views/onboard/start.dart';
 import 'amoders_loading.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => UserPreferences.isLoggedIn()
-            ? const NavbarScreen(initialIndex: 0)
+            ? const Start()
             : const LoginPage(),
       ),
     );

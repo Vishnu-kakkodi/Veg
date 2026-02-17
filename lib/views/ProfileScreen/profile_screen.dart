@@ -615,6 +615,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
 import 'package:veegify/provider/ProfileProvider.dart/profile_provider.dart';
+import 'package:veegify/views/Coupons/coupons.dart';
+import 'package:veegify/views/NotificationScreen/notification_screen.dart';
 import 'package:veegify/views/ProfileScreen/edit_profile_screen.dart';
 import 'package:veegify/views/ProfileScreen/help_screen.dart';
 import 'package:veegify/views/Booking/booking_screen.dart';
@@ -1050,6 +1052,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => WalletScreen()),
+            );
+          },
+        ),
+                _buildProfileOption(
+          icon: Icons.local_offer,
+          title: 'Coupons',
+          backgroundColor: Colors.black,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CouponsScreen()),
+            );
+          },
+        ),
+                        _buildProfileOption(
+          icon: Icons.notifications,
+          title: 'Notifications',
+          backgroundColor: Colors.black,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationScreen()),
             );
           },
         ),

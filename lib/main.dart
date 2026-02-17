@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +9,7 @@ import 'package:veegify/provider/BannerProvider/home_layout_provider.dart';
 import 'package:veegify/provider/BookingProvider/booking_provider.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/provider/CategoryProvider/category_provider.dart';
+import 'package:veegify/provider/CouponProvider/coupon_provider.dart';
 import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/provider/MaintenanceProvider/maintenance_provider.dart';
@@ -66,8 +66,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MaintenanceProvider()),
         ChangeNotifierProvider(create: (_) => VersionProvider()),
         ChangeNotifierProvider(create: (_) => HomeLayoutProvider()),
-                ChangeNotifierProvider(create: (_) => CredentialProvider()),
-
+        ChangeNotifierProvider(create: (_) => CredentialProvider()),
+        ChangeNotifierProvider(create: (_) => CouponProvider()),
       ],
       child: const _AppBootstrapper(),
     );

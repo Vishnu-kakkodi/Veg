@@ -1,7 +1,6 @@
 
 // // lib/views/navbar/navbar_screen.dart
 // import 'dart:io';
-
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:provider/provider.dart';
@@ -9,7 +8,6 @@
 
 // import 'package:veegify/helper/storage_helper.dart';
 // import 'package:veegify/model/user_model.dart';
-// import 'package:veegify/model/order.dart';
 
 // import 'package:veegify/provider/CartProvider/cart_provider.dart';
 // import 'package:veegify/provider/BookingProvider/booking_provider.dart';
@@ -22,16 +20,13 @@
 // import 'package:veegify/views/Cart/cart_screen.dart';
 // import 'package:veegify/views/Booking/history_screen.dart';
 // import 'package:veegify/views/ProfileScreen/profile_screen.dart';
-// import 'package:veegify/views/Booking/accepted_order_polling_screen.dart';
+
 // import 'package:veegify/widgets/bottom_navbar.dart';
 
 // class NavbarScreen extends StatefulWidget {
 //   final int initialIndex;
 
-//   const NavbarScreen({
-//     super.key,
-//     this.initialIndex = 0,
-//   });
+//   const NavbarScreen({super.key, this.initialIndex = 0});
 
 //   @override
 //   State<NavbarScreen> createState() => _NavbarScreenState();
@@ -39,36 +34,23 @@
 
 // class _NavbarScreenState extends State<NavbarScreen> {
 //   User? user;
-
-//   bool _showCartSummary = true;
-//   bool _showBookingSummary = true;
 //   bool _isUpdateDialogOpen = false;
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     _initialize();
+
+//     user = UserPreferences.getUser();
 
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       context
-//           .read<BottomNavbarProvider>()
-//           .setIndex(widget.initialIndex.clamp(0, 4));
-//     });
-//   }
-
-//   Future<void> _initialize() async {
-//     final userData = UserPreferences.getUser();
-//     if (userData != null) user = userData;
-
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       context.read<BottomNavbarProvider>().setIndex(widget.initialIndex);
 //       context.read<CartProvider>().loadCart(user?.userId);
 //       context.read<OrderProvider>().loadAllOrders(user?.userId);
 //     });
 //   }
 
-//   void _handleTabChange(int index) {
-//     final nav = context.read<BottomNavbarProvider>();
-//     nav.setIndex(index);
+//   void _onTabChange(int index) {
+//     context.read<BottomNavbarProvider>().setIndex(index);
 
 //     if (index == 2) {
 //       context.read<CartProvider>().loadCart(user?.userId);
@@ -83,33 +65,33 @@
 //     final isDesktop = Responsive.isDesktop(context);
 //     final navProvider = context.watch<BottomNavbarProvider>();
 //     final versionProvider = context.watch<VersionProvider>();
-//     final theme = Theme.of(context);
 
-//     final pages = [
+//     final pages = const [
 //       HomeScreen(),
-//       const WishlistScreen(),
+//       WishlistScreen(),
 //       CartScreen(),
-//       const HystoryScreen(),
+//       HystoryScreen(),
 //       ProfileScreen(),
 //     ];
 
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       if (versionProvider.needsUpdate && !_isUpdateDialogOpen) {
 //         _isUpdateDialogOpen = true;
-//         _showUpdateDialog(context, versionProvider).then((_) {
+//         _showUpdateDialog(context).then((_) {
 //           _isUpdateDialogOpen = false;
 //         });
 //       }
 //     });
 
 //     return Scaffold(
-// body: isDesktop
-//     ? Row(
+//       body: Column(
 //         children: [
-//           DesktopSideNavbar(
-//             currentIndex: navProvider.currentIndex,
-//             onTap: _handleTabChange,
-//           ),
+//           if (isDesktop)
+//             DesktopTopNavbar(
+//               currentIndex: navProvider.currentIndex,
+//               onTap: _onTabChange,
+//             ),
+
 //           Expanded(
 //             child: IndexedStack(
 //               index: navProvider.currentIndex,
@@ -117,23 +99,17 @@
 //             ),
 //           ),
 //         ],
-//       )
-//     : IndexedStack(
-//         index: navProvider.currentIndex,
-//         children: pages,
 //       ),
 
-
-//       // ✅ Mobile bottom bar stays
+//       // Mobile bottom nav
 //       bottomNavigationBar: isDesktop
 //           ? null
 //           : BottomNavigationBar(
 //               currentIndex: navProvider.currentIndex,
-//               onTap: _handleTabChange,
+//               onTap: _onTabChange,
 //               type: BottomNavigationBarType.fixed,
 //               items: const [
-//                 BottomNavigationBarItem(
-//                     icon: Icon(Icons.home), label: 'Home'),
+//                 BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
 //                 BottomNavigationBarItem(
 //                     icon: Icon(Icons.favorite), label: 'Favourites'),
 //                 BottomNavigationBarItem(
@@ -147,17 +123,9 @@
 //     );
 //   }
 
-  
-
-//   // ---------------- UPDATE DIALOG (UNCHANGED) ----------------
-
-//   Future<void> _showUpdateDialog(
-//     BuildContext context,
-//     VersionProvider versionProvider,
-//   ) async {
+//   Future<void> _showUpdateDialog(BuildContext context) async {
 //     const playStoreUrl =
 //         'https://play.google.com/store/apps/details?id=com.veggify.veegify';
-//     final url = Platform.isIOS ? playStoreUrl : playStoreUrl;
 
 //     await showDialog(
 //       context: context,
@@ -172,7 +140,7 @@
 //           ),
 //           ElevatedButton(
 //             onPressed: () async {
-//               final uri = Uri.parse(url);
+//               final uri = Uri.parse(playStoreUrl);
 //               if (await canLaunchUrl(uri)) {
 //                 await launchUrl(uri,
 //                     mode: LaunchMode.externalApplication);
@@ -187,14 +155,255 @@
 // }
 
 // // ===================================================================
-// // ====================== DESKTOP SIDE NAV ============================
+// // ====================== DESKTOP TOP NAVBAR ==========================
 // // ===================================================================
 
-// class DesktopSideNavbar extends StatelessWidget {
+
+
+
+
+
+
+
+
+
+
+// // lib/views/navbar/navbar_screen.dart
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:provider/provider.dart';
+// import 'package:url_launcher/url_launcher.dart';
+
+// import 'package:veegify/helper/storage_helper.dart';
+// import 'package:veegify/model/user_model.dart';
+
+// import 'package:veegify/provider/CartProvider/cart_provider.dart';
+// import 'package:veegify/provider/BookingProvider/booking_provider.dart';
+// import 'package:veegify/provider/VersionProvider/version_provider.dart';
+
+// import 'package:veegify/utils/responsive.dart';
+
+// import 'package:veegify/views/home/home_screen.dart';
+// import 'package:veegify/views/Wishlist/wishlist_screen.dart';
+// import 'package:veegify/views/Cart/cart_screen.dart';
+// import 'package:veegify/views/Booking/history_screen.dart';
+// import 'package:veegify/views/ProfileScreen/profile_screen.dart';
+// import 'package:veegify/widgets/bottom_navbar.dart';
+
+// class NavbarScreen extends StatefulWidget {
+//   final int initialIndex;
+
+//   const NavbarScreen({super.key, this.initialIndex = 0});
+
+//   @override
+//   State<NavbarScreen> createState() => _NavbarScreenState();
+// }
+
+// class _NavbarScreenState extends State<NavbarScreen> {
+//   User? user;
+//   bool _isUpdateDialogOpen = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     user = UserPreferences.getUser();
+
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       context.read<BottomNavbarProvider>().setIndex(widget.initialIndex);
+//       context.read<CartProvider>().loadCart(user?.userId);
+//       context.read<OrderProvider>().loadAllOrders(user?.userId);
+//     });
+//   }
+
+//   void _onTabChange(int index) {
+//     context.read<BottomNavbarProvider>().setIndex(index);
+
+//     if (index == 2) {
+//       context.read<CartProvider>().loadCart(user?.userId);
+//     }
+
+//     if (index == 3 || index == 4) {
+//       context.read<OrderProvider>().loadAllOrders(user?.userId);
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDesktop = Responsive.isDesktop(context);
+//     final navProvider = context.watch<BottomNavbarProvider>();
+//     final versionProvider = context.watch<VersionProvider>();
+
+//     final pages = const [
+//       HomeScreen(),
+//       WishlistScreen(),
+//       CartScreen(),
+//       HystoryScreen(),
+//       ProfileScreen(),
+//     ];
+
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       if (versionProvider.needsUpdate && !_isUpdateDialogOpen) {
+//         _isUpdateDialogOpen = true;
+//         _showUpdateDialog(context).then((_) {
+//           _isUpdateDialogOpen = false;
+//         });
+//       }
+//     });
+
+//     return Scaffold(
+//       body: Column(
+//         children: [
+//           if (isDesktop)
+//             DesktopTopNavbar(
+//               currentIndex: navProvider.currentIndex,
+//               onTap: _onTabChange,
+//             ),
+//           Expanded(
+//             child: IndexedStack(
+//               index: navProvider.currentIndex,
+//               children: pages,
+//             ),
+//           ),
+//         ],
+//       ),
+
+//       /// ✅ MOBILE CUSTOM NAVBAR
+//       bottomNavigationBar: isDesktop
+//           ? null
+//           : CustomMobileNavbar(
+//               currentIndex: navProvider.currentIndex,
+//               onTap: _onTabChange,
+//             ),
+//     );
+//   }
+
+//   Future<void> _showUpdateDialog(BuildContext context) async {
+//     const playStoreUrl =
+//         'https://play.google.com/store/apps/details?id=com.veggify.veegify';
+
+//     await showDialog(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (_) => AlertDialog(
+//         title: const Text('Update Required'),
+//         content: const Text('Please update to continue using Veegify'),
+//         actions: [
+//           TextButton(
+//             onPressed: () => SystemNavigator.pop(),
+//             child: const Text('Close App'),
+//           ),
+//           ElevatedButton(
+//             onPressed: () async {
+//               final uri = Uri.parse(playStoreUrl);
+//               if (await canLaunchUrl(uri)) {
+//                 await launchUrl(uri,
+//                     mode: LaunchMode.externalApplication);
+//               }
+//             },
+//             child: const Text('Update Now'),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+// class CustomMobileNavbar extends StatelessWidget {
 //   final int currentIndex;
 //   final Function(int) onTap;
 
-//   const DesktopSideNavbar({
+//   const CustomMobileNavbar({
+//     super.key,
+//     required this.currentIndex,
+//     required this.onTap,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     const activeColor = Color(0xFFFF5A2C);
+
+//     return Container(
+//       height: 75,
+//       decoration: BoxDecoration(
+//         color: Colors.grey.shade100,
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.05),
+//             blurRadius: 10,
+//           ),
+//         ],
+//       ),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceAround,
+//         children: [
+
+//           _navItem(Icons.home_outlined, "Home", 0, activeColor),
+//           _navItem(Icons.favorite_border, "Saved", 1, activeColor),
+
+//           /// 🔥 CENTER ORANGE CART BUTTON
+//           GestureDetector(
+//             onTap: () => onTap(2),
+//             child: Container(
+//               height: 58,
+//               width: 58,
+//               decoration: const BoxDecoration(
+//                 color: activeColor,
+//                 shape: BoxShape.circle,
+//               ),
+//               child: const Icon(
+//                 Icons.shopping_bag_outlined,
+//                 color: Colors.white,
+//                 size: 26,
+//               ),
+//             ),
+//           ),
+
+//           _navItem(Icons.receipt_long_outlined, "Orders", 3, activeColor),
+//           _navItem(Icons.person_outline, "Profile", 4, activeColor),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _navItem(
+//       IconData icon, String label, int index, Color activeColor) {
+//     final bool isActive = currentIndex == index;
+
+//     return GestureDetector(
+//       onTap: () => onTap(index),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           Icon(
+//             icon,
+//             size: 22,
+//             color: isActive ? activeColor : Colors.grey,
+//           ),
+//           const SizedBox(height: 4),
+//           Text(
+//             label,
+//             style: TextStyle(
+//               fontSize: 11,
+//               fontWeight: FontWeight.w500,
+//               color: isActive ? activeColor : Colors.grey,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+// class DesktopTopNavbar extends StatelessWidget {
+//   final int currentIndex;
+//   final Function(int) onTap;
+
+//   const DesktopTopNavbar({
 //     super.key,
 //     required this.currentIndex,
 //     required this.onTap,
@@ -206,175 +415,138 @@
 //     final colorScheme = theme.colorScheme;
 
 //     return Container(
-//       width: 260,
-//       height: double.infinity,
-//       decoration: BoxDecoration(
-//         color: colorScheme.surface,
-//         border: Border(
-//           right: BorderSide(
-//             color: colorScheme.outline.withOpacity(0.1),
-//           ),
-//         ),
-//       ),
-//       child: Column(
-//         children: [
-//           const SizedBox(height: 24),
-
-//           // ---------------- LOGO / BRAND ----------------
-//           Padding(
-//             padding: const EdgeInsets.symmetric(horizontal: 20),
-//             child: Row(
+//       height: 70,
+//       width: double.infinity,
+//       color: const Color.fromARGB(255, 176, 255, 183), // 🌿 Light green
+//       child: Padding(
+//         padding: const EdgeInsets.symmetric(horizontal: 64),
+//         child: Row(
+//           children: [
+//             // ---------------- LEFT: LOGO ----------------
+//             Row(
 //               children: [
 //                 Image.asset(
 //                   'assets/images/logo.png',
-//                   height: 36,
+//                   height: 38,
+//                   errorBuilder: (_, __, ___) => Icon(
+//                     Icons.shopping_basket,
+//                     size: 36,
+//                     color: colorScheme.primary,
+//                   ),
 //                 ),
 //                 const SizedBox(width: 10),
 //                 Text(
-//                   'Veegiffy',
+//                   'Vegiffy',
 //                   style: theme.textTheme.titleLarge?.copyWith(
 //                     fontWeight: FontWeight.bold,
+//                     color: colorScheme.primary,
 //                   ),
 //                 ),
 //               ],
 //             ),
-//           ),
 
-//           const SizedBox(height: 32),
+//             const Spacer(),
 
-//           // ---------------- NAV ITEMS ----------------
-//           _SideNavItem(
-//             icon: Icons.home_rounded,
-//             label: 'Home',
-//             index: 0,
-//             currentIndex: currentIndex,
-//             onTap: onTap,
-//           ),
-//           _SideNavItem(
-//             icon: Icons.favorite_rounded,
-//             label: 'Favourites',
-//             index: 1,
-//             currentIndex: currentIndex,
-//             onTap: onTap,
-//           ),
-//           _SideNavItem(
-//             icon: Icons.shopping_cart_rounded,
-//             label: 'Cart',
-//             index: 2,
-//             currentIndex: currentIndex,
-//             onTap: onTap,
-//           ),
-//           _SideNavItem(
-//             icon: Icons.receipt_long_rounded,
-//             label: 'History',
-//             index: 3,
-//             currentIndex: currentIndex,
-//             onTap: onTap,
-//           ),
-//           _SideNavItem(
-//             icon: Icons.person_rounded,
-//             label: 'Account',
-//             index: 4,
-//             currentIndex: currentIndex,
-//             onTap: onTap,
-//           ),
-
-//           const Spacer(),
-
-//           // ---------------- FOOTER ----------------
-//           Padding(
-//             padding: const EdgeInsets.all(16),
-//             child: Text(
-//               '© 2026 Veegiffy',
-//               style: theme.textTheme.bodySmall?.copyWith(
-//                 color: colorScheme.onSurface.withOpacity(0.5),
-//               ),
+//             // ---------------- RIGHT: NAV ITEMS ----------------
+//             _NavItem(
+//               label: 'Home',
+//               icon: Icons.home_rounded,
+//               index: 0,
+//               currentIndex: currentIndex,
+//               onTap: onTap,
 //             ),
-//           ),
-//         ],
+//             _NavItem(
+//               label: 'Favourites',
+//               icon: Icons.favorite_rounded,
+//               index: 1,
+//               currentIndex: currentIndex,
+//               onTap: onTap,
+//             ),
+//             _NavItem(
+//               label: 'Cart',
+//               icon: Icons.shopping_cart_rounded,
+//               index: 2,
+//               currentIndex: currentIndex,
+//               onTap: onTap,
+//             ),
+//             _NavItem(
+//               label: 'History',
+//               icon: Icons.receipt_long_rounded,
+//               index: 3,
+//               currentIndex: currentIndex,
+//               onTap: onTap,
+//             ),
+//             _NavItem(
+//               label: 'Account',
+//               icon: Icons.person_rounded,
+//               index: 4,
+//               currentIndex: currentIndex,
+//               onTap: onTap,
+//             ),
+//           ],
+//         ),
 //       ),
 //     );
 //   }
 // }
 
-
-
-
-
-// class _SideNavItem extends StatefulWidget {
-//   final IconData icon;
+// class _NavItem extends StatefulWidget {
 //   final String label;
+//   final IconData icon;
 //   final int index;
 //   final int currentIndex;
 //   final Function(int) onTap;
 
-//   const _SideNavItem({
-//     required this.icon,
+//   const _NavItem({
 //     required this.label,
+//     required this.icon,
 //     required this.index,
 //     required this.currentIndex,
 //     required this.onTap,
 //   });
 
 //   @override
-//   State<_SideNavItem> createState() => _SideNavItemState();
+//   State<_NavItem> createState() => _NavItemState();
 // }
 
-// class _SideNavItemState extends State<_SideNavItem> {
-//   bool _hovered = false;
+// class _NavItemState extends State<_NavItem> {
+//   bool hovered = false;
 
 //   @override
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final colorScheme = theme.colorScheme;
-
 //     final isActive = widget.index == widget.currentIndex;
 
 //     return MouseRegion(
-//       onEnter: (_) => setState(() => _hovered = true),
-//       onExit: (_) => setState(() => _hovered = false),
-//       child: InkWell(
+//       onEnter: (_) => setState(() => hovered = true),
+//       onExit: (_) => setState(() => hovered = false),
+//       child: GestureDetector(
 //         onTap: () => widget.onTap(widget.index),
-//         borderRadius: BorderRadius.circular(12),
 //         child: Container(
-//           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-//           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+//           margin: const EdgeInsets.symmetric(horizontal: 6),
+//           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
 //           decoration: BoxDecoration(
 //             color: isActive
-//                 ? colorScheme.primary.withOpacity(0.12)
-//                 : _hovered
-//                     ? colorScheme.primary.withOpacity(0.06)
+//                 ? colorScheme.primary.withOpacity(0.15)
+//                 : hovered
+//                     ? colorScheme.primary.withOpacity(0.08)
 //                     : Colors.transparent,
-//             borderRadius: BorderRadius.circular(12),
+//             borderRadius: BorderRadius.circular(8),
 //           ),
 //           child: Row(
 //             children: [
-//               // Active indicator bar
-//               AnimatedContainer(
-//                 duration: const Duration(milliseconds: 200),
-//                 width: 4,
-//                 height: 24,
-//                 decoration: BoxDecoration(
-//                   color: isActive
-//                       ? colorScheme.primary
-//                       : Colors.transparent,
-//                   borderRadius: BorderRadius.circular(4),
-//                 ),
-//               ),
-//               const SizedBox(width: 12),
-
 //               Icon(
 //                 widget.icon,
-//                 size: 22,
+//                 size: 18,
 //                 color: isActive
 //                     ? colorScheme.primary
 //                     : colorScheme.onSurface.withOpacity(0.7),
 //               ),
-//               const SizedBox(width: 14),
-
+//               const SizedBox(width: 6),
 //               Text(
 //                 widget.label,
-//                 style: theme.textTheme.bodyLarge?.copyWith(
+//                 style: theme.textTheme.bodyMedium?.copyWith(
 //                   fontWeight:
 //                       isActive ? FontWeight.w600 : FontWeight.w500,
 //                   color: isActive
@@ -389,16 +561,6 @@
 //     );
 //   }
 // }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -429,7 +591,6 @@ import 'package:veegify/views/Wishlist/wishlist_screen.dart';
 import 'package:veegify/views/Cart/cart_screen.dart';
 import 'package:veegify/views/Booking/history_screen.dart';
 import 'package:veegify/views/ProfileScreen/profile_screen.dart';
-
 import 'package:veegify/widgets/bottom_navbar.dart';
 
 class NavbarScreen extends StatefulWidget {
@@ -445,6 +606,11 @@ class _NavbarScreenState extends State<NavbarScreen> {
   User? user;
   bool _isUpdateDialogOpen = false;
 
+  // Orange color constants
+  static const Color orangePrimary = Color(0xFFFF5A2C);
+  static const Color orangeLight = Color(0xFFFF8A5C);
+  static const Color orangeVeryLight = Color(0xFFFFE9E0);
+
   @override
   void initState() {
     super.initState();
@@ -452,6 +618,11 @@ class _NavbarScreenState extends State<NavbarScreen> {
     user = UserPreferences.getUser();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Set user ID in cart provider
+      if (user?.userId != null) {
+        context.read<CartProvider>().setUserId(user!.userId);
+      }
+      
       context.read<BottomNavbarProvider>().setIndex(widget.initialIndex);
       context.read<CartProvider>().loadCart(user?.userId);
       context.read<OrderProvider>().loadAllOrders(user?.userId);
@@ -464,6 +635,7 @@ class _NavbarScreenState extends State<NavbarScreen> {
     if (index == 2) {
       context.read<CartProvider>().loadCart(user?.userId);
     }
+
     if (index == 3 || index == 4) {
       context.read<OrderProvider>().loadAllOrders(user?.userId);
     }
@@ -474,6 +646,7 @@ class _NavbarScreenState extends State<NavbarScreen> {
     final isDesktop = Responsive.isDesktop(context);
     final navProvider = context.watch<BottomNavbarProvider>();
     final versionProvider = context.watch<VersionProvider>();
+    final cartProvider = context.watch<CartProvider>();
 
     final pages = const [
       HomeScreen(),
@@ -499,8 +672,8 @@ class _NavbarScreenState extends State<NavbarScreen> {
             DesktopTopNavbar(
               currentIndex: navProvider.currentIndex,
               onTap: _onTabChange,
+              cartItemCount: cartProvider.totalItems,
             ),
-
           Expanded(
             child: IndexedStack(
               index: navProvider.currentIndex,
@@ -510,23 +683,102 @@ class _NavbarScreenState extends State<NavbarScreen> {
         ],
       ),
 
-      // Mobile bottom nav
+      /// ✅ MOBILE CUSTOM NAVBAR WITH FLOATING CART
       bottomNavigationBar: isDesktop
           ? null
-          : BottomNavigationBar(
-              currentIndex: navProvider.currentIndex,
-              onTap: _onTabChange,
-              type: BottomNavigationBarType.fixed,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite), label: 'Favourites'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart), label: 'Cart'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.list), label: 'History'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.person), label: 'Account'),
+          : Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Bottom navigation bar
+                CustomMobileNavbar(
+                  currentIndex: navProvider.currentIndex,
+                  onTap: _onTabChange,
+                ),
+                
+                // Floating cart button
+                Positioned(
+                  top: -20, // Adjust this value to control how high it floats
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () => _onTabChange(2),
+                      child: Container(
+                        height: 65,
+                        width: 65,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [orangePrimary, orangeLight],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: orangePrimary.withOpacity(0.4),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Center(
+                              child: Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            
+                            // Cart badge - using cartProvider.totalItems
+                            if (cartProvider.totalItems > 0)
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    '${cartProvider.totalItems}',
+                                    style: const TextStyle(
+                                      color: orangePrimary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              
+                            // Show "!" if vendor is inactive
+                            if (cartProvider.hasItems && !cartProvider.isVendorActive)
+                              Positioned(
+                                bottom: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.white,
+                                    size: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
     );
@@ -555,6 +807,10 @@ class _NavbarScreenState extends State<NavbarScreen> {
                     mode: LaunchMode.externalApplication);
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: orangePrimary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Update Now'),
           ),
         ],
@@ -563,29 +819,182 @@ class _NavbarScreenState extends State<NavbarScreen> {
   }
 }
 
-// ===================================================================
-// ====================== DESKTOP TOP NAVBAR ==========================
-// ===================================================================
-
-class DesktopTopNavbar extends StatelessWidget {
+class CustomMobileNavbar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const DesktopTopNavbar({
+  const CustomMobileNavbar({
     super.key,
     required this.currentIndex,
     required this.onTap,
   });
 
+  // Orange color constants
+  static const Color orangePrimary = Color(0xFFFF5A2C);
+  static const Color orangeLight = Color(0xFFFF8A5C);
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch cart provider for badge updates
+    final cartProvider = context.watch<CartProvider>();
+    
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Home - left side
+          Expanded(
+            child: _navItem(
+              Icons.home_outlined, 
+              "Home", 
+              0, 
+              orangePrimary,
+              showBadge: false,
+            ),
+          ),
+          
+          // Saved - left side
+          Expanded(
+            child: _navItem(
+              Icons.favorite_border, 
+              "Saved", 
+              1, 
+              orangePrimary,
+              showBadge: false,
+            ),
+          ),
+
+          /// Empty space in the middle for floating cart button
+          const SizedBox(width: 70),
+
+          // Orders - right side
+          Expanded(
+            child: _navItem(
+              Icons.receipt_long_outlined, 
+              "Orders", 
+              3, 
+              orangePrimary,
+              showBadge: false,
+            ),
+          ),
+          
+          // Profile - right side
+          Expanded(
+            child: _navItem(
+              Icons.person_outline, 
+              "Profile", 
+              4, 
+              orangePrimary,
+              showBadge: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(
+    IconData icon, 
+    String label, 
+    int index, 
+    Color activeColor, {
+    required bool showBadge,
+    int badgeCount = 0,
+  }) {
+    final bool isActive = currentIndex == index;
+
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(
+                icon,
+                size: 22,
+                color: isActive ? activeColor : Colors.grey,
+              ),
+              
+              // Optional badge (currently not used for any nav items)
+              if (showBadge && badgeCount > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 14,
+                      minHeight: 14,
+                    ),
+                    child: Text(
+                      badgeCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: isActive ? activeColor : Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DesktopTopNavbar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+  final int cartItemCount;
+
+  const DesktopTopNavbar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+    required this.cartItemCount,
+  });
+
+  // Orange color constants
+  static const Color orangePrimary = Color(0xFFFF5A2C);
+  static const Color orangeLight = Color(0xFFFF8A5C);
+  static const Color orangeVeryLight = Color(0xFFFFE9E0);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    
     return Container(
       height: 70,
       width: double.infinity,
-      color: const Color.fromARGB(255, 176, 255, 183), // 🌿 Light green
+      color: orangeVeryLight, // Light orange background
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64),
         child: Row(
@@ -599,15 +1008,15 @@ class DesktopTopNavbar extends StatelessWidget {
                   errorBuilder: (_, __, ___) => Icon(
                     Icons.shopping_basket,
                     size: 36,
-                    color: colorScheme.primary,
+                    color: orangePrimary,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Vegiffy',
+                  'Veegify',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                    color: orangePrimary,
                   ),
                 ),
               ],
@@ -630,13 +1039,48 @@ class DesktopTopNavbar extends StatelessWidget {
               currentIndex: currentIndex,
               onTap: onTap,
             ),
-            _NavItem(
-              label: 'Cart',
-              icon: Icons.shopping_cart_rounded,
-              index: 2,
-              currentIndex: currentIndex,
-              onTap: onTap,
+            
+            // Cart item with badge
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _NavItem(
+                  label: 'Cart',
+                  icon: Icons.shopping_cart_rounded,
+                  index: 2,
+                  currentIndex: currentIndex,
+                  onTap: onTap,
+                ),
+                
+                // Cart badge
+                if (cartItemCount > 0)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: orangePrimary,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        cartItemCount > 9 ? '9+' : cartItemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
+            
             _NavItem(
               label: 'History',
               icon: Icons.receipt_long_rounded,
@@ -680,10 +1124,14 @@ class _NavItem extends StatefulWidget {
 class _NavItemState extends State<_NavItem> {
   bool hovered = false;
 
+  // Orange color constants
+  static const Color orangePrimary = Color(0xFFFF5A2C);
+  static const Color orangeLight = Color(0xFFFF8A5C);
+  static const Color orangeVeryLight = Color(0xFFFFE9E0);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final isActive = widget.index == widget.currentIndex;
 
     return MouseRegion(
@@ -696,9 +1144,9 @@ class _NavItemState extends State<_NavItem> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: isActive
-                ? colorScheme.primary.withOpacity(0.15)
+                ? orangePrimary.withOpacity(0.15)
                 : hovered
-                    ? colorScheme.primary.withOpacity(0.08)
+                    ? orangePrimary.withOpacity(0.08)
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
@@ -708,8 +1156,8 @@ class _NavItemState extends State<_NavItem> {
                 widget.icon,
                 size: 18,
                 color: isActive
-                    ? colorScheme.primary
-                    : colorScheme.onSurface.withOpacity(0.7),
+                    ? orangePrimary
+                    : theme.colorScheme.onSurface.withOpacity(0.7),
               ),
               const SizedBox(width: 6),
               Text(
@@ -718,8 +1166,8 @@ class _NavItemState extends State<_NavItem> {
                   fontWeight:
                       isActive ? FontWeight.w600 : FontWeight.w500,
                   color: isActive
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withOpacity(0.8),
+                      ? orangePrimary
+                      : theme.colorScheme.onSurface.withOpacity(0.8),
                 ),
               ),
             ],

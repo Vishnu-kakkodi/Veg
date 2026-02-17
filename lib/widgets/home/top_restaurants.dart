@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/home/recommended_screen.dart';
+import 'package:veegify/widgets/home/discount.dart';
 
 class TicketRestaurantCard extends StatelessWidget {
   final String id;
@@ -320,18 +321,7 @@ class TicketRestaurantCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
 
-                          // Price
-                          if (price != null)
-                            Text(
-                              "Starts from ₹$price",
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.primary,
-                                fontSize: 13,
-                              ),
-                            ),
                         ],
                       ),
                     ],
@@ -356,6 +346,16 @@ class TicketRestaurantCard extends StatelessWidget {
     double perforationWidth,
     double contentPadding,
   ) {
+
+        String getFirstTwoWords(String text) {
+  final parts = text.trim().split(RegExp(r'\s+'));
+  if (parts.length >= 2) {
+    return "${parts[0]} ${parts[1]}";
+  } else if (parts.isNotEmpty) {
+    return parts[0];
+  }
+  return "";
+}
     return GestureDetector(
       onTap: isActive
           ? () {
@@ -372,7 +372,7 @@ class TicketRestaurantCard extends StatelessWidget {
         opacity: isActive ? 1.0 : 0.55,
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? theme.cardColor : Colors.white,
+            color: isDark ? theme.cardColor : const Color(0XFFB7EFC5),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -446,6 +446,14 @@ class TicketRestaurantCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                      ),
+
+
+             if (discount != null && discount.toString().isNotEmpty)
+                      Positioned(
+                        bottom: 8,
+                        left: 8,
+                        child: discountBadge(discount),
                       ),
 
                       // Vendor Closed overlay
@@ -570,14 +578,14 @@ class TicketRestaurantCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: isActive
-                                  ? Colors.green.withOpacity(0.15)
+                                  ?  Colors.white
                                   : Colors.red.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               isActive ? "Open" : "Closed",
                               style: TextStyle(
-                                color: isActive ? Colors.green : Colors.red,
+                                color: isActive ? const Color.fromARGB(255, 6, 52, 255) : Colors.red,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 10,
                               ),
@@ -613,10 +621,10 @@ class TicketRestaurantCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              locationName.split(' ').first,
+                              getFirstTwoWords(locationName),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurface
-                                    .withOpacity(0.6),
+                                    ,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
