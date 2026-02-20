@@ -912,6 +912,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   },
                 ),
+                                _buildProfileOption(
+                  icon: Icons.local_offer,
+                  title: 'Coupons',
+                  backgroundColor: Colors.black,
+                  isWeb: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CouponsScreen()),
+                    );
+                  },
+                ),
+                                _buildProfileOption(
+                  icon: Icons.notifications,
+                  title: 'Notifications',
+                  backgroundColor: Colors.black,
+                  isWeb: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NotificationScreen()),
+                    );
+                  },
+                ),
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),

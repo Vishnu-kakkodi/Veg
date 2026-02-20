@@ -49,8 +49,8 @@ class RestaurantCard extends StatelessWidget {
     final double cardWidth = Responsive.value(
       context,
       mobile: 170.0,
-      tablet: 220.0,
-      desktop: 260.0,
+      tablet: 170.0,
+      desktop: 170.0,
     );
 
     final double imageHeight = Responsive.value(
@@ -138,7 +138,7 @@ class RestaurantCard extends StatelessWidget {
                     ),
 
                     /// For Mobile: Name and Rating inside image
-                    if (isMobile) ...[
+                    // if (isMobile) ...[
                       // Name at top left
                       Positioned(
                         top: 8,
@@ -190,40 +190,6 @@ class RestaurantCard extends StatelessWidget {
                         ),
                       ),
                       
-                      // Rating at bottom left (inside image)
-                      // Positioned(
-                      //   top: 8,
-                      //   right: 12,
-                      //   child: Container(
-                      //     padding: const EdgeInsets.symmetric(
-                      //       horizontal: 8,
-                      //       vertical: 4,
-                      //     ),
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.black.withOpacity(0.7),
-                      //       borderRadius: BorderRadius.circular(20),
-                      //     ),
-                      //     child: Row(
-                      //       mainAxisSize: MainAxisSize.min,
-                      //       children: [
-                      //         const Icon(
-                      //           Icons.star,
-                      //           size: 14,
-                      //           color: Colors.amber,
-                      //         ),
-                      //         const SizedBox(width: 3),
-                      //         Text(
-                      //           rating.toStringAsFixed(1),
-                      //           style: const TextStyle(
-                      //             fontSize: 12,
-                      //             fontWeight: FontWeight.w600,
-                      //             color: Colors.white,
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
 
                                             Positioned(
                         bottom: 8,
@@ -258,43 +224,43 @@ class RestaurantCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
+                    // ],
 
                     /// For Desktop/Tablet: Rating badge at top right
-                    if (!isMobile)
-                      Positioned(
-                        right: 6,
-                        top: 6,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 14,
-                                color: Colors.amber,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                rating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    // if (!isMobile)
+                    //   Positioned(
+                    //     right: 6,
+                    //     top: 6,
+                    //     child: Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //         horizontal: 8,
+                    //         vertical: 4,
+                    //       ),
+                    //       decoration: BoxDecoration(
+                    //         color: Colors.black.withOpacity(0.7),
+                    //         borderRadius: BorderRadius.circular(20),
+                    //       ),
+                    //       child: Row(
+                    //         mainAxisSize: MainAxisSize.min,
+                    //         children: [
+                    //           const Icon(
+                    //             Icons.star,
+                    //             size: 14,
+                    //             color: Colors.amber,
+                    //           ),
+                    //           const SizedBox(width: 3),
+                    //           Text(
+                    //             rating.toStringAsFixed(1),
+                    //             style: const TextStyle(
+                    //               fontSize: 12,
+                    //               fontWeight: FontWeight.w600,
+                    //               color: Colors.white,
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   ),
 
                     /// Discount Badge (Top Left)
                     if (discount != null && discount.toString().isNotEmpty)
@@ -356,94 +322,94 @@ class RestaurantCard extends StatelessWidget {
               ),
 
               /// CONTENT - Only show for desktop/tablet, mobile already has name/rating in image
-              if (!isMobile)
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(
-                      Responsive.spacing(
-                        context,
-                        mobile: 12.0,
-                        tablet: 14.0,
-                        desktop: 16.0,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        /// Name
-                        Text(
-                          name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                            fontSize: Responsive.fontSize(
-                              context,
-                              mobile: 14.0,
-                              tablet: 15.0,
-                              desktop: 16.0,
-                            ),
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              // if (!isMobile)
+              //   Expanded(
+              //     child: Padding(
+              //       padding: EdgeInsets.all(
+              //         Responsive.spacing(
+              //           context,
+              //           mobile: 12.0,
+              //           tablet: 14.0,
+              //           desktop: 16.0,
+              //         ),
+              //       ),
+              //       child: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           /// Name
+              //           Text(
+              //             name,
+              //             style: theme.textTheme.titleMedium?.copyWith(
+              //               fontWeight: FontWeight.bold,
+              //               color: theme.colorScheme.onSurface,
+              //               fontSize: Responsive.fontSize(
+              //                 context,
+              //                 mobile: 14.0,
+              //                 tablet: 15.0,
+              //                 desktop: 16.0,
+              //               ),
+              //             ),
+              //             maxLines: 2,
+              //             overflow: TextOverflow.ellipsis,
+              //           ),
 
-                        /// Location
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              color: theme.colorScheme.primary,
-                              size: Responsive.value(
-                                context,
-                                mobile: 16.0,
-                                tablet: 18.0,
-                                desktop: 20.0,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                 getFirstTwoWords(locationName),
+              //           /// Location
+              //           Row(
+              //             children: [
+              //               Icon(
+              //                 Icons.location_on_outlined,
+              //                 color: theme.colorScheme.primary,
+              //                 size: Responsive.value(
+              //                   context,
+              //                   mobile: 16.0,
+              //                   tablet: 18.0,
+              //                   desktop: 20.0,
+              //                 ),
+              //               ),
+              //               const SizedBox(width: 4),
+              //               Expanded(
+              //                 child: Text(
+              //                    getFirstTwoWords(locationName),
 
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.9),
-                                  fontSize: Responsive.fontSize(
-                                    context,
-                                    mobile: 12.0,
-                                    tablet: 13.0,
-                                    desktop: 14.0,
-                                  ),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+              //                   style: theme.textTheme.bodySmall?.copyWith(
+              //                     color: theme.colorScheme.onSurface
+              //                         .withOpacity(0.9),
+              //                     fontSize: Responsive.fontSize(
+              //                       context,
+              //                       mobile: 12.0,
+              //                       tablet: 13.0,
+              //                       desktop: 14.0,
+              //                     ),
+              //                   ),
+              //                   maxLines: 1,
+              //                   overflow: TextOverflow.ellipsis,
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
 
-                        /// Price (if available)
-                        if (price != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            "From ₹$price",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: Responsive.fontSize(
-                                context,
-                                mobile: 12.0,
-                                tablet: 13.0,
-                                desktop: 14.0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+              //           /// Price (if available)
+              //           if (price != null) ...[
+              //             const SizedBox(height: 4),
+              //             Text(
+              //               "From ₹$price",
+              //               style: theme.textTheme.bodySmall?.copyWith(
+              //                 color: theme.colorScheme.primary,
+              //                 fontWeight: FontWeight.w600,
+              //                 fontSize: Responsive.fontSize(
+              //                   context,
+              //                   mobile: 12.0,
+              //                   tablet: 13.0,
+              //                   desktop: 14.0,
+              //                 ),
+              //               ),
+              //             ),
+              //           ],
+              //         ],
+              //       ),
+              //     ),
+              //   ),
               
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/BannerProvider/banner_provider.dart';
 import 'package:veegify/provider/CategoryProvider/category_provider.dart';
@@ -1547,12 +1548,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               maxWidth: maxContentWidth,
             ),
             padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
+              horizontal: 10,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: isDesktop ? 60 : 30),
+                // SizedBox(height: isDesktop ? 60 : 30),
 
                 // Categories Section
                 _buildAnimatedSection(
@@ -1591,7 +1592,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      SizedBox(height: isDesktop ? 30 : 20),
+                      // SizedBox(height: isDesktop ? 30 : 20),
                       _isInitializing
                           ? _buildCategorySkeleton()
                           : _buildCategories(),
@@ -1599,16 +1600,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
 
-                SizedBox(height: isDesktop ? 60 : 0),
+                // SizedBox(height: isDesktop ? 60 : 0),
 
                 // Static Promotional Banners
-                _buildAnimatedSection(
-                  slideAnimation: _bannerSlideAnimation,
-                  fadeAnimation: _bannerFadeAnimation,
-                  child: _buildStaticPromoBanners(),
-                ),
+                // _buildAnimatedSection(
+                //   slideAnimation: _bannerSlideAnimation,
+                //   fadeAnimation: _bannerFadeAnimation,
+                //   child: _buildStaticPromoBanners(),
+                // ),
 
-                SizedBox(height: isDesktop ? 60 : 0),
+                // SizedBox(height: isDesktop ? 60 : 0),
 
                 // Nearby Restaurants Section
                 Column(
@@ -1627,7 +1628,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         );
                       },
                     ),
-                    SizedBox(height: isDesktop ? 24 : 8),
+                    // SizedBox(height: isDesktop ? 24 : 8),
                     _isInitializing
                         ? _buildRestaurantSkeleton()
                         : _buildAnimatedSection(
@@ -1638,7 +1639,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ),
 
-                SizedBox(height: isDesktop ? 60 : 0),
+                // SizedBox(height: isDesktop ? 60 : 0),
 
                 // Popular Restaurants Section
                 Column(
@@ -1657,7 +1658,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         );
                       },
                     ),
-                    SizedBox(height: isDesktop ? 24 : 6),
+                    // SizedBox(height: isDesktop ? 24 : 6),
                     _isInitializing
                         ? _buildVerticalRestaurantSkeleton()
                         : _buildAnimatedSection(
@@ -1669,6 +1670,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
 
                 SizedBox(height: isDesktop ? 80 : 10),
+
+                _buildFooterSection(theme: theme, isDesktop: isDesktop),
+
+// SizedBox(height: isDesktop ? 40 : 20),
               ],
             ),
           ),
@@ -1676,6 +1681,286 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ],
     );
   }
+
+
+Widget _buildFooterSection({
+  required ThemeData theme,
+  required bool isDesktop,
+}) {
+  const bgColor = Color(0xFF1A2E1A); // Deep forest green
+  const dividerColor = Color(0xFF2E4A2E);
+  const headingColor = Colors.white;
+  const textColor = Color(0xFFB0C8B0); // Soft muted green-white
+  const accentColor = Color(0xFF6FCF97); // Fresh green accent
+
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(
+      vertical: isDesktop ? 60 : 40,
+      horizontal: isDesktop ? 60 : 24,
+    ),
+    color: bgColor,
+    child: Column(
+      children: [
+        // Main Footer Grid
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            int crossAxisCount = 3;
+            if (screenWidth < 700) crossAxisCount = 2;
+            if (screenWidth < 450) crossAxisCount = 1;
+
+            return GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 36,
+              crossAxisSpacing: 36,
+              childAspectRatio: screenWidth < 450 ? 2.2 : 1.7,
+              children: [
+                _buildFooterColumn(
+                  title: 'Company',
+                  items: const ['About Us', 'Careers', 'Help & Support'],
+                  links: const ['https://vegiffy.com/', null, null],
+                  textColor: textColor,
+                  headingColor: headingColor,
+                  accentColor: accentColor,
+                ),
+                _buildFooterColumn(
+                  title: 'Legal',
+                  items: const ['Privacy Policy', 'Terms & Conditions'],
+                  links: const [
+                    'https://vegiffy-policy.onrender.com/privacy-and-policy',
+                    'https://vegiffy-policy.onrender.com/terms-and-conditions',
+                  ],
+                  textColor: textColor,
+                  headingColor: headingColor,
+                  accentColor: accentColor,
+                ),
+                _buildPartnerWithUsColumn(
+                  textColor: textColor,
+                  headingColor: headingColor,
+                  accentColor: accentColor,
+                ),
+              ],
+            );
+          },
+        ),
+
+        SizedBox(height: isDesktop ? 48 : 32),
+
+        const Divider(color: dividerColor, thickness: 1, height: 1),
+
+        SizedBox(height: isDesktop ? 36 : 24),
+
+        // App Downloads
+        _buildAppDownloads(isDesktop: isDesktop, headingColor: headingColor),
+
+        SizedBox(height: isDesktop ? 36 : 24),
+
+        const Divider(color: dividerColor, thickness: 1, height: 1),
+
+        SizedBox(height: isDesktop ? 24 : 16),
+
+        // Logo + Copyright
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset('assets/images/applogo.png', height: 32),
+            Text(
+              '© ${DateTime.now().year} Vegiffy. All rights reserved.',
+              style: const TextStyle(
+                color: textColor,
+                fontSize: 12,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildPartnerWithUsColumn({
+  required Color textColor,
+  required Color headingColor,
+  required Color accentColor,
+}) {
+  final partners = [
+    {'label': '🛒  Become a Vendor', 'url': 'https://vendor.vegiffy.in/'},
+    {'label': '🏍️  Ride with Us', 'url': 'https://play.google.com/store/apps/details?id=com.pixelmind.vegiffydeliveryapp'},
+    {'label': '🌟  Become an Ambassador', 'url': 'https://vegiffypanel.vegiffy.in/'},
+  ];
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Partner With Us',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: headingColor,
+          letterSpacing: 0.5,
+        ),
+      ),
+      const SizedBox(height: 14),
+      ...partners.map(
+        (partner) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: GestureDetector(
+            onTap: () => launchUrl(
+              Uri.parse(partner['url']!),
+              mode: LaunchMode.externalApplication,
+            ),
+            child: Text(
+              partner['label']!,
+              style: TextStyle(
+                color: accentColor,
+                fontSize: 13,
+                height: 1.6,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildFooterColumn({
+  required String title,
+  required List<String> items,
+  required List<String?> links,
+  required Color textColor,
+  required Color headingColor,
+  required Color accentColor,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: headingColor,
+          letterSpacing: 0.5,
+        ),
+      ),
+      const SizedBox(height: 14),
+      ...List.generate(items.length, (i) {
+        final url = links[i];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: GestureDetector(
+            onTap: url != null
+                ? () => launchUrl(
+                      Uri.parse(url),
+                      mode: LaunchMode.externalApplication,
+                    )
+                : null,
+            child: Text(
+              items[i],
+              style: TextStyle(
+                color: url != null ? accentColor : textColor,
+                fontSize: 13,
+                height: 1.6,
+              ),
+            ),
+          ),
+        );
+      }),
+    ],
+  );
+}
+
+Widget _buildAppDownloads({
+  required bool isDesktop,
+  required Color headingColor,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Download the Vegiffy App',
+        style: TextStyle(
+          fontSize: isDesktop ? 15 : 13,
+          color: headingColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+        ),
+      ),
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          _buildDownloadButton(
+            icon: Icons.apple,
+            platform: 'App Store',
+            onTap: () => launchUrl(
+              Uri.parse('https://apps.apple.com/in/app/vegiffyy/id6757138352'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+          const SizedBox(width: 14),
+          _buildDownloadButton(
+            icon: Icons.android,
+            platform: 'Google Play',
+            onTap: () => launchUrl(
+              Uri.parse('https://play.google.com/store/apps/details?id=com.veggify.veegify'),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+Widget _buildDownloadButton({
+  required IconData icon,
+  required String platform,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(10),
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF243B24),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF3A5C3A), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Download on',
+                style: TextStyle(color: Colors.grey[400], fontSize: 10),
+              ),
+              Text(
+                platform,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   // Hero section with full-width banner
   Widget _buildHeroSection() {
@@ -1843,22 +2128,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     SizedBox(height: isDesktop ? 24 : 16),
 
                     // Stats or trust indicators
-                    if (isDesktop)
-                      Row(
-                        children: [
-                          _buildStatItem(
-                            icon: Icons.people_rounded,
-                            value: '4.8',
-                            label: 'Ratings',
-                          ),
-                          const SizedBox(width: 32),
-                          _buildStatItem(
-                            icon: Icons.restaurant_menu,
-                            value: '200+',
-                            label: 'Restaurants',
-                          ),
-                        ],
-                      ),
+                    // if (isDesktop)
+                    //   Row(
+                    //     children: [
+                    //       _buildStatItem(
+                    //         icon: Icons.people_rounded,
+                    //         value: '4.8',
+                    //         label: 'Ratings',
+                    //       ),
+                    //       const SizedBox(width: 32),
+                    //       _buildStatItem(
+                    //         icon: Icons.restaurant_menu,
+                    //         value: '200+',
+                    //         label: 'Restaurants',
+                    //       ),
+                    //     ],
+                    //   ),
                   ],
                 ),
               ),

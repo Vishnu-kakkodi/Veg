@@ -664,7 +664,7 @@ class TicketRestaurantCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        "FLAT $discount% OFF",
+        "Upto $discount% OFF",
         style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

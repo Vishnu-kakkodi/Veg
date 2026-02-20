@@ -1,7 +1,7 @@
 name: veegify
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.10+15
+version: 1.0.10+14
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -92,6 +92,7 @@ flutter:
     - assets/images/login_bg.png
     - assets/images/promo1.png
     - assets/images/start.png
+    - assets/appstore.png
 
 flutter_icons:
   android: true
