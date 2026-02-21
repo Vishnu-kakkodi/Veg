@@ -9,6 +9,7 @@
 // import 'package:veegify/model/previous_order.dart';
 // import 'package:veegify/model/user_model.dart';
 // import 'package:veegify/provider/AuthProvider/auth_provider.dart';
+// import 'package:veegify/provider/Credential/credential_provider.dart';
 // import 'package:veegify/utils/previous_order.dart';
 // import 'package:veegify/views/ProfileScreen/help_screen.dart';
 // import 'package:veegify/views/Booking/booking_screen.dart';
@@ -21,11 +22,13 @@
 // import 'package:http/http.dart' as http;
 
 // // ↓↓↓ INVOICE RELATED ↓↓↓
-// import 'package:printing/printing.dart';
-// import 'package:pdf/pdf.dart';
+// // import 'package:printing/printing.dart';
+// // import 'package:pdf/pdf.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:open_filex/open_filex.dart';
 // // ↑↑↑ INVOICE RELATED ↑↑↑
+
+// import 'package:veegify/utils/responsive.dart'; // ✅ responsive util
 
 // class HystoryScreenWithController extends StatelessWidget {
 //   final ScrollController scrollController;
@@ -57,7 +60,7 @@
 //   String? _error;
 //   Object? _lastError;
 
-//   // ✅ use typed Order list
+//   // ✅ typed Order list
 //   List<Order> _orders = [];
 
 //   final Map<String, bool> _favorites = {}; // Track favorites by product ID
@@ -152,9 +155,7 @@
 //       debugPrint("Orders response: ${response.statusCode} -> ${response.body}");
 
 //       if (response.statusCode == 200) {
-//         // ✅ Use helper from order.dart
-//         final List<Order> orders =
-//             ordersFromApiResponse(response.body);
+//         final List<Order> orders = ordersFromApiResponse(response.body);
 
 //         setState(() {
 //           _orders = orders;
@@ -216,229 +217,273 @@
 //     final gstAmount = order.gstAmount ?? 0;
 //     final platformCharge = order.platformCharge ?? 0;
 //     final deliveryCharge = order.deliveryCharge;
+//         final packingCharge = order.packingCharges;
+//                 final deliveryGst = order.gstOnDelivery;
+
+
 //     final couponDiscount = order.couponDiscount;
 //     final totalPayable = order.totalPayable;
 
-//       Future<void> openWhatsApp(String phoneNumber, {String message = ""}) async {
-//     // Remove spaces and ensure only digits
-//     String cleanedNumber = phoneNumber.replaceAll(RegExp(r'\D'), '');
+//     Future<void> openWhatsApp(String phoneNumber,
+//         {String message = ""}) async {
+//       // Remove spaces and ensure only digits
+//       String cleanedNumber = phoneNumber.replaceAll(RegExp(r'\D'), '');
 
-//     // If number is missing country code, add +91 by default
-//     if (!cleanedNumber.startsWith("91") && cleanedNumber.length == 10) {
-//       cleanedNumber = "91$cleanedNumber";
+//       // If number is missing country code, add +91 by default
+//       if (!cleanedNumber.startsWith("91") && cleanedNumber.length == 10) {
+//         cleanedNumber = "91$cleanedNumber";
+//       }
+
+//       final String encodedMessage = Uri.encodeComponent(message);
+//       final String url = "https://wa.me/$cleanedNumber?text=$encodedMessage";
+
+//       final Uri uri = Uri.parse(url);
+
+//       if (await canLaunchUrl(uri)) {
+//         await launchUrl(uri, mode: LaunchMode.externalApplication);
+//       } else {
+//         throw "Could not launch WhatsApp";
+//       }
 //     }
 
-//     final String encodedMessage = Uri.encodeComponent(message);
-//     final String url = "https://wa.me/$cleanedNumber?text=$encodedMessage";
+//     final isMobile = Responsive.isMobile(context);
+//     final isTablet = Responsive.isTablet(context);
+//     final isDesktop = Responsive.isDesktop(context);
 
-//     final Uri uri = Uri.parse(url);
+//     final double maxWidth =
+//         isDesktop ? 520 : (isTablet ? 480 : double.infinity);
 
-//     if (await canLaunchUrl(uri)) {
-//       await launchUrl(uri, mode: LaunchMode.externalApplication);
-//     } else {
-//       throw "Could not launch WhatsApp";
-//     }
-//   }
-
-// return Container(
-//   constraints: BoxConstraints(
-//     maxHeight: MediaQuery.of(context).size.height * 0.85,
-//   ),
-//   child: Padding(
-//     padding: const EdgeInsets.all(24),
-//     child: Column(
-//       mainAxisSize: MainAxisSize.min,
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Center(
-//           child: Container(
-//             width: 40,
-//             height: 4,
-//             decoration: BoxDecoration(
-//               color: theme.colorScheme.onSurface.withOpacity(0.3),
-//               borderRadius: BorderRadius.circular(2),
-//             ),
-//           ),
+//     return Center(
+//       child: ConstrainedBox(
+//         constraints: BoxConstraints(
+//           maxWidth: maxWidth,
+//           maxHeight: MediaQuery.of(context).size.height * 0.85,
 //         ),
-//         const SizedBox(height: 20),
+//         child: Padding(
+//           padding: const EdgeInsets.all(24),
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Center(
+//                 child: Container(
+//                   width: 40,
+//                   height: 4,
+//                   decoration: BoxDecoration(
+//                     color: theme.colorScheme.onSurface.withOpacity(0.3),
+//                     borderRadius: BorderRadius.circular(2),
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 20),
 
-//         Text(
-//           'Order Items',
-//           style: theme.textTheme.titleLarge?.copyWith(
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         const SizedBox(height: 16),
+//               Text(
+//                 'Order Items',
+//                 style: theme.textTheme.titleLarge?.copyWith(
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
 
-//         // SCROLLABLE CONTENT
-//         Expanded(
-//           child: SingleChildScrollView(
-//             physics: const BouncingScrollPhysics(),
-//             child: Column(
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 ...products.map((product) {
-//                   final price = product.price;
-//                   final quantity = product.quantity;
-//                   final lineTotal = price * quantity;
+//               // SCROLLABLE CONTENT
+//               Expanded(
+//                 child: SingleChildScrollView(
+//                   physics: const BouncingScrollPhysics(),
+//                   child: Column(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       ...products.map((product) {
+//                         final price = product.price;
+//                         final quantity = product.quantity;
+//                         final lineTotal = price * quantity;
 
-//                   return Container(
-//                     margin: const EdgeInsets.only(bottom: 12),
-//                     padding: const EdgeInsets.all(16),
-//                     decoration: BoxDecoration(
-//                       color: theme.colorScheme.surface.withOpacity(0.5),
-//                       borderRadius: BorderRadius.circular(16),
-//                       border: Border.all(
-//                         color: theme.dividerColor.withOpacity(0.3),
-//                       ),
-//                     ),
-//                     child: Row(
-//                       children: [
-//                         // IMAGE
-//                         Container(
-//                           width: 60,
-//                           height: 60,
+//                         return Container(
+//                           margin: const EdgeInsets.only(bottom: 12),
+//                           padding: const EdgeInsets.all(16),
 //                           decoration: BoxDecoration(
-//                             borderRadius: BorderRadius.circular(12),
-//                             image: DecorationImage(
-//                               image: _normalizeImageUrl(
-//                                           product.image?.toString())
-//                                       .isNotEmpty
-//                                   ? NetworkImage(_normalizeImageUrl(
-//                                       product.image?.toString()))
-//                                   : const AssetImage(
-//                                           'assets/placeholder.png')
-//                                       as ImageProvider,
-//                               fit: BoxFit.cover,
+//                             color:
+//                                 theme.colorScheme.surface.withOpacity(0.5),
+//                             borderRadius: BorderRadius.circular(16),
+//                             border: Border.all(
+//                               color: theme.dividerColor.withOpacity(0.3),
 //                             ),
 //                           ),
-//                         ),
-//                         const SizedBox(width: 12),
-
-//                         // INFO
-//                         Expanded(
-//                           child: Column(
-//                             crossAxisAlignment:
-//                                 CrossAxisAlignment.start,
+//                           child: Row(
 //                             children: [
-//                               Text(
-//                                 product.name,
-//                                 style: theme.textTheme.bodyMedium
-//                                     ?.copyWith(
-//                                   fontWeight: FontWeight.w600,
+//                               // IMAGE
+//                               Container(
+//                                 width: 60,
+//                                 height: 60,
+//                                 decoration: BoxDecoration(
+//                                   borderRadius: BorderRadius.circular(12),
+//                                   image: DecorationImage(
+//                                     image: _normalizeImageUrl(
+//                                                 product.image?.toString())
+//                                             .isNotEmpty
+//                                         ? NetworkImage(_normalizeImageUrl(
+//                                             product.image?.toString()))
+//                                         : const AssetImage(
+//                                                 'assets/placeholder.png')
+//                                             as ImageProvider,
+//                                     fit: BoxFit.cover,
+//                                   ),
 //                                 ),
 //                               ),
-//                               const SizedBox(height: 4),
-//                               Text(
-//                                 '${product.quantity} x ₹${price.toStringAsFixed(2)}',
-//                                 style: theme.textTheme.bodySmall
-//                                     ?.copyWith(
-//                                   color: theme.colorScheme.onSurface
-//                                       .withOpacity(0.6),
-//                                 ),
-//                               ),
-//                               const SizedBox(height: 4),
-//                               Text(
-//                                 'Total: ₹${lineTotal.toStringAsFixed(2)}',
-//                                 style: theme.textTheme.bodySmall
-//                                     ?.copyWith(
-//                                   fontWeight: FontWeight.w600,
-//                                   color: theme.colorScheme.primary,
+//                               const SizedBox(width: 12),
+
+//                               // INFO
+//                               Expanded(
+//                                 child: Column(
+//                                   crossAxisAlignment:
+//                                       CrossAxisAlignment.start,
+//                                   children: [
+//                                     Text(
+//                                       product.name,
+//                                       style: theme
+//                                           .textTheme.bodyMedium
+//                                           ?.copyWith(
+//                                         fontWeight: FontWeight.w600,
+//                                       ),
+//                                     ),
+//                                     const SizedBox(height: 4),
+//                                     Text(
+//                                       '${product.quantity} x ₹${price.toStringAsFixed(2)}',
+//                                       style: theme
+//                                           .textTheme.bodySmall
+//                                           ?.copyWith(
+//                                         color: theme
+//                                             .colorScheme.onSurface
+//                                             .withOpacity(0.6),
+//                                       ),
+//                                     ),
+//                                     const SizedBox(height: 4),
+//                                     Text(
+//                                       'Total: ₹${lineTotal.toStringAsFixed(2)}',
+//                                       style: theme
+//                                           .textTheme.bodySmall
+//                                           ?.copyWith(
+//                                         fontWeight: FontWeight.w600,
+//                                         color: theme
+//                                             .colorScheme.primary,
+//                                       ),
+//                                     ),
+//                                   ],
 //                                 ),
 //                               ),
 //                             ],
 //                           ),
+//                         );
+//                       }).toList(),
+
+//                       const SizedBox(height: 16),
+
+//                       // ORDER SUMMARY
+//                       Container(
+//                         width: double.infinity,
+//                         padding: const EdgeInsets.all(16),
+//                         decoration: BoxDecoration(
+//                           color: theme.colorScheme.primary
+//                               .withOpacity(0.04),
+//                           borderRadius: BorderRadius.circular(16),
+//                           border: Border.all(
+//                             color: theme.colorScheme.primary
+//                                 .withOpacity(0.3),
+//                           ),
 //                         ),
-//                       ],
-//                     ),
-//                   );
-//                 }).toList(),
+//                         child: Column(
+//                           children: [
+//                             _summaryRow('Items Total', subTotal, theme),
+//                             _summaryRow('GST', gstAmount, theme),
+//                             _summaryRow(
+//                                 'Platform Charge', platformCharge, theme),
+//                             _summaryRow(
+//                                 'Delivery Charge', deliveryCharge, theme),
+//                                                             _summaryRow(
+//                                 'Packing Charge', packingCharge, theme),
+//                                                             _summaryRow(
+//                                 'Delivery Gst Charge', deliveryGst, theme),
+//                             if (couponDiscount > 0)
+//                               _summaryRow(
+//                                 'Coupon Discount',
+//                                 -couponDiscount,
+//                                 theme,
+//                                 isDiscount: true,
+//                               ),
+//                             const Divider(height: 18),
+//                             _summaryRow(
+//                               'Total Payable',
+//                               totalPayable,
+//                               theme,
+//                               isTotal: true,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
 
-//                 const SizedBox(height: 16),
-
-//                 // ORDER SUMMARY
-//                 Container(
-//                   width: double.infinity,
-//                   padding: const EdgeInsets.all(16),
-//                   decoration: BoxDecoration(
-//                     color: theme.colorScheme.primary.withOpacity(0.04),
-//                     borderRadius: BorderRadius.circular(16),
-//                     border: Border.all(
-//                       color: theme.colorScheme.primary.withOpacity(0.3),
-//                     ),
+//                       const SizedBox(height: 20),
+//                     ],
 //                   ),
-//                   child: Column(
+//                 ),
+//               ),
+
+//               const SizedBox(height: 12),
+
+//               // 🚀 WHATSAPP BUTTON
+//               GestureDetector(
+//      onTap: () {
+//     final supportPhone = context.read<CredentialProvider>().getWhatsappByType('user');
+    
+//     if (supportPhone != null && supportPhone.isNotEmpty) {
+//       final orderIdText = order.id ?? "N/A";
+//       final message =
+//           "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
+
+//       openWhatsApp(supportPhone, message: message);
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(
+//           content: Text('Support contact not available'),
+//           backgroundColor: Theme.of(context).colorScheme.error,
+//         ),
+//       );
+//     }
+//   },
+//                 child: Container(
+//                   width: double.infinity,
+//                   padding:
+//                       const EdgeInsets.symmetric(vertical: 14),
+//                   decoration: BoxDecoration(
+//                     color: Colors.green.shade600,
+//                     borderRadius: BorderRadius.circular(14),
+//                   ),
+//                   child: Row(
+//                     mainAxisAlignment: MainAxisAlignment.center,
 //                     children: [
-//                       _summaryRow('Items Total', subTotal, theme),
-//                       _summaryRow('GST', gstAmount, theme),
-//                       _summaryRow('Platform Charge', platformCharge, theme),
-//                       _summaryRow('Delivery Charge', deliveryCharge, theme),
-//                       if (couponDiscount > 0)
-//                         _summaryRow(
-//                           'Coupon Discount',
-//                           -couponDiscount,
-//                           theme,
-//                           isDiscount: true,
+//                       Image.asset(
+//                         'assets/images/wattsapp.png',
+//                         width: 22,
+//                         height: 22,
+//                       ),
+//                       const SizedBox(width: 8),
+//                       const Text(
+//                         "Contact Support on WhatsApp",
+//                         style: TextStyle(
+//                           color: Colors.white,
+//                           fontWeight: FontWeight.bold,
+//                           fontSize: 15,
 //                         ),
-//                       const Divider(height: 18),
-//                       _summaryRow(
-//                         'Total Payable',
-//                         totalPayable,
-//                         theme,
-//                         isTotal: true,
 //                       ),
 //                     ],
 //                   ),
 //                 ),
+//               ),
 
-//                 const SizedBox(height: 20),
-//               ],
-//             ),
+//               const SizedBox(height: 8),
+//             ],
 //           ),
 //         ),
-
-//         // 🚀 WHATSAPP BUTTON (NEW)
-//         const SizedBox(height: 12),
-
-//         GestureDetector(
-//           onTap: () {
-//             final orderIdText = order.id ?? "N/A";
-//             final message =
-//                 "Hello Vegiffyy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
-
-//             openWhatsApp("9961593179", message: message);
-//           },
-//           child: Container(
-//             width: double.infinity,
-//             padding: const EdgeInsets.symmetric(vertical: 14),
-//             decoration: BoxDecoration(
-//               color: Colors.green.shade600,
-//               borderRadius: BorderRadius.circular(14),
-//             ),
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 Image.asset('assets/images/wattsapp.png',
-//                     width: 22, height: 22),
-//                 const SizedBox(width: 8),
-//                 const Text(
-//                   "Contact Support on WhatsApp",
-//                   style: TextStyle(
-//                       color: Colors.white,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 15),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-
-//         const SizedBox(height: 8),
-//       ],
-//     ),
-//   ),
-// );
-
+//       ),
+//     );
 //   }
 
 //   Widget _summaryRow(
@@ -508,20 +553,17 @@
 //     try {
 //       // 1) Build Veegify HTML
 //       final htmlContent = buildInvoiceHtml(orderModel);
-//           print("kfldsjfdskjfdfjdsl;fjld;fds;fkd;fkd;sfk;df$htmlContent");
+//       debugPrint("Invoice HTML: $htmlContent");
 
-
-//     await Printing.layoutPdf(
-//       onLayout: (PdfPageFormat format) async {
-//         // This converts your HTML to PDF bytes
-//         final pdfBytes = await Printing.convertHtml(
-//           format: format,
-//           html: htmlContent,
-//         );
-
-//         return pdfBytes;
-//       },
-//     );
+//       // await Printing.layoutPdf(
+//       //   onLayout: (PdfPageFormat format) async {
+//       //     final pdfBytes = await Printing.convertHtml(
+//       //       format: format,
+//       //       html: htmlContent,
+//       //     );
+//       //     return pdfBytes;
+//       //   },
+//       // );
 //     } catch (e, st) {
 //       debugPrint('Invoice error: $e\n$st');
 //       if (!mounted) return;
@@ -564,7 +606,7 @@
 //             : orderStatusRaw);
 
 //     return Container(
-//       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//       margin: const EdgeInsets.symmetric(vertical: 8),
 //       decoration: BoxDecoration(
 //         color: theme.cardColor,
 //         borderRadius: BorderRadius.circular(16),
@@ -573,7 +615,8 @@
 //         ),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(isDarkMode ? 0.1 : 0.05),
+//             color:
+//                 Colors.black.withOpacity(isDarkMode ? 0.1 : 0.05),
 //             blurRadius: 8,
 //             offset: const Offset(0, 2),
 //           ),
@@ -616,8 +659,7 @@
 //                         Expanded(
 //                           child: Text(
 //                             restaurantName,
-//                             style: theme.textTheme.bodySmall
-//                                 ?.copyWith(
+//                             style: theme.textTheme.bodySmall?.copyWith(
 //                               color: theme.colorScheme.onSurface
 //                                   .withOpacity(0.6),
 //                             ),
@@ -630,7 +672,9 @@
 //                   ],
 //                   Container(
 //                     padding: const EdgeInsets.symmetric(
-//                         horizontal: 12, vertical: 4),
+//                       horizontal: 12,
+//                       vertical: 4,
+//                     ),
 //                     decoration: BoxDecoration(
 //                       color: isDelivered
 //                           ? Colors.green.withOpacity(0.08)
@@ -640,8 +684,7 @@
 //                     child: Text(
 //                       chipText,
 //                       style: TextStyle(
-//                         color:
-//                             isDelivered ? Colors.green : Colors.orange,
+//                         color: isDelivered ? Colors.green : Colors.orange,
 //                         fontWeight: FontWeight.w600,
 //                         fontSize: 12,
 //                       ),
@@ -656,21 +699,19 @@
 //                         child: ElevatedButton(
 //                           onPressed: () => _viewOrderDetails(order),
 //                           style: ElevatedButton.styleFrom(
-//                             backgroundColor:
-//                                 theme.colorScheme.primary,
+//                             backgroundColor: theme.colorScheme.primary,
 //                             foregroundColor:
 //                                 theme.colorScheme.onPrimary,
 //                             shape: RoundedRectangleBorder(
-//                               borderRadius:
-//                                   BorderRadius.circular(12),
+//                               borderRadius: BorderRadius.circular(12),
 //                             ),
 //                             padding:
 //                                 const EdgeInsets.symmetric(vertical: 8),
 //                           ),
 //                           child: Text(
 //                             'View Items',
-//                             style: theme.textTheme.bodyMedium
-//                                 ?.copyWith(
+//                             style:
+//                                 theme.textTheme.bodyMedium?.copyWith(
 //                               fontWeight: FontWeight.w600,
 //                             ),
 //                           ),
@@ -686,15 +727,13 @@
 //                             side: BorderSide(
 //                               color: theme.colorScheme.primary,
 //                             ),
-//                             foregroundColor:
-//                                 theme.colorScheme.primary,
+//                             foregroundColor: theme.colorScheme.primary,
 //                             padding: const EdgeInsets.symmetric(
 //                               horizontal: 10,
 //                               vertical: 8,
 //                             ),
 //                             shape: RoundedRectangleBorder(
-//                               borderRadius:
-//                                   BorderRadius.circular(12),
+//                               borderRadius: BorderRadius.circular(12),
 //                             ),
 //                           ),
 //                           icon: const Icon(
@@ -703,8 +742,7 @@
 //                           ),
 //                           label: Text(
 //                             'Invoice',
-//                             style:
-//                                 theme.textTheme.bodySmall?.copyWith(
+//                             style: theme.textTheme.bodySmall?.copyWith(
 //                               fontWeight: FontWeight.w600,
 //                             ),
 //                           ),
@@ -719,24 +757,19 @@
 //             const SizedBox(width: 16),
 
 //             // Right side image
-//             Stack(
-//               clipBehavior: Clip.none,
-//               children: [
-//                 Container(
-//                   width: 120,
-//                   height: 140,
-//                   decoration: BoxDecoration(
-//                     borderRadius: BorderRadius.circular(12),
-//                     image: DecorationImage(
-//                       image: imageUrl.isNotEmpty
-//                           ? NetworkImage(imageUrl)
-//                           : const AssetImage('assets/placeholder.png')
-//                               as ImageProvider,
-//                       fit: BoxFit.cover,
-//                     ),
-//                   ),
+//             Container(
+//               width: 120,
+//               height: 140,
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(12),
+//                 image: DecorationImage(
+//                   image: imageUrl.isNotEmpty
+//                       ? NetworkImage(imageUrl)
+//                       : const AssetImage('assets/placeholder.png')
+//                           as ImageProvider,
+//                   fit: BoxFit.cover,
 //                 ),
-//               ],
+//               ),
 //             ),
 //           ],
 //         ),
@@ -758,8 +791,8 @@
 
 //     if (_error != null) {
 //       return Center(
-//         child: _buildNetworkErrorWidget(
-//             _lastError ?? _error!, _fetchPreviousOrders),
+//         child:
+//             _buildNetworkErrorWidget(_lastError ?? _error!, _fetchPreviousOrders),
 //       );
 //     }
 
@@ -777,8 +810,7 @@
 //             Text(
 //               'No previous orders',
 //               style: theme.textTheme.titleMedium?.copyWith(
-//                 color: theme.colorScheme.onSurface
-//                     .withOpacity(0.5),
+//                 color: theme.colorScheme.onSurface.withOpacity(0.5),
 //               ),
 //             ),
 //           ],
@@ -786,14 +818,31 @@
 //       );
 //     }
 
-//     return ListView.builder(
-//       controller: widget.scrollController,
-//       padding: const EdgeInsets.only(top: 16, bottom: 80),
-//       itemCount: _orders.length,
-//       itemBuilder: (context, index) {
-//         final order = _orders[index];
-//         return _buildOrderCard(order);
-//       },
+//     final isMobile = Responsive.isMobile(context);
+//     final isTablet = Responsive.isTablet(context);
+//     final isDesktop = Responsive.isDesktop(context);
+
+//     final double maxWidth =
+//         isDesktop ? 900 : (isTablet ? 700 : double.infinity);
+
+//     return Center(
+//       child: ConstrainedBox(
+//         constraints: BoxConstraints(maxWidth: maxWidth),
+//         child: ListView.builder(
+//           controller: widget.scrollController,
+//           padding: EdgeInsets.fromLTRB(
+//             16,
+//             16,
+//             16,
+//             isMobile ? 80 : 32,
+//           ),
+//           itemCount: _orders.length,
+//           itemBuilder: (context, index) {
+//             final order = _orders[index];
+//             return _buildOrderCard(order);
+//           },
+//         ),
+//       ),
 //     );
 //   }
 
@@ -802,7 +851,10 @@
 //     final isNetwork = error is SocketException ||
 //         (error is HttpException) ||
 //         error.toString().toLowerCase().contains('socket') ||
-//         error.toString().toLowerCase().contains('failed host lookup') ||
+//         error
+//             .toString()
+//             .toLowerCase()
+//             .contains('failed host lookup') ||
 //         error.toString().toLowerCase().contains('network');
 
 //     return Container(
@@ -823,16 +875,13 @@
 //         mainAxisSize: MainAxisSize.min,
 //         children: [
 //           Icon(
-//             isNetwork ? Icons.wifi_off : Icons.error_outline,
+//             isNetwork ? Icons.wifi_off : Icons.folder_off,
 //             size: 64,
-//             color:
-//                 theme.colorScheme.onSurface.withOpacity(0.3),
+//             color: theme.colorScheme.onSurface.withOpacity(0.3),
 //           ),
 //           const SizedBox(height: 16),
-//           Text( 
-//             isNetwork
-//                 ? "No Internet Connection"
-//                 : "",
+//           Text(
+//             isNetwork ? "No Internet Connection" : "",
 //             style: theme.textTheme.titleMedium?.copyWith(
 //               fontWeight: FontWeight.bold,
 //             ),
@@ -845,30 +894,11 @@
 //                 : error.toString(),
 //             textAlign: TextAlign.center,
 //             style: theme.textTheme.bodyMedium?.copyWith(
-//               color: theme.colorScheme.onSurface
-//                   .withOpacity(0.6),
+//               color:
+//                   theme.colorScheme.onSurface.withOpacity(0.6),
 //             ),
 //           ),
-//           // const SizedBox(height: 20),
-//           // Row(
-//           //   mainAxisAlignment: MainAxisAlignment.center,
-//           //   children: [
-//           //     ElevatedButton(
-//           //       onPressed: () => onRetry(),
-//           //       style: ElevatedButton.styleFrom(
-//           //         backgroundColor: theme.colorScheme.primary,
-//           //         foregroundColor:
-//           //             theme.colorScheme.onPrimary,
-//           //       ),
-//           //       child: const Text("Retry"),
-//           //     ),
-//           //     const SizedBox(width: 12),
-//           //     OutlinedButton(
-//           //       onPressed: () => Navigator.of(context).pop(),
-//           //       child: const Text("Close"),
-//           //     )
-//           //   ],
-//           // ),
+//           // If you want retry / close buttons, you already have them commented.
 //         ],
 //       ),
 //     );
@@ -901,6 +931,14 @@
 //     );
 //   }
 // }
+
+
+
+
+
+
+
+
 
 
 
@@ -1136,9 +1174,8 @@ class _HystoryScreenState extends State<HystoryScreen> {
     final gstAmount = order.gstAmount ?? 0;
     final platformCharge = order.platformCharge ?? 0;
     final deliveryCharge = order.deliveryCharge;
-        final packingCharge = order.packingCharges;
-                final deliveryGst = order.gstOnDelivery;
-
+    final packingCharge = order.packingCharges;
+    final deliveryGst = order.gstOnDelivery;
 
     final couponDiscount = order.couponDiscount;
     final totalPayable = order.totalPayable;
@@ -1317,9 +1354,9 @@ class _HystoryScreenState extends State<HystoryScreen> {
                                 'Platform Charge', platformCharge, theme),
                             _summaryRow(
                                 'Delivery Charge', deliveryCharge, theme),
-                                                            _summaryRow(
+                            _summaryRow(
                                 'Packing Charge', packingCharge, theme),
-                                                            _summaryRow(
+                            _summaryRow(
                                 'Delivery Gst Charge', deliveryGst, theme),
                             if (couponDiscount > 0)
                               _summaryRow(
@@ -1349,28 +1386,27 @@ class _HystoryScreenState extends State<HystoryScreen> {
 
               // 🚀 WHATSAPP BUTTON
               GestureDetector(
-     onTap: () {
-    final supportPhone = context.read<CredentialProvider>().getWhatsappByType('user');
-    
-    if (supportPhone != null && supportPhone.isNotEmpty) {
-      final orderIdText = order.id ?? "N/A";
-      final message =
-          "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
+                onTap: () {
+                  final supportPhone = context.read<CredentialProvider>().getWhatsappByType('user');
+                  
+                  if (supportPhone != null && supportPhone.isNotEmpty) {
+                    final orderIdText = order.id ?? "N/A";
+                    final message =
+                        "Hello Vegiffy Support,\n\nI need help with my order.\nOrder ID: $orderIdText\n\nPlease assist me.";
 
-      openWhatsApp(supportPhone, message: message);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Support contact not available'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    }
-  },
+                    openWhatsApp(supportPhone, message: message);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Support contact not available'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
+                },
                 child: Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
                     color: Colors.green.shade600,
                     borderRadius: BorderRadius.circular(14),
@@ -1495,6 +1531,171 @@ class _HystoryScreenState extends State<HystoryScreen> {
     }
   }
 
+  Widget _buildBody() {
+    final theme = Theme.of(context);
+    final isMobile = Responsive.isMobile(context);
+    final isTablet = Responsive.isTablet(context);
+    final isDesktop = Responsive.isDesktop(context);
+
+    if (_loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor:
+              AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: _buildNetworkErrorWidget(_lastError ?? _error!, _fetchPreviousOrders),
+      );
+    }
+
+    if (_orders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_long,
+              size: isDesktop ? 100 : 80,
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No previous orders',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                fontSize: isDesktop ? 20 : 16,
+              ),
+            ),
+            if (isDesktop) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Your order history will appear here',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    final double maxWidth = isDesktop ? 1200 : (isTablet ? 900 : double.infinity);
+    final double horizontalPadding = isDesktop ? 32 : (isTablet ? 24 : 16);
+
+    return RefreshIndicator(
+      onRefresh: _fetchPreviousOrders,
+      color: theme.colorScheme.primary,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: CustomScrollView(
+            controller: widget.scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Header for web
+              if (isDesktop) ...[
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(horizontalPadding, 24, horizontalPadding, 16),
+                  sliver: SliverToBoxAdapter(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.history,
+                            color: theme.colorScheme.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Order History',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${_orders.length} ${_orders.length == 1 ? 'order' : 'orders'} placed',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _fetchPreviousOrders,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+
+              // Orders grid/list
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  isDesktop ? 8 : 16,
+                  horizontalPadding,
+                  isMobile ? 80 : 32,
+                ),
+                sliver: isDesktop
+                    ? SliverGrid(
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 500,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: 1.2,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final order = _orders[index];
+                            return _buildOrderCardWeb(order);
+                          },
+                          childCount: _orders.length,
+                        ),
+                      )
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final order = _orders[index];
+                            return _buildOrderCard(order);
+                          },
+                          childCount: _orders.length,
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Mobile/Tablet Order Card (existing)
   Widget _buildOrderCard(Order order) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
@@ -1525,7 +1726,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
             : orderStatusRaw);
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -1534,8 +1735,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                Colors.black.withOpacity(isDarkMode ? 0.1 : 0.05),
+            color: Colors.black.withOpacity(isDarkMode ? 0.1 : 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1677,8 +1877,8 @@ class _HystoryScreenState extends State<HystoryScreen> {
 
             // Right side image
             Container(
-              width: 120,
-              height: 140,
+              width: 100,
+              height: 120,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 image: DecorationImage(
@@ -1696,70 +1896,280 @@ class _HystoryScreenState extends State<HystoryScreen> {
     );
   }
 
-  Widget _buildBody() {
+  // Web Professional Order Card
+  Widget _buildOrderCardWeb(Order order) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
-    if (_loading) {
-      return Center(
-        child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-        ),
-      );
-    }
+    final products = order.products;
+    final mainProduct = products.isNotEmpty ? products.first : null;
+    final rawImageUrl =
+        mainProduct != null ? (mainProduct.image ?? '') : '';
+    final imageUrl = _normalizeImageUrl(rawImageUrl.toString());
+    final name = mainProduct != null ? mainProduct.name : 'Item';
+    final price = mainProduct != null ? mainProduct.price : 0.0;
 
-    if (_error != null) {
-      return Center(
-        child:
-            _buildNetworkErrorWidget(_lastError ?? _error!, _fetchPreviousOrders),
-      );
-    }
+    final restaurantName = order.restaurant.restaurantName;
+    final orderDate = order.createdAt ?? DateTime.now();
+    final formattedDate = '${orderDate.day}/${orderDate.month}/${orderDate.year}';
 
-    if (_orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.receipt_long,
-              size: 80,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No previous orders',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final orderStatusRaw = order.orderStatus;
+    final deliveryStatusRaw = order.deliveryStatus;
+    final statusLower = orderStatusRaw.toLowerCase();
+    final deliveryLower = deliveryStatusRaw.toLowerCase();
 
-    final isMobile = Responsive.isMobile(context);
-    final isTablet = Responsive.isTablet(context);
-    final isDesktop = Responsive.isDesktop(context);
+    final isDelivered = statusLower.contains('delivered') ||
+        statusLower.contains('completed') ||
+        deliveryLower.contains('delivered');
 
-    final double maxWidth =
-        isDesktop ? 900 : (isTablet ? 700 : double.infinity);
+    final chipText = isDelivered
+        ? 'Delivered'
+        : (deliveryStatusRaw.isNotEmpty
+            ? deliveryStatusRaw
+            : orderStatusRaw);
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: ListView.builder(
-          controller: widget.scrollController,
-          padding: EdgeInsets.fromLTRB(
-            16,
-            16,
-            16,
-            isMobile ? 80 : 32,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: theme.dividerColor.withOpacity(0.2),
           ),
-          itemCount: _orders.length,
-          itemBuilder: (context, index) {
-            final order = _orders[index];
-            return _buildOrderCard(order);
-          },
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with date and status
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.receipt_outlined,
+                      color: theme.colorScheme.primary,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Order #${order.id?.substring(0,5)}',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          formattedDate,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDelivered
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isDelivered ? Icons.check_circle : Icons.pending,
+                          size: 14,
+                          color: isDelivered ? Colors.green : Colors.orange,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          chipText,
+                          style: TextStyle(
+                            color: isDelivered ? Colors.green : Colors.orange,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Product info row
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      imageUrl,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: theme.colorScheme.surface,
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: theme.colorScheme.onSurface.withOpacity(0.3),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Product details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (restaurantName.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.store,
+                                size: 14,
+                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                restaurantName,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Text(
+                          '₹${price.toStringAsFixed(2)}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Total and actions
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Total',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                      Text(
+                        '₹${order.totalPayable.toStringAsFixed(2)}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _viewOrderDetails(order),
+                      icon: const Icon(Icons.visibility, size: 18),
+                      label: const Text('View Details'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  if (isDelivered)
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _downloadInvoice(order),
+                        icon: const Icon(Icons.download, size: 18),
+                        label: const Text('Invoice'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          final supportPhone = context.read<CredentialProvider>().getWhatsappByType('user');
+                          if (supportPhone != null) {
+                            final message = "Hello, I need help with my order #${order.id}";
+                            launchUrl(Uri.parse("https://wa.me/$supportPhone?text=${Uri.encodeComponent(message)}"));
+                          }
+                        },
+                        icon: Image.asset(
+                          'assets/images/wattsapp.png',
+                          width: 18,
+                          height: 18,
+                        ),
+                        label: const Text('Support'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1770,11 +2180,9 @@ class _HystoryScreenState extends State<HystoryScreen> {
     final isNetwork = error is SocketException ||
         (error is HttpException) ||
         error.toString().toLowerCase().contains('socket') ||
-        error
-            .toString()
-            .toLowerCase()
-            .contains('failed host lookup') ||
+        error.toString().toLowerCase().contains('failed host lookup') ||
         error.toString().toLowerCase().contains('network');
+    final isDesktop = Responsive.isDesktop(context);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1795,7 +2203,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
         children: [
           Icon(
             isNetwork ? Icons.wifi_off : Icons.folder_off,
-            size: 64,
+            size: isDesktop ? 80 : 64,
             color: theme.colorScheme.onSurface.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
@@ -1803,6 +2211,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
             isNetwork ? "No Internet Connection" : "",
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: isDesktop ? 20 : 16,
             ),
             textAlign: TextAlign.center,
           ),
@@ -1813,11 +2222,32 @@ class _HystoryScreenState extends State<HystoryScreen> {
                 : error.toString(),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color:
-                  theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontSize: isDesktop ? 16 : 14,
             ),
           ),
-          // If you want retry / close buttons, you already have them commented.
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 24 : 20,
+                    vertical: isDesktop ? 14 : 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1826,12 +2256,13 @@ class _HystoryScreenState extends State<HystoryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDesktop = Responsive.isDesktop(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Previous Orders',
+          isDesktop ? 'Order History' : 'Previous Orders',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -1843,8 +2274,9 @@ class _HystoryScreenState extends State<HystoryScreen> {
           ),
           onPressed: _handleBackButton,
         ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
+        elevation: isDesktop ? 1 : 0,
+        backgroundColor: isDesktop ? theme.cardColor : Colors.transparent,
+        centerTitle: isDesktop,
       ),
       body: SafeArea(child: _buildBody()),
     );

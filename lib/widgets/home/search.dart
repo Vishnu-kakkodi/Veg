@@ -842,8 +842,9 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                 decoration: InputDecoration(
                   filled: true,
                   // fillColor: isDark ? theme.cardColor : const Color(0xFFEBF4F1),
+                  
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(30),
                     // borderSide: BorderSide(
                     //   color: Colors.black, // 👈 border color
                     // ),

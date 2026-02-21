@@ -2489,14 +2489,40 @@ class _CartScreenState extends State<CartScreen> {
             // Loading
             if (!cp.hasItems) {
               return Center(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  CircularProgressIndicator(color: cs.primary),
-                  const SizedBox(height: 16),
-                  Text('Loading cart...',
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: cs.onSurface.withOpacity(0.7))),
-                ]),
-              );
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.shopify,
+                            size:  64,
+                            color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Your cart is empty',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                            fontSize:  18,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Add items to see them here',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
             }
 
             // Error

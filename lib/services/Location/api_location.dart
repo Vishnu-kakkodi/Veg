@@ -11,6 +11,7 @@ class ApiLocationService {
   }) async {
     try {
       final uri = Uri.parse(ApiConstants.location(userId));
+      print("jkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj$uri");
 
       final response = await http.post(
         uri,
@@ -20,6 +21,8 @@ class ApiLocationService {
           'longitude': double.parse(longitude),
         }),
       );
+
+      print("jkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj${response.body}");
 
       if (response.statusCode == 200) {
         return true;

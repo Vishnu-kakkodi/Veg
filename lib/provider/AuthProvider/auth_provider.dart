@@ -7,6 +7,7 @@ import 'package:veegify/views/Auth/create_password.dart';
 import 'package:veegify/views/Auth/login_page.dart';
 import 'package:veegify/views/Auth/otp_screen.dart';
 import 'package:veegify/views/Navbar/navbar_screen.dart';
+import 'package:veegify/views/onboard/start.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -124,7 +125,7 @@ class AuthProvider with ChangeNotifier {
       // Navigate to home screen
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => NavbarScreen(initialIndex: 0,)),
+        MaterialPageRoute(builder: (_) => Start()),
         (route) => false,
       );
     } on ValidationException catch (e) {

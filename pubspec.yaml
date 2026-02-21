@@ -59,6 +59,7 @@ dependencies:
   # 🔥 FIXED COMPATIBILITY PAIR
   package_info_plus: ^9.0.0
   new_version_plus: ^1.0.1
+  chewie: ^1.13.0
 
 dev_dependencies:
   test: ^1.29.0
@@ -79,6 +80,7 @@ flutter:
     - assets/images/applogo.png
     - assets/images/logolocation.png
     - assets/videos/home.mp4
+    - assets/videos/start_video.mp4
     - assets/images/logo.png
     - assets/images/no food.png
     - assets/images/check_mark.png

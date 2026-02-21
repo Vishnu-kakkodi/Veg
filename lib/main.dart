@@ -13,6 +13,7 @@ import 'package:veegify/provider/CouponProvider/coupon_provider.dart';
 import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/provider/LocationProvider/location_provider.dart';
 import 'package:veegify/provider/MaintenanceProvider/maintenance_provider.dart';
+import 'package:veegify/provider/NotificationProvider/notification_provider.dart';
 import 'package:veegify/provider/ProfileProvider.dart/profile_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/nearby_restaurants_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/restaurant_products_provider.dart';
@@ -68,6 +69,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => HomeLayoutProvider()),
         ChangeNotifierProvider(create: (_) => CredentialProvider()),
         ChangeNotifierProvider(create: (_) => CouponProvider()),
+                ChangeNotifierProvider(create: (_) => NotificationProvider()),
+
       ],
       child: const _AppBootstrapper(),
     );
