@@ -54,7 +54,8 @@ void initState() {
       debugPrint("User not available yet");
 
     if (userId != null ) {
- 
+     print("User Id printing in navbar Screen: $userId");
+
       context.read<CartProvider>().setUserId(userId.toString());
       context.read<CartProvider>().loadCart(userId.toString());
       

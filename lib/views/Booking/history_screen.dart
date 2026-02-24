@@ -112,7 +112,7 @@ class _HystoryScreenState extends State<HystoryScreen> {
         setState(() {
           imageUrl = userData['profileImg'] ?? '';
           user = User(
-            userId: userData['_id'],
+            userId: userData['userId'],
             fullName: userData['fullName'] ?? '',
             email: userData['email'] ?? '',
             phoneNumber: userData['phoneNumber'] ?? '',
@@ -149,7 +149,7 @@ debugPrint("USER ID: ${user?.userId}");
 
     try {
       final url =
-          Uri.parse("$_apiHost/api/userpreviousorders/${user!.userId}");
+          Uri.parse("$_apiHost/api/userpreviousorders/${user?.userId}");
       final response = await http.get(url);
 
       debugPrint("Orders response: ${response.statusCode} -> ${response.body}");
@@ -1305,7 +1305,7 @@ debugPrint("USER ID: ${user?.userId}");
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          isDesktop ? 'Order History' : 'Previous Orders',
+          isDesktop ? 'Previous Orders' : 'Previous Orders',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),

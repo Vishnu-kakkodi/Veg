@@ -2247,6 +2247,7 @@ class _CartScreenState extends State<CartScreen> {
 
   // ── Init ──────────────────────────────────────────────────────────────────
   Future<void> _initializeCart() async {
+    print("User Id printing in cart Screen: ${user?.userId}");
     await _loadUser();
     final cp = context.read<CartProvider>();
     await cp.loadCart(user?.userId.toString());
