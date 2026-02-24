@@ -41,24 +41,40 @@ class _NavbarScreenState extends State<NavbarScreen> {
   static const Color orangeLight = Color(0xFFFF8A5C);
   static const Color orangeVeryLight = Color(0xFFFFE9E0);
 
-  @override
-  void initState() {
-    super.initState();
+    String? userId;
 
-    user = UserPreferences.getUser();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Set user ID in cart provider
-      if (user?.userId != null) {
-        context.read<CartProvider>().setUserId(user!.userId);
-      }
+@override
+void initState() {
+  super.initState();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await _loadUserId();
+
+      debugPrint("User not available yet");
+
+    if (userId != null ) {
+ 
+      context.read<CartProvider>().setUserId(userId.toString());
+      context.read<CartProvider>().loadCart(userId.toString());
       
-      context.read<BottomNavbarProvider>().setIndex(widget.initialIndex);
-      context.read<CartProvider>().loadCart(user?.userId);
-      context.read<OrderProvider>().loadAllOrders(user?.userId);
-    });
-  }
+      // Load orders for history screen
+      context.read<OrderProvider>().loadAllOrders(userId.toString());
+    } else {
+      debugPrint("User not available yet");
+    }
+  });
+}
 
+
+  Future<void> _loadUserId() async {
+    final user = UserPreferences.getUser();
+    if (user != null && mounted) {
+      setState(() {
+        userId = user.userId;
+      });
+    }
+  }
   void _onTabChange(int index) {
     context.read<BottomNavbarProvider>().setIndex(index);
 
