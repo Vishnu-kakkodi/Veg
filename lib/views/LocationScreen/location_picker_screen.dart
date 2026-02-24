@@ -204,53 +204,128 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   }
 
   // Search for places using Nominatim API
+  // Future<void> _searchPlaces(String query) async {
+  //   if (query.isEmpty) {
+  //     setState(() {
+  //       _suggestions = [];
+  //     });
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   final url = Uri.parse(
+  //       'https://nominatim.openstreetmap.org/search?format=json&q=$query&limit=5&addressdetails=1');
+
+  //   try {
+  //     final response = await http.get(url, headers: {
+  //       'User-Agent': 'FlutterApp',
+  //     });
+
+  //     if (response.statusCode == 200) {
+  //       final List<dynamic> data = jsonDecode(response.body);
+  //       setState(() {
+  //         _suggestions = data.map((item) => {
+  //           'display_name': item['display_name'],
+  //           'lat': double.parse(item['lat']),
+  //           'lon': double.parse(item['lon']),
+  //         }).toList();
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error searching places: $e');
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
+
+
+
   Future<void> _searchPlaces(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        _suggestions = [];
-      });
-      return;
-    }
-
+print("Query printing: $query");
+    const String googleApiKey = "AIzaSyDrfuvRqBj5hfk8BW7R7h-MxFoISkqfUpE";
+  if (query.isEmpty) {
     setState(() {
-      _isLoading = true;
+      _suggestions = [];
     });
+    return;
+  }
 
-    final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?format=json&q=$query&limit=5&addressdetails=1');
+  setState(() {
+    _isLoading = true;
+  });
 
-    try {
-      final response = await http.get(url, headers: {
-        'User-Agent': 'FlutterApp',
-      });
+  final url = Uri.parse(
+    "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+    "?input=$query"
+    "&key=$googleApiKey"
+    "&components=country:in"
+  );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        setState(() {
-          _suggestions = data.map((item) => {
-            'display_name': item['display_name'],
-            'lat': double.parse(item['lat']),
-            'lon': double.parse(item['lon']),
-          }).toList();
-        });
-      }
-    } catch (e) {
-      print('Error searching places: $e');
-    } finally {
+  try {
+    print("Base Url printing: $url");
+    final response = await http.get(url);
+
+    print("Response printing : ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
       setState(() {
-        _isLoading = false;
+        _suggestions = data["predictions"].map<Map<String, dynamic>>((item) {
+          return {
+            "description": item["description"],
+            "place_id": item["place_id"],
+          };
+        }).toList();
       });
     }
+  } catch (e) {
+    print("Error: $e");
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
   // Handle suggestion selection
-  void _selectLocation(Map<String, dynamic> suggestion) {
-    final result = {
-      'location': LatLng(suggestion['lat'], suggestion['lon']),
-      'address': suggestion['display_name'],
-    };
-    Navigator.pop(context, result);
-  }
+  // void _selectLocation(Map<String, dynamic> suggestion) {
+  //   final result = {
+  //     'location': LatLng(suggestion['lat'], suggestion['lon']),
+  //     'address': suggestion['display_name'],
+  //   };
+  //   Navigator.pop(context, result);
+  // }
+
+
+  Future<void> _selectLocation(Map<String, dynamic> suggestion) async {
+
+    const String googleApiKey = "AIzaSyDrfuvRqBj5hfk8BW7R7h-MxFoISkqfUpE";
+  final placeId = suggestion["place_id"];
+
+  final url = Uri.parse(
+    "https://maps.googleapis.com/maps/api/place/details/json"
+    "?place_id=$placeId"
+    "&key=$googleApiKey"
+  );
+
+  final response = await http.get(url);
+  final data = jsonDecode(response.body);
+
+  final location = data["result"]["geometry"]["location"];
+
+  final result = {
+    "location": LatLng(location["lat"], location["lng"]),
+    "address": suggestion["description"],
+  };
+
+  Navigator.pop(context, result);
+}
 
   @override
   Widget build(BuildContext context) {

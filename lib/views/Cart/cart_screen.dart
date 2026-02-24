@@ -2184,6 +2184,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -2193,6 +2194,7 @@ import 'package:veegify/model/CartModel/cart_model.dart';
 import 'package:veegify/model/user_model.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/views/Booking/checkout_screen.dart';
+import 'package:veegify/views/Booking/checkout_screen_web.dart';
 import 'package:veegify/views/Cart/cart_summary.dart';
 import 'package:veegify/core/app_lifecycle_service.dart';
 import 'package:veegify/utils/responsive.dart';
@@ -2394,8 +2396,9 @@ class _CartScreenState extends State<CartScreen> {
       return;
     }
     if (mounted) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (_) => const CheckoutScreen()));
+
+  // Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutScreen()));
+ Navigator.push(context, MaterialPageRoute(builder: (_) => CheckoutScreenWeb()));
     }
   }
 

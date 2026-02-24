@@ -60,6 +60,7 @@ dependencies:
   package_info_plus: ^9.0.0
   new_version_plus: ^1.0.1
   chewie: ^1.13.0
+  universal_html: ^2.3.0
 
 dev_dependencies:
   test: ^1.29.0
