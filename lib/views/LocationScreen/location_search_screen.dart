@@ -688,3 +688,153 @@
 //     );
 //   }
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+
+class LocationSearchScreen extends StatefulWidget {
+  const LocationSearchScreen({super.key});
+
+  @override
+  State<LocationSearchScreen> createState() => _LocationSearchScreenState();
+}
+
+class _LocationSearchScreenState extends State<LocationSearchScreen> {
+
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _suggestions = [];
+
+  final String googleApiKey = "AIzaSyDrfuvRqBj5hfk8BW7R7h-MxFoISkqfUpE";
+
+  Future<void> _searchPlaces(String query) async {
+    print("Response printing : $query");
+
+    if (query.isEmpty) {
+      setState(() => _suggestions = []);
+      return;
+    }
+
+    final url = Uri.parse(
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+        "?input=$query&key=$googleApiKey&components=country:in");
+
+        
+
+    final response = await http.get(url);
+        print("Response printing : ${response.body}");
+
+
+    if (response.statusCode == 200) {
+
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        _suggestions = data["predictions"]
+            .map<Map<String, dynamic>>((item) => {
+                  "description": item["description"],
+                  "place_id": item["place_id"],
+                })
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _selectLocation(Map<String, dynamic> suggestion) async {
+    print("Response printing : $suggestion");
+
+    final placeId = suggestion["place_id"];
+
+    final url = Uri.parse(
+        "https://maps.googleapis.com/maps/api/place/details/json"
+        "?place_id=$placeId&key=$googleApiKey");
+
+    final response = await http.get(url);
+    print("Response printing : ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    final location = data["result"]["geometry"]["location"];
+
+    Navigator.pop(context, {
+      "location": LatLng(location["lat"], location["lng"]),
+      "address": suggestion["description"],
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Search Location")),
+      body: Column(
+        children: [
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: "Search place",
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) {
+                Future.delayed(const Duration(milliseconds: 400), () {
+                  if (_searchController.text == value) {
+                    _searchPlaces(value);
+                  }
+                });
+              },
+            ),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: _suggestions.length,
+              itemBuilder: (context, index) {
+
+                final suggestion = _suggestions[index];
+
+                return ListTile(
+                  leading: const Icon(Icons.location_on),
+                  title: Text(suggestion["description"]),
+                  onTap: () => _selectLocation(suggestion),
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}

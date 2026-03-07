@@ -2398,8 +2398,8 @@ class _CartScreenState extends State<CartScreen> {
     }
     if (mounted) {
 
-  // Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutScreen()));
- Navigator.push(context, MaterialPageRoute(builder: (_) => CheckoutScreenWeb()));
+  Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutScreen()));
+//  Navigator.push(context, MaterialPageRoute(builder: (_) => CheckoutScreenWeb()));
     }
   }
 
