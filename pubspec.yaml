@@ -96,6 +96,8 @@ flutter:
     - assets/images/promo1.png
     - assets/images/start.png
     - assets/appstore.png
+    - assets/splash.png
+    - assets/images/img.png
 
 flutter_icons:
   android: true

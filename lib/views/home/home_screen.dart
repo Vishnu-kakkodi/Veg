@@ -1364,7 +1364,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height:5),
 
             /// 🔥 Categories Section
             Padding(
@@ -1379,12 +1379,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
 
             /// 🔥 Nearby Restaurants
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            //   child: Column(
+            //     children: [
+            //       SectionHeader(
+            //         title: 'Nearby restaurants',
+            //         onSeeAll: () {
+            //           Navigator.push(
+            //             context,
+            //             MaterialPageRoute(
+            //               builder: (_) => NearbyScreen(
+            //                 userId: userId.toString(),
+            //               ),
+            //             ),
+            //           );
+            //         },
+            //       ),
+            //       _isInitializing
+            //           ? _buildRestaurantSkeleton()
+            //           : _buildRestaurantList(),
+            //     ],
+            //   ),
+            // ),
+
+            /// 🔥 Popular Restaurants
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SectionHeader(
-                    title: 'Nearby restaurants',
+                    title: 'Near Restaurants',
                     onSeeAll: () {
                       Navigator.push(
                         context,
@@ -1399,32 +1425,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   _isInitializing
                       ? _buildRestaurantSkeleton()
                       : _buildRestaurantList(),
-                ],
-              ),
-            ),
-
-            /// 🔥 Popular Restaurants
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SectionHeader(
-                    title: 'Popular Restaurants',
-                    onSeeAll: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TopRestaurantsScreen(
-                            userId: userId.toString(),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  _isInitializing
-                      ? _buildVerticalRestaurantSkeleton()
-                      : _buildTopRestaurants(),
                 ],
               ),
             ),
@@ -1567,7 +1567,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SectionHeader(
-                      title: 'Popular Restaurants',
+                      title: 'Near Restaurants',
                       onSeeAll: () {
                         Navigator.push(
                           context,
@@ -1635,7 +1635,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: isDesktop ? 6 : 4,
+              crossAxisCount: isDesktop ? 6 : 2,
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
               childAspectRatio: 0.9,
@@ -1677,7 +1677,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildRestaurantList() {
+Widget _buildRestaurantList() {
     final theme = Theme.of(context);
     final isDesktop = Responsive.isDesktop(context);
     final isWeb = kIsWeb;
@@ -1725,74 +1725,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           );
         }
 
-        return SizedBox(
-          height: Responsive.value(
-            context,
-            mobile: 120,
-            tablet: 120,
-            desktop: 180,
-          ),
-          child: isWeb
-              ? Scrollbar(
-                  thumbVisibility: false,
-                  thickness: 0,
-                  radius: const Radius.circular(10),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const ClampingScrollPhysics(),
-                    itemCount: provider.nearbyRestaurants.length,
-                    itemBuilder: (context, index) {
-                      final restaurant = provider.nearbyRestaurants[index];
-                      return SizedBox(
-                        width: Responsive.value(
-                          context,
-                          mobile: 300,
-                          tablet: 260,
-                          desktop: 300,
-                        ),
-                        child: RestaurantCard(
-                          id: restaurant.id,
-                          imagePath: restaurant.imageUrl,
-                          name: restaurant.restaurantName,
-                          rating: restaurant.rating.toDouble(),
-                          description: restaurant.description,
-                          price: restaurant.startingPrice,
-                          locationName: restaurant.locationName,
-                          status: restaurant.status,
-                          discount: restaurant.discount,
-                        ),
-                      );
-                    },
-                  ),
-                )
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: provider.nearbyRestaurants.length,
-                  itemBuilder: (context, index) {
-                    final restaurant = provider.nearbyRestaurants[index];
-                    return SizedBox(
-                      width: Responsive.value(
-                        context,
-                        mobile: 300,
-                        tablet: 260,
-                        desktop: 300,
-                      ),
-                      child: RestaurantCard(
-                        id: restaurant.id,
-                        imagePath: restaurant.imageUrl,
-                        name: restaurant.restaurantName,
-                        rating: restaurant.rating.toDouble(),
-                        description: restaurant.description,
-                        price: restaurant.startingPrice,
-                        locationName: restaurant.locationName,
-                        status: restaurant.status,
-                        discount: restaurant.discount,
-                      ),
-                    );
-                  },
-                ),
-        );
+return GridView.builder(
+  shrinkWrap: true,                              // ✅ wraps to content height
+  physics: const NeverScrollableScrollPhysics(), // ✅ disables inner scroll
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
+    childAspectRatio: 1.0,
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 12,
+  ),
+  itemCount: provider.nearbyRestaurants.length,
+  itemBuilder: (context, index) {
+    final restaurant = provider.nearbyRestaurants[index];
+    return RestaurantCard(
+      id: restaurant.id,
+      imagePath: restaurant.imageUrl,
+      name: restaurant.restaurantName,
+      rating: restaurant.rating.toDouble(),
+      description: restaurant.description,
+      price: restaurant.startingPrice,
+      locationName: restaurant.locationName,
+      status: restaurant.status,
+      discount: restaurant.discount,
+      distance: restaurant.distance
+    );
+  },
+);
       },
     );
   }

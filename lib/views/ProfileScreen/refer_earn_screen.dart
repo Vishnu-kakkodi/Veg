@@ -992,6 +992,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ReferEarnScreen extends StatelessWidget {
@@ -1127,68 +1128,77 @@ class ReferEarnScreen extends StatelessWidget {
 
   // ----------------- UI Widgets -----------------
 
-  Widget _heroCard(ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF4CAF50),
-            Color(0xFF2E7D32),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
+
+Widget _heroCard(ThemeData theme) {
+  return Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFF4CAF50),
+          Color(0xFF2E7D32),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Container(
-              height: 160,
-              width: 160,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(80),
-              ),
-              child: const Icon(
-                Icons.card_giftcard_rounded,
-                size: 80,
-                color: Colors.white,
-              ),
+      borderRadius: BorderRadius.circular(24),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.green.withOpacity(0.3),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          Container(
+            height: 160,
+            width: 160,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(80),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              "🎉 Earn Rewards!",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            child: const Icon(
+              Icons.card_giftcard_rounded,
+              size: 80,
+              color: Colors.white,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "Refer 10 friends this month and earn up to ₹3,000!\nThat's equal to a month's subscription.",
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "🎉 Earn Rewards!",
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: const BoxDecoration(
+              color: Colors.amber,
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Text(
+              "Refer 10 friends earn up to ₹500!",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.9),
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                color: const Color(0xFF011239),
+                fontWeight: FontWeight.bold,
                 height: 1.5,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _inviteCard(ThemeData theme) {
     return Container(
@@ -1424,14 +1434,14 @@ class ReferEarnScreen extends StatelessWidget {
             color: Colors.orange,
             theme: theme,
           ),
-          const SizedBox(height: 16),
-          _buildHowItWorksStep(
-            icon: Icons.card_giftcard_rounded,
-            title: "Both earn rewards",
-            subtitle: "Get ₹300 for each successful referral",
-            color: Colors.green,
-            theme: theme,
-          ),
+          // const SizedBox(height: 16),
+          // _buildHowItWorksStep(
+          //   icon: Icons.card_giftcard_rounded,
+          //   title: "Both earn rewards",
+          //   subtitle: "Get ₹300 for each successful referral",
+          //   color: Colors.green,
+          //   theme: theme,
+          // ),
         ],
       ),
     );

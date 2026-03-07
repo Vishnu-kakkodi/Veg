@@ -61,6 +61,7 @@ class NearbyRestaurantModel {
   final String locationName;
   final String status;
   final dynamic discount;
+   String? distance;
 
   NearbyRestaurantModel({
     required this.id,
@@ -71,7 +72,8 @@ class NearbyRestaurantModel {
     required this.startingPrice,
     required this.locationName,
     required this.status,
-    required this.discount
+    required this.discount,
+    this.distance
   });
 
   factory NearbyRestaurantModel.fromJson(Map<String, dynamic> json) {
@@ -97,6 +99,7 @@ class NearbyRestaurantModel {
       locationName: json['locationName']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       discount: json['discount']?.toString() ??'',
+      distance: json['distance'] ?.toString() ?? ''
     );
   }
 }

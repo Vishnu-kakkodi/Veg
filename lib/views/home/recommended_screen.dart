@@ -35,6 +35,8 @@
 //   Timer? _availabilityTimer;
 //   bool _hasLoadedOnce = false;
 
+  
+
 //   @override
 //   void initState() {
 //     super.initState();
@@ -99,7 +101,6 @@
 
 //       final provider = context.read<RestaurantProductsProvider>();
 
-//       // 👉 If there are no products, skip polling to avoid glitch
 //       if (provider.error == "NO_PRODUCTS") {
 //         return;
 //       }
@@ -115,10 +116,58 @@
 //     });
 //   }
 
+//   // Responsive helper methods
+//   bool _isMobile(BuildContext context) =>
+//       MediaQuery.of(context).size.width < 600;
+
+//   bool _isTablet(BuildContext context) {
+//     final width = MediaQuery.of(context).size.width;
+//     return width >= 600 && width < 1024;
+//   }
+
+//   bool _isDesktop(BuildContext context) =>
+//       MediaQuery.of(context).size.width >= 1024;
+
+//   // int _getCrossAxisCount(BuildContext context) {
+//   //   if (_isDesktop(context)) return 3;
+//   //   if (_isTablet(context)) return 2;
+//   //   return 1;
+//   // }
+
+
+//   int _getCrossAxisCount(BuildContext context) {
+//   final w = MediaQuery.of(context).size.width;
+
+//   if (w >= 1600) return 5;
+//   if (w >= 1300) return 4;
+//   if (w >= 1024) return 3;
+//   if (w >= 700) return 2;
+//   return 1;
+// }
+
+
+//   // double _getMaxWidth(BuildContext context) {
+//   //   if (_isDesktop(context)) return 1400;
+//   //   return double.infinity;
+//   // }
+
+
+//   double _getMaxWidth(BuildContext context) {
+//   final w = MediaQuery.of(context).size.width;
+
+//   if (w >= 1600) return 1300;
+//   if (w >= 1200) return 1800;
+//   if (w >= 1024) return 1100;
+//   return double.infinity;
+// }
+
+
 //   @override
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
+//     final isMobile = _isMobile(context);
+//     final isDesktop = _isDesktop(context);
 
 //     return Scaffold(
 //       backgroundColor: isDark ? theme.scaffoldBackgroundColor : Colors.white,
@@ -126,7 +175,6 @@
 //         top: false,
 //         child: Consumer<RestaurantProductsProvider>(
 //           builder: (context, restaurantProvider, child) {
-//             // Only show full-screen loader before first successful load.
 //             if (restaurantProvider.isLoading && !_hasLoadedOnce) {
 //               return Center(
 //                 child: CircularProgressIndicator(
@@ -147,753 +195,172 @@
 //                 ? restaurantProvider.allRecommendedItems
 //                 : restaurantProvider.searchItems(_searchQuery);
 
-//             final specialitiesText =
-//                 restaurantProvider.recommendedProducts.isNotEmpty &&
-//                     restaurantProvider
-//                         .recommendedProducts
-//                         .first
-//                         .recommendedItem
-//                         .tags
-//                         .isNotEmpty
-//                 ? restaurantProvider
-//                       .recommendedProducts
-//                       .first
-//                       .recommendedItem
-//                       .tags
-//                       .join(", ")
-//                 : "Food, Specialties";
-
 //             final rating = restaurantProvider.rating > 0
 //                 ? restaurantProvider.rating.toStringAsFixed(1)
 //                 : "4.0";
 
 //             final totalReviews = restaurantProvider.totalReviews;
 
-//             // ⚠️ Replace `restaurantStatus` with your actual field
 //             final bool isRestaurantActive =
 //                 (restaurantProvider.restaurantStatus ?? '').toLowerCase() ==
 //                 'active';
 
 //             return SingleChildScrollView(
-//               child: Column(
-//                 children: [
-//                   Stack(
+//               child: Center(
+//                 child: Container(
+//                   constraints: BoxConstraints(
+//                     maxWidth: _getMaxWidth(context),
+//                   ),
+//                   child: Column(
 //                     children: [
-//                       // 🔥 Background Restaurant Image
-//                       Container(
-//                         height: 400,
-//                         width: double.infinity,
-//                         decoration: BoxDecoration(
-//                           borderRadius: const BorderRadius.vertical(
-//                             bottom: Radius.circular(30),
-//                           ),
-//                           image: DecorationImage(
-//                             image: NetworkImage(
-//                               // restaurantProvider.restaurantImage.isNotEmpty
-//                               //     ? restaurantProvider.restaurantImage:
-//                               restaurantProvider.resImage,
-//                             ),
-//                             fit: BoxFit.cover,
-//                           ),
-//                         ),
+//                       // Hero Section
+//                       _buildHeroSection(
+//                         context,
+//                         restaurantProvider,
+//                         theme,
+//                         isDark,
+//                         isRestaurantActive,
+//                         rating,
+//                         totalReviews,
+//                         isMobile,
+//                         isDesktop,
 //                       ),
 
-//                       // 🔥 Gradient Overlay (for readability)
-//                       Container(
-//                         height: 400,
-//                         decoration: BoxDecoration(
-//                           borderRadius: const BorderRadius.vertical(
-//                             bottom: Radius.circular(30),
+//                       SizedBox(height: isDesktop ? 40 : 20),
+
+//                       // Search Bar
+//                       Padding(
+//                         padding: EdgeInsets.symmetric(
+//                           horizontal: isDesktop ? 32 : 16,
+//                           vertical: 8,
+//                         ),
+//                         child: Container(
+//                           constraints: const BoxConstraints(maxWidth: 800),
+//                           decoration: BoxDecoration(
+//                             border: Border.all(
+//                               color: const Color.fromARGB(255, 32, 203, 20),
+//                             ),
+//                             borderRadius: BorderRadius.circular(12),
 //                           ),
-//                           gradient: LinearGradient(
-//                             begin: Alignment.topCenter,
-//                             end: Alignment.bottomCenter,
-//                             colors: [
-//                               Colors.black.withOpacity(0.2),
-//                               Colors.black.withOpacity(0.6),
+//                           child: Row(
+//                             children: [
+//                               Expanded(
+//                                 child: SizedBox(
+//                                   height: 50,
+//                                   child: TextFormField(
+//                                     controller: _searchController,
+//                                     style: TextStyle(
+//                                       color: theme.colorScheme.onSurface,
+//                                     ),
+//                                     decoration: InputDecoration(
+//                                       hintText: 'Search your food',
+//                                       hintStyle: TextStyle(
+//                                         color: theme.colorScheme.onSurface
+//                                             .withOpacity(0.6),
+//                                       ),
+//                                       prefixIcon: Icon(
+//                                         Icons.search,
+//                                         color: theme.colorScheme.onSurface
+//                                             .withOpacity(0.6),
+//                                       ),
+//                                       filled: true,
+//                                       fillColor: isDark
+//                                           ? theme.cardColor
+//                                           : Colors.white,
+//                                       border: OutlineInputBorder(
+//                                         borderRadius: BorderRadius.circular(30),
+//                                         borderSide: BorderSide.none,
+//                                       ),
+//                                       contentPadding:
+//                                           const EdgeInsets.symmetric(
+//                                         vertical: 0,
+//                                       ),
+//                                     ),
+//                                     onChanged: (value) {
+//                                       setState(() {
+//                                         _searchQuery = value;
+//                                       });
+//                                     },
+//                                   ),
+//                                 ),
+//                               ),
+//                               const SizedBox(width: 10),
 //                             ],
 //                           ),
 //                         ),
 //                       ),
 
-//                       // 🔙 Back Button
-//                       Positioned(
-//                         top: 50,
-//                         left: 16,
-//                         child: CircleAvatar(
-//                           backgroundColor: Colors.black54,
-//                           child: IconButton(
-//                             icon: const Icon(
-//                               Icons.arrow_back_ios,
-//                               color: Colors.white,
-//                             ),
-//                             onPressed: () => Navigator.pop(context),
-//                           ),
-//                         ),
+//                       Divider(
+//                         height: 30,
+//                         color: isDark ? Colors.grey[700] : Colors.grey[300],
+//                         indent: isDesktop ? 32 : 16,
+//                         endIndent: isDesktop ? 32 : 16,
 //                       ),
 
-//                       // 🌟 Bottom-left Restaurant Info
-//                       Positioned(
-//                         left: 20,
-//                         right: 20,
-//                         bottom: 20,
-//                         child: Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                       // Recommended Header
+//                       Padding(
+//                         padding: EdgeInsets.symmetric(
+//                           horizontal: isDesktop ? 32 : 16,
+//                           vertical: 8,
+//                         ),
+//                         child: Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //                           children: [
-//                             // Restaurant Name
 //                             Text(
-//                               restaurantProvider.restaurantName,
-//                               style: TextStyle(
-//                                 fontSize: 22,
+//                               'Recommended',
+//                               style: theme.textTheme.titleLarge?.copyWith(
 //                                 fontWeight: FontWeight.bold,
-//                                 color: Colors.white,
-//                                 shadows: [
-//                                   Shadow(
-//                                     offset: Offset(0, 1),
-//                                     blurRadius: 4,
-//                                     color: Colors.black.withOpacity(0.7),
-//                                   ),
-//                                 ],
+//                                 color: theme.colorScheme.onSurface,
 //                               ),
 //                             ),
-
-//                             const SizedBox(height: 6),
-
-//                             // Location Row
-//                             Row(
-//                               children: [
-//                                 const Icon(
-//                                   Icons.location_on,
-//                                   color: Colors.white,
-//                                   size: 16,
-//                                 ),
-//                                 const SizedBox(width: 4),
-//                                 Expanded(
-//                                   child: Text(
-//                                     restaurantProvider.locationName,
-//                                     overflow: TextOverflow.ellipsis,
-//                                     style: TextStyle(
-//                                       fontSize: 14,
-//                                       color: Colors.white.withOpacity(0.9),
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-
-//                             const SizedBox(height: 8),
-
-//                             // ⭐ Rating Badge
-//                             GestureDetector(
-//                               onTap: isRestaurantActive
-//                                   ? () {
-//                                       Navigator.push(
-//                                         context,
-//                                         MaterialPageRoute(
-//                                           builder: (context) =>
-//                                               RestaurantReviewsScreen(
-//                                                 restaurantName:
-//                                                     restaurantProvider
-//                                                         .restaurantName,
-//                                                 totalRatings: restaurantProvider
-//                                                     .totalRatings,
-//                                                 totalReviews: restaurantProvider
-//                                                     .totalReviews,
-//                                                 reviews: restaurantProvider
-//                                                     .restaurantReviews,
-//                                               ),
-//                                         ),
-//                                       );
-//                                     }
-//                                   : null,
-//                               child: Container(
-//                                 padding: const EdgeInsets.symmetric(
-//                                   horizontal: 12,
-//                                   vertical: 6,
-//                                 ),
-//                                 decoration: BoxDecoration(
-//                                   color: Colors.orangeAccent,
-//                                   borderRadius: BorderRadius.circular(8),
-//                                 ),
-//                                 child: Row(
-//                                   mainAxisSize: MainAxisSize.min,
-//                                   children: [
-//                                     const Icon(
-//                                       Icons.star,
-//                                       size: 16,
-//                                       color: Colors.white,
-//                                     ),
-//                                     const SizedBox(width: 4),
-//                                     Text(
-//                                       rating,
-//                                       style: const TextStyle(
-//                                         color: Colors.white,
-//                                         fontWeight: FontWeight.bold,
-//                                       ),
-//                                     ),
-//                                     const SizedBox(width: 6),
-//                                     Text(
-//                                       "($totalReviews reviews)",
-//                                       style: TextStyle(
-//                                         color: Colors.white.withOpacity(0.9),
-//                                         fontSize: 12,
-//                                       ),
-//                                     ),
-//                                     const SizedBox(width: 6),
-//                                     const Icon(
-//                                       Icons.arrow_circle_right,
-//                                       size: 16,
-//                                       color: Colors.white,
-//                                     ),
-//                                   ],
-//                                 ),
+//                             Text(
+//                               '${restaurantProvider.totalRecommendedItems} items',
+//                               style: TextStyle(
+//                                 color: theme.colorScheme.onSurface
+//                                     .withOpacity(0.6),
+//                                 fontSize: isDesktop ? 16 : 14,
 //                               ),
 //                             ),
 //                           ],
 //                         ),
 //                       ),
 
-//                       // ❌ CLOSED banner
-//                       if (!isRestaurantActive)
-//                         Positioned(
-//                           top: 70,
-//                           right: 0,
-//                           left: 0,
-//                           child: Center(
-//                             child: SwingingClosedBanner(
-//                               topText: 'Currently',
-//                               bottomText: 'CLOSED',
-//                               width: 180,
-//                               height: 60,
-//                             ),
-//                           ),
-//                         ),
-//                     ],
-//                   ),
-
-//                   const SizedBox(height: 20),
-
-//                   // Search Bar
-//                   Padding(
-//                     padding: const EdgeInsets.all(8.0),
-//                     child: Container(
-//                       decoration: BoxDecoration(
-//                         border: Border.all(
-//                           color: const Color.fromARGB(255, 32, 203, 20),
-//                         ),
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                       child: Row(
-//                         children: [
-//                           Expanded(
-//                             child: SizedBox(
-//                               height: 50,
-//                               child: TextFormField(
-//                                 controller: _searchController,
-//                                 style: TextStyle(
-//                                   color: theme.colorScheme.onSurface,
-//                                 ),
-//                                 decoration: InputDecoration(
-//                                   hintText: 'Search your food',
-//                                   hintStyle: TextStyle(
+//                       // Products Grid/List
+//                       recommendedItems.isEmpty
+//                           ? Padding(
+//                               padding: const EdgeInsets.all(32.0),
+//                               child: Column(
+//                                 children: [
+//                                   Icon(
+//                                     Icons.search_off,
+//                                     size: 64,
 //                                     color: theme.colorScheme.onSurface
-//                                         .withOpacity(0.6),
+//                                         .withOpacity(0.5),
 //                                   ),
-//                                   prefixIcon: Icon(
-//                                     Icons.search,
-//                                     color: theme.colorScheme.onSurface
-//                                         .withOpacity(0.6),
-//                                   ),
-//                                   filled: true,
-//                                   fillColor: isDark
-//                                       ? theme.cardColor
-//                                       : Colors.white,
-//                                   border: OutlineInputBorder(
-//                                     borderRadius: BorderRadius.circular(30),
-//                                     borderSide: BorderSide.none,
-//                                   ),
-//                                   contentPadding: const EdgeInsets.symmetric(
-//                                     vertical: 0,
-//                                   ),
-//                                 ),
-//                                 onChanged: (value) {
-//                                   setState(() {
-//                                     _searchQuery = value;
-//                                   });
-//                                 },
-//                               ),
-//                             ),
-//                           ),
-//                           const SizedBox(width: 10),
-//                         ],
-//                       ),
-//                     ),
-//                   ),
-
-//                   Divider(
-//                     height: 30,
-//                     color: isDark ? Colors.grey[700] : Colors.grey[300],
-//                   ),
-
-//                   Padding(
-//                     padding: const EdgeInsets.all(8.0),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Text(
-//                           'Recommended',
-//                           style: theme.textTheme.titleMedium?.copyWith(
-//                             fontWeight: FontWeight.bold,
-//                             color: theme.colorScheme.onSurface,
-//                           ),
-//                         ),
-//                         Text(
-//                           '${restaurantProvider.totalRecommendedItems} items',
-//                           style: TextStyle(
-//                             color: theme.colorScheme.onSurface.withOpacity(0.6),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-
-//                   // Dishes List
-//                   recommendedItems.isEmpty
-//                       ? Padding(
-//                           padding: const EdgeInsets.all(32.0),
-//                           child: Column(
-//                             children: [
-//                               Icon(
-//                                 Icons.search_off,
-//                                 size: 64,
-//                                 color: theme.colorScheme.onSurface.withOpacity(
-//                                   0.5,
-//                                 ),
-//                               ),
-//                               const SizedBox(height: 16),
-//                               Text(
-//                                 'No items found',
-//                                 style: theme.textTheme.bodyMedium?.copyWith(
-//                                   color: theme.colorScheme.onSurface
-//                                       .withOpacity(0.6),
-//                                 ),
-//                               ),
-//                             ],
-//                           ),
-//                         )
-//                       : ListView.builder(
-//                           shrinkWrap: true,
-//                           physics: const NeverScrollableScrollPhysics(),
-//                           itemCount: recommendedItems.length,
-//                           itemBuilder: (context, index) {
-//                             final itemWithId = recommendedItems[index];
-//                             final item = itemWithId.recommendedItem;
-//                             final productId = itemWithId.productId;
-//                             final itemId = item.itemId;
-
-//                             final product = restaurantProvider
-//                                 .getProductByRecommendedItem(item);
-
-//                             // ⚠️ Replace `item.status` with your field name if different
-//                             final bool isProductActive =
-//                                 (item.status ?? '').toLowerCase() == 'active';
-
-//                             final bool canInteractProduct =
-//                                 isRestaurantActive && isProductActive;
-
-//                             // Choose effective unit price for display
-//                             int basePrice;
-//                             if (item.halfPlatePrice > 0) {
-//                               basePrice = item.halfPlatePrice;
-//                             } else if (item.fullPlatePrice > 0) {
-//                               basePrice = item.fullPlatePrice;
-//                             } else {
-//                               basePrice = item.price;
-//                             }
-
-//                             final discountedPrice = item.discount > 0
-//                                 ? (basePrice -
-//                                           (basePrice * item.discount / 100))
-//                                       .round()
-//                                 : basePrice;
-
-//                             return Consumer<CartProvider>(
-//                               builder: (context, cartProvider, child) {
-//                                 final cartItem = cartProvider.getCartProduct(
-//                                   productId,
-//                                 );
-//                                 final isInCart = cartItem != null;
-//                                 final cartQuantity = cartItem?.quantity ?? 0;
-
-//                                 return GestureDetector(
-//                                   onTap: canInteractProduct
-//                                       ? () {
-//                                           Navigator.push(
-//                                             context,
-//                                             MaterialPageRoute(
-//                                               builder: (context) =>
-//                                                   DetailScreen(
-//                                                     productId: itemId,
-//                                                     currentUserId: userId
-//                                                         .toString(),
-//                                                     restaurantId:
-//                                                         widget.restaurantId,
-//                                                   ),
-//                                             ),
-//                                           );
-//                                         }
-//                                       : null,
-//                                   child: Padding(
-//                                     padding: const EdgeInsets.all(8),
-//                                     child: Opacity(
-//                                       opacity: isProductActive ? 1.0 : 0.4,
-//                                       child: Container(
-//                                         padding: const EdgeInsets.all(8),
-//                                         decoration: BoxDecoration(
-//                                           color: isDark
-//                                               ? theme.cardColor
-//                                               : Colors.white,
-//                                           borderRadius: BorderRadius.circular(
-//                                             16,
-//                                           ),
-//                                           boxShadow: [
-//                                             if (!isDark && isProductActive)
-//                                               BoxShadow(
-//                                                 color: Colors.grey.withOpacity(
-//                                                   0.1,
-//                                                 ),
-//                                                 spreadRadius: 1,
-//                                                 blurRadius: 4,
-//                                                 offset: const Offset(0, 2),
-//                                               ),
-//                                           ],
-//                                         ),
-//                                         child: Row(
-//                                           children: [
-//                                             // Left: Dish Info
-//                                             Expanded(
-//                                               child: Column(
-//                                                 crossAxisAlignment:
-//                                                     CrossAxisAlignment.start,
-//                                                 children: [
-//                                                   Container(
-//                                                     padding:
-//                                                         const EdgeInsets.all(5),
-//                                                     decoration: BoxDecoration(
-//                                                       border: Border.all(
-//                                                         color: theme
-//                                                             .colorScheme
-//                                                             .primary,
-//                                                       ),
-//                                                     ),
-//                                                     child: Icon(
-//                                                       Icons.circle,
-//                                                       size: 12,
-//                                                       color: theme
-//                                                           .colorScheme
-//                                                           .primary,
-//                                                     ),
-//                                                   ),
-//                                                   const SizedBox(height: 6),
-//                                                   Text(
-//                                                     item.name,
-//                                                     style: theme
-//                                                         .textTheme
-//                                                         .bodyLarge
-//                                                         ?.copyWith(
-//                                                           fontWeight:
-//                                                               FontWeight.bold,
-//                                                           color: theme
-//                                                               .colorScheme
-//                                                               .onSurface,
-//                                                         ),
-//                                                   ),
-//                                                   const SizedBox(height: 6),
-//                                                   Row(
-//                                                     children: [
-//                                                       Text(
-//                                                         "₹${(item.price - (item.price * item.discount / 100))}",
-//                                                         style: theme
-//                                                             .textTheme
-//                                                             .bodyLarge
-//                                                             ?.copyWith(
-//                                                               fontWeight:
-//                                                                   FontWeight
-//                                                                       .bold,
-//                                                               color: theme
-//                                                                   .colorScheme
-//                                                                   .onSurface,
-//                                                             ),
-//                                                       ),
-//                                                       if (item.discount >
-//                                                           0) ...[
-//                                                         const SizedBox(
-//                                                           width: 6,
-//                                                         ),
-//                                                         Text(
-//                                                           "₹${item.price}",
-//                                                           style: TextStyle(
-//                                                             decoration:
-//                                                                 TextDecoration
-//                                                                     .lineThrough,
-//                                                             fontSize: 12,
-//                                                             color: theme
-//                                                                 .colorScheme
-//                                                                 .onSurface
-//                                                                 .withOpacity(
-//                                                                   0.6,
-//                                                                 ),
-//                                                           ),
-//                                                         ),
-//                                                         const SizedBox(
-//                                                           width: 6,
-//                                                         ),
-//                                                         Container(
-//                                                           padding:
-//                                                               const EdgeInsets.symmetric(
-//                                                                 horizontal: 6,
-//                                                                 vertical: 2,
-//                                                               ),
-//                                                           decoration: BoxDecoration(
-//                                                             color: theme
-//                                                                 .colorScheme
-//                                                                 .primary
-//                                                                 .withOpacity(
-//                                                                   0.1,
-//                                                                 ),
-//                                                             borderRadius:
-//                                                                 BorderRadius.circular(
-//                                                                   6,
-//                                                                 ),
-//                                                           ),
-//                                                           child: Text(
-//                                                             '${item.discount}% OFF',
-//                                                             style: TextStyle(
-//                                                               fontSize: 10,
-//                                                               color: theme
-//                                                                   .colorScheme
-//                                                                   .primary,
-//                                                             ),
-//                                                           ),
-//                                                         ),
-//                                                       ],
-//                                                     ],
-//                                                   ),
-//                                                   const SizedBox(height: 6),
-//                                                   if (item.tags.isNotEmpty)
-//                                                     Row(
-//                                                       children: [
-//                                                         Icon(
-//                                                           Icons
-//                                                               .local_fire_department,
-//                                                           size: 16,
-//                                                           color: theme
-//                                                               .colorScheme
-//                                                               .primary,
-//                                                         ),
-//                                                         const SizedBox(
-//                                                           width: 4,
-//                                                         ),
-//                                                         Expanded(
-//                                                           child: Text(
-//                                                             item.tags.join(
-//                                                               " · ",
-//                                                             ),
-//                                                             style: TextStyle(
-//                                                               color: theme
-//                                                                   .colorScheme
-//                                                                   .onSurface
-//                                                                   .withOpacity(
-//                                                                     0.7,
-//                                                                   ),
-//                                                             ),
-//                                                             overflow:
-//                                                                 TextOverflow
-//                                                                     .ellipsis,
-//                                                           ),
-//                                                         ),
-//                                                       ],
-//                                                     ),
-//                                                   const SizedBox(height: 6),
-//                                                   Text(
-//                                                     item.content.isNotEmpty
-//                                                         ? item.content
-//                                                         : "Delicious food item",
-//                                                     style: TextStyle(
-//                                                       color: theme
-//                                                           .colorScheme
-//                                                           .onSurface
-//                                                           .withOpacity(0.7),
-//                                                     ),
-//                                                     maxLines: 2,
-//                                                     overflow:
-//                                                         TextOverflow.ellipsis,
-//                                                   ),
-//                                                   const SizedBox(height: 4),
-//                                                   if (item
-//                                                       .category
-//                                                       .categoryName
-//                                                       .isNotEmpty)
-//                                                     Container(
-//                                                       padding:
-//                                                           const EdgeInsets.symmetric(
-//                                                             horizontal: 8,
-//                                                             vertical: 4,
-//                                                           ),
-//                                                       decoration: BoxDecoration(
-//                                                         color: isDark
-//                                                             ? Colors.grey[800]!
-//                                                             : Colors.grey[100]!,
-//                                                         borderRadius:
-//                                                             BorderRadius.circular(
-//                                                               12,
-//                                                             ),
-//                                                       ),
-//                                                       child: Text(
-//                                                         item
-//                                                             .category
-//                                                             .categoryName,
-//                                                         style: TextStyle(
-//                                                           fontSize: 10,
-//                                                           color: theme
-//                                                               .colorScheme
-//                                                               .onSurface
-//                                                               .withOpacity(0.6),
-//                                                         ),
-//                                                       ),
-//                                                     ),
-//                                                 ],
-//                                               ),
-//                                             ),
-//                                             const SizedBox(width: 10),
-
-//                                             // Right: Image and Add Button
-//                                             SizedBox(
-//                                               width: 150,
-//                                               child: Column(
-//                                                 children: [
-//                                                   Stack(
-//                                                     clipBehavior: Clip.none,
-//                                                     children: [
-//                                                       ClipRRect(
-//                                                         borderRadius:
-//                                                             BorderRadius.circular(
-//                                                               10,
-//                                                             ),
-//                                                         child: Image.network(
-//                                                           item.image,
-//                                                           width: 150,
-//                                                           height: 150,
-//                                                           fit: BoxFit.cover,
-//                                                           errorBuilder:
-//                                                               (
-//                                                                 context,
-//                                                                 error,
-//                                                                 stackTrace,
-//                                                               ) {
-//                                                                 return Container(
-//                                                                   width: 150,
-//                                                                   height: 150,
-//                                                                   color: isDark
-//                                                                       ? Colors
-//                                                                             .grey[700]
-//                                                                       : Colors
-//                                                                             .grey[200],
-//                                                                   child: Icon(
-//                                                                     Icons
-//                                                                         .image_not_supported,
-//                                                                     color: theme
-//                                                                         .colorScheme
-//                                                                         .onSurface
-//                                                                         .withOpacity(
-//                                                                           0.5,
-//                                                                         ),
-//                                                                     size: 40,
-//                                                                   ),
-//                                                                 );
-//                                                               },
-//                                                         ),
-//                                                       ),
-//                                                       Consumer<
-//                                                         WishlistProvider
-//                                                       >(
-//                                                         builder:
-//                                                             (
-//                                                               context,
-//                                                               wishlistProvider,
-//                                                               child,
-//                                                             ) {
-//                                                               final isInWishlist =
-//                                                                   wishlistProvider
-//                                                                       .isInWishlist(
-//                                                                         itemId,
-//                                                                       );
-
-//                                                               return Positioned(
-//                                                                 top: 4,
-//                                                                 right: 4,
-//                                                                 child: _WishlistHeart(
-//                                                                   isDark:
-//                                                                       isDark,
-//                                                                   theme: theme,
-//                                                                   enabled:
-//                                                                       isRestaurantActive,
-//                                                                   initialIsInWishlist:
-//                                                                       isInWishlist,
-//                                                                   onToggle: () async {
-//                                                                     await wishlistProvider
-//                                                                         .toggleWishlist(
-//                                                                           userId
-//                                                                               .toString(),
-//                                                                           itemId,
-//                                                                         );
-//                                                                   },
-//                                                                 ),
-//                                                               );
-//                                                             },
-//                                                       ),
-
-//                                                       Positioned(
-//                                                         left: 35,
-//                                                         bottom: -20,
-//                                                         child: _buildProductActionWidget(
-//                                                           context: context,
-//                                                           theme: theme,
-//                                                           isDark: isDark,
-//                                                           cartProvider:
-//                                                               cartProvider,
-//                                                           canInteractProduct:
-//                                                               canInteractProduct,
-//                                                           isInCart: isInCart,
-//                                                           cartQuantity:
-//                                                               cartQuantity,
-//                                                           productId: productId,
-//                                                           product: product,
-//                                                           item: item,
-//                                                           restaurantId: widget
-//                                                               .restaurantId,
-//                                                           userId: userId,
-//                                                         ),
-//                                                       ),
-//                                                     ],
-//                                                   ),
-//                                                   const SizedBox(height: 25),
-//                                                 ],
-//                                               ),
-//                                             ),
-//                                           ],
-//                                         ),
-//                                       ),
+//                                   const SizedBox(height: 16),
+//                                   Text(
+//                                     'No items found',
+//                                     style: theme.textTheme.bodyMedium?.copyWith(
+//                                       color: theme.colorScheme.onSurface
+//                                           .withOpacity(0.6),
 //                                     ),
 //                                   ),
-//                                 );
-//                               },
-//                             );
-//                           },
-//                         ),
+//                                 ],
+//                               ),
+//                             )
+//                           : _buildProductsGrid(
+//                               context,
+//                               recommendedItems,
+//                               restaurantProvider,
+//                               theme,
+//                               isDark,
+//                               isRestaurantActive,
+//                             ),
 
-//                   const SizedBox(height: 100),
-//                 ],
+//                       SizedBox(height: isDesktop ? 150 : 100),
+//                     ],
+//                   ),
+//                 ),
 //               ),
 //             );
 //           },
@@ -911,9 +378,13 @@
 //             return const SizedBox.shrink();
 //           }
 
+//           final isDesktopView = _isDesktop(context);
+
 //           return Container(
-//             width: double.infinity,
-//             margin: const EdgeInsets.symmetric(horizontal: 16),
+//             width: isDesktopView ? 400 : double.infinity,
+//             margin: EdgeInsets.symmetric(
+//               horizontal: isDesktopView ? 0 : 16,
+//             ),
 //             child: FloatingActionButton.extended(
 //               onPressed: () {
 //                 Navigator.pushReplacement(
@@ -932,6 +403,7 @@
 //                       fontWeight: FontWeight.bold,
 //                     ),
 //                   ),
+//                   const SizedBox(width: 20),
 //                   Text(
 //                     'View Cart',
 //                     style: TextStyle(
@@ -953,6 +425,781 @@
 //     );
 //   }
 
+//   Widget _buildHeroSection(
+//     BuildContext context,
+//     RestaurantProductsProvider restaurantProvider,
+//     ThemeData theme,
+//     bool isDark,
+//     bool isRestaurantActive,
+//     String rating,
+//     int totalReviews,
+//     bool isMobile,
+//     bool isDesktop,
+//   ) {
+//     final heroHeight = isDesktop ? 500.0 : (isMobile ? 400.0 : 200.0);
+
+//     return Stack(
+//       children: [
+//         // Background Restaurant Image
+//         Container(
+//           height: heroHeight,
+//           width: double.infinity,
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.vertical(
+//               bottom: Radius.circular(isDesktop ? 0 : 30),
+//             ),
+//             image: DecorationImage(
+//               image: NetworkImage(restaurantProvider.resImage),
+//               fit: BoxFit.cover,
+//             ),
+//           ),
+//         ),
+
+//         // Gradient Overlay
+//         Container(
+//           height: heroHeight,
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.vertical(
+//               bottom: Radius.circular(isDesktop ? 0 : 30),
+//             ),
+//             gradient: LinearGradient(
+//               begin: Alignment.topCenter,
+//               end: Alignment.bottomCenter,
+//               colors: [
+//                 Colors.black.withOpacity(0.2),
+//                 Colors.black.withOpacity(0.6),
+//               ],
+//             ),
+//           ),
+//         ),
+
+//         // Back Button
+//         Positioned(
+//           top: isDesktop ? 60 : 50,
+//           left: isDesktop ? 32 : 16,
+//           child: CircleAvatar(
+//             backgroundColor: Colors.black54,
+//             radius: isDesktop ? 22 : 20,
+//             child: IconButton(
+//               icon: Icon(
+//                 Icons.arrow_back_ios,
+//                 color: Colors.white,
+//                 size: isDesktop ? 20 : 18,
+//               ),
+//               onPressed: () => Navigator.pop(context),
+//             ),
+//           ),
+//         ),
+
+//         // Restaurant Info
+//         Positioned(
+//           left: isDesktop ? 60 : 20,
+//           right: isDesktop ? 60 : 20,
+//           bottom: isDesktop ? 40 : 20,
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 restaurantProvider.restaurantName,
+//                 style: TextStyle(
+//                   fontSize: isDesktop ? 32 : 22,
+//                   fontWeight: FontWeight.bold,
+//                   color: Colors.white,
+//                   shadows: [
+//                     Shadow(
+//                       offset: const Offset(0, 1),
+//                       blurRadius: 4,
+//                       color: Colors.black.withOpacity(0.7),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               SizedBox(height: isDesktop ? 10 : 6),
+//               Row(
+//                 children: [
+//                   Icon(
+//                     Icons.location_on,
+//                     color: Colors.white,
+//                     size: isDesktop ? 18 : 16,
+//                   ),
+//                   const SizedBox(width: 4),
+//                   Expanded(
+//                     child: Text(
+//                       restaurantProvider.locationName,
+//                       overflow: TextOverflow.ellipsis,
+//                       style: TextStyle(
+//                         fontSize: isDesktop ? 16 : 14,
+//                         color: Colors.white.withOpacity(0.9),
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: isDesktop ? 12 : 8),
+//               GestureDetector(
+//                 onTap: isRestaurantActive
+//                     ? () {
+//                         Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                             builder: (context) => RestaurantReviewsScreen(
+//                               restaurantName: restaurantProvider.restaurantName,
+//                               totalRatings: restaurantProvider.totalRatings,
+//                               totalReviews: restaurantProvider.totalReviews,
+//                               reviews: restaurantProvider.restaurantReviews,
+//                             ),
+//                           ),
+//                         );
+//                       }
+//                     : null,
+//                 child: Container(
+//                   padding: EdgeInsets.symmetric(
+//                     horizontal: isDesktop ? 16 : 12,
+//                     vertical: isDesktop ? 8 : 6,
+//                   ),
+//                   decoration: BoxDecoration(
+//                     color: Colors.orangeAccent,
+//                     borderRadius: BorderRadius.circular(8),
+//                   ),
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.min,
+//                     children: [
+//                       Icon(
+//                         Icons.star,
+//                         size: isDesktop ? 18 : 16,
+//                         color: Colors.white,
+//                       ),
+//                       const SizedBox(width: 4),
+//                       Text(
+//                         rating,
+//                         style: TextStyle(
+//                           color: Colors.white,
+//                           fontWeight: FontWeight.bold,
+//                           fontSize: isDesktop ? 16 : 14,
+//                         ),
+//                       ),
+//                       const SizedBox(width: 6),
+//                       Text(
+//                         "($totalReviews reviews)",
+//                         style: TextStyle(
+//                           color: Colors.white.withOpacity(0.9),
+//                           fontSize: isDesktop ? 14 : 12,
+//                         ),
+//                       ),
+//                       const SizedBox(width: 6),
+//                       Icon(
+//                         Icons.arrow_circle_right,
+//                         size: isDesktop ? 18 : 16,
+//                         color: Colors.white,
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+
+//         // CLOSED banner
+//         if (!isRestaurantActive)
+//           Positioned(
+//             top: isDesktop ? 100 : 70,
+//             right: 0,
+//             left: 0,
+//             child: Center(
+//               child: SwingingClosedBanner(
+//                 topText: 'Currently',
+//                 bottomText: 'CLOSED',
+//                 width: isDesktop ? 220 : 180,
+//                 height: isDesktop ? 80 : 60,
+//               ),
+//             ),
+//           ),
+//       ],
+//     );
+//   }
+
+//   Widget _buildProductsGrid(
+//     BuildContext context,
+//     List<dynamic> recommendedItems,
+//     RestaurantProductsProvider restaurantProvider,
+//     ThemeData theme,
+//     bool isDark,
+//     bool isRestaurantActive,
+//   ) {
+//     final isDesktop = _isDesktop(context);
+//     final crossAxisCount = _getCrossAxisCount(context);
+
+//     if (crossAxisCount == 1) {
+//       // Mobile/Tablet - List View
+//       return ListView.builder(
+//         shrinkWrap: true,
+//         physics: const NeverScrollableScrollPhysics(),
+//         padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32 : 8),
+//         itemCount: recommendedItems.length,
+//         itemBuilder: (context, index) {
+//           return _buildProductCard(
+//             context,
+//             recommendedItems[index],
+//             restaurantProvider,
+//             theme,
+//             isDark,
+//             isRestaurantActive,
+//             isListView: true,
+//           );
+//         },
+//       );
+//     } else {
+//       // Desktop/Tablet - Grid View
+//       return GridView.builder(
+//         shrinkWrap: true,
+//         physics: const NeverScrollableScrollPhysics(),
+//         padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32 : 16),
+//         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//           crossAxisCount: crossAxisCount,
+//           childAspectRatio: _isDesktop(context) ? 0.82 : 0.75,
+
+//           // childAspectRatio: isDesktop ? 0.75 : 0.7,
+//           crossAxisSpacing: 16,
+//           mainAxisSpacing: 16,
+//         ),
+//         itemCount: recommendedItems.length,
+//         itemBuilder: (context, index) {
+//           return _buildProductCard(
+//             context,
+//             recommendedItems[index],
+//             restaurantProvider,
+//             theme,
+//             isDark,
+//             isRestaurantActive,
+//             isListView: false,
+//           );
+//         },
+//       );
+//     }
+//   }
+
+//   Widget _buildProductCard(
+//     BuildContext context,
+//     dynamic itemWithId,
+//     RestaurantProductsProvider restaurantProvider,
+//     ThemeData theme,
+//     bool isDark,
+//     bool isRestaurantActive, {
+//     required bool isListView,
+//   }) {
+//     final item = itemWithId.recommendedItem;
+//     final productId = itemWithId.productId;
+//     final itemId = item.itemId;
+
+//     final product = restaurantProvider.getProductByRecommendedItem(item);
+
+//     final bool isProductActive = (item.status ?? '').toLowerCase() == 'active';
+//     final bool canInteractProduct = isRestaurantActive && isProductActive;
+
+//     return Consumer<CartProvider>(
+//       builder: (context, cartProvider, child) {
+//         final cartItem = cartProvider.getCartProduct(productId);
+//         final isInCart = cartItem != null;
+//         final cartQuantity = cartItem?.quantity ?? 0;
+
+//         if (isListView) {
+//           return _buildListCard(
+//             context,
+//             item,
+//             productId,
+//             itemId,
+//             product,
+//             theme,
+//             isDark,
+//             canInteractProduct,
+//             isProductActive,
+//             cartProvider,
+//             isInCart,
+//             cartQuantity,
+//             isRestaurantActive,
+//           );
+//         } else {
+//           return _buildGridCard(
+//             context,
+//             item,
+//             productId,
+//             itemId,
+//             product,
+//             theme,
+//             isDark,
+//             canInteractProduct,
+//             isProductActive,
+//             cartProvider,
+//             isInCart,
+//             cartQuantity,
+//             isRestaurantActive,
+//           );
+//         }
+//       },
+//     );
+//   }
+
+//   Widget _buildListCard(
+//     BuildContext context,
+//     dynamic item,
+//     String productId,
+//     String itemId,
+//     dynamic product,
+//     ThemeData theme,
+//     bool isDark,
+//     bool canInteractProduct,
+//     bool isProductActive,
+//     CartProvider cartProvider,
+//     bool isInCart,
+//     int cartQuantity,
+//     bool isRestaurantActive,
+//   ) {
+//     return GestureDetector(
+//       onTap: canInteractProduct
+//           ? () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) => DetailScreen(
+//                     productId: itemId,
+//                     currentUserId: userId.toString(),
+//                     restaurantId: widget.restaurantId,
+//                   ),
+//                 ),
+//               );
+//             }
+//           : null,
+//       child: Padding(
+//         padding: const EdgeInsets.all(8),
+//         child: Opacity(
+//           opacity: isProductActive ? 1.0 : 0.4,
+//           child: Container(
+//             padding: const EdgeInsets.all(8),
+//             decoration: BoxDecoration(
+//               color: isDark ? theme.cardColor : Colors.white,
+//               borderRadius: BorderRadius.circular(16),
+//               boxShadow: [
+//                 if (!isDark && isProductActive)
+//                   BoxShadow(
+//                     color: Colors.grey.withOpacity(0.1),
+//                     spreadRadius: 1,
+//                     blurRadius: 4,
+//                     offset: const Offset(0, 2),
+//                   ),
+//               ],
+//             ),
+//             child: Row(
+//               children: [
+//                 Expanded(
+//                   child: _buildProductInfo(item, theme, isDark),
+//                 ),
+//                 const SizedBox(width: 10),
+//                 SizedBox(
+//                   width: 150,
+//                   child: _buildProductImage(
+//                     context,
+//                     item,
+//                     itemId,
+//                     theme,
+//                     isDark,
+//                     canInteractProduct,
+//                     cartProvider,
+//                     isInCart,
+//                     cartQuantity,
+//                     productId,
+//                     product,
+//                     isRestaurantActive,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildGridCard(
+//     BuildContext context,
+//     dynamic item,
+//     String productId,
+//     String itemId,
+//     dynamic product,
+//     ThemeData theme,
+//     bool isDark,
+//     bool canInteractProduct,
+//     bool isProductActive,
+//     CartProvider cartProvider,
+//     bool isInCart,
+//     int cartQuantity,
+//     bool isRestaurantActive,
+//   ) {
+//     return GestureDetector(
+//       onTap: canInteractProduct
+//           ? () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) => DetailScreen(
+//                     productId: itemId,
+//                     currentUserId: userId.toString(),
+//                     restaurantId: widget.restaurantId,
+//                   ),
+//                 ),
+//               );
+//             }
+//           : null,
+//       child: Opacity(
+//         opacity: isProductActive ? 1.0 : 0.4,
+//         child: Container(
+//           decoration: BoxDecoration(
+//             color: isDark ? theme.cardColor : Colors.white,
+//             borderRadius: BorderRadius.circular(16),
+//             boxShadow: [
+//               if (!isDark && isProductActive)
+//                 BoxShadow(
+//                   color: Colors.grey.withOpacity(0.1),
+//                   spreadRadius: 1,
+//                   blurRadius: 8,
+//                   offset: const Offset(0, 2),
+//                 ),
+//             ],
+//           ),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Expanded(
+//                 flex: 3,
+//                 child: Stack(
+//                   children: [
+//                     ClipRRect(
+//                       borderRadius: const BorderRadius.vertical(
+//                         top: Radius.circular(16),
+//                       ),
+//                       child: Image.network(
+//                         item.image,
+//                         width: double.infinity,
+//                         height: double.infinity,
+//                         fit: BoxFit.cover,
+//                         errorBuilder: (context, error, stackTrace) {
+//                           return Container(
+//                             color: isDark ? Colors.grey[700] : Colors.grey[200],
+//                             child: Icon(
+//                               Icons.image_not_supported,
+//                               color: theme.colorScheme.onSurface.withOpacity(0.5),
+//                               size: 40,
+//                             ),
+//                           );
+//                         },
+//                       ),
+//                     ),
+//                     Consumer<WishlistProvider>(
+//                       builder: (context, wishlistProvider, child) {
+//                         final isInWishlist = wishlistProvider.isInWishlist(itemId);
+//                         return Positioned(
+//                           top: 8,
+//                           right: 8,
+//                           child: _WishlistHeart(
+//                             isDark: isDark,
+//                             theme: theme,
+//                             enabled: isRestaurantActive,
+//                             initialIsInWishlist: isInWishlist,
+//                             onToggle: () async {
+//                               await wishlistProvider.toggleWishlist(
+//                                 userId.toString(),
+//                                 itemId,
+//                               );
+//                             },
+//                           ),
+//                         );
+//                       },
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               Expanded(
+//                 flex: 2,
+//                 child: Padding(
+//                   padding: const EdgeInsets.all(12),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Row(
+//                         children: [
+//                           Container(
+//                             padding: const EdgeInsets.all(4),
+//                             decoration: BoxDecoration(
+//                               border: Border.all(
+//                                 color: theme.colorScheme.primary,
+//                               ),
+//                             ),
+//                             child: Icon(
+//                               Icons.circle,
+//                               size: 10,
+//                               color: theme.colorScheme.primary,
+//                             ),
+//                           ),
+//                           const SizedBox(width: 8),
+//                           Expanded(
+//                             child: Text(
+//                               item.name,
+//                               style: theme.textTheme.bodyMedium?.copyWith(
+//                                 fontWeight: FontWeight.bold,
+//                                 color: theme.colorScheme.onSurface,
+//                               ),
+//                               maxLines: 1,
+//                               overflow: TextOverflow.ellipsis,
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                       const SizedBox(height: 6),
+//                       Row(
+//                         children: [
+//                           Text(
+//                             "₹${(item.price - (item.price * item.discount / 100))}",
+//                             style: theme.textTheme.bodyLarge?.copyWith(
+//                               fontWeight: FontWeight.bold,
+//                               color: theme.colorScheme.onSurface,
+//                             ),
+//                           ),
+//                           if (item.discount > 0) ...[
+//                             const SizedBox(width: 6),
+//                             Text(
+//                               "₹${item.price}",
+//                               style: TextStyle(
+//                                 decoration: TextDecoration.lineThrough,
+//                                 fontSize: 12,
+//                                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                               ),
+//                             ),
+//                           ],
+//                         ],
+//                       ),
+//                       const Spacer(),
+//                       _buildProductActionWidget(
+//                         context: context,
+//                         theme: theme,
+//                         isDark: isDark,
+//                         cartProvider: cartProvider,
+//                         canInteractProduct: canInteractProduct,
+//                         isInCart: isInCart,
+//                         cartQuantity: cartQuantity,
+//                         productId: productId,
+//                         product: product,
+//                         item: item,
+//                         restaurantId: widget.restaurantId,
+//                         userId: userId,
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildProductInfo(dynamic item, ThemeData theme, bool isDark) {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Container(
+//           padding: const EdgeInsets.all(5),
+//           decoration: BoxDecoration(
+//             border: Border.all(color: theme.colorScheme.primary),
+//           ),
+//           child: Icon(
+//             Icons.circle,
+//             size: 12,
+//             color: theme.colorScheme.primary,
+//           ),
+//         ),
+//         const SizedBox(height: 6),
+//         Text(
+//           item.name,
+//           style: theme.textTheme.bodyLarge?.copyWith(
+//             fontWeight: FontWeight.bold,
+//             color: theme.colorScheme.onSurface,
+//           ),
+//         ),
+//         const SizedBox(height: 6),
+//         Row(
+//           children: [
+//             Text(
+//               "₹${(item.price - (item.price * item.discount / 100))}",
+//               style: theme.textTheme.bodyLarge?.copyWith(
+//                 fontWeight: FontWeight.bold,
+//                 color: theme.colorScheme.onSurface,
+//               ),
+//             ),
+//             if (item.discount > 0) ...[
+//               const SizedBox(width: 6),
+//               Text(
+//                 "₹${item.price}",
+//                 style: TextStyle(
+//                   decoration: TextDecoration.lineThrough,
+//                   fontSize: 12,
+//                   color: theme.colorScheme.onSurface.withOpacity(0.6),
+//                 ),
+//               ),
+//               const SizedBox(width: 6),
+//               Container(
+//                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+//                 decoration: BoxDecoration(
+//                   color: theme.colorScheme.primary.withOpacity(0.1),
+//                   borderRadius: BorderRadius.circular(6),
+//                 ),
+//                 child: Text(
+//                   '${item.discount}% OFF',
+//                   style: TextStyle(
+//                     fontSize: 10,
+//                     color: theme.colorScheme.primary,
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ],
+//         ),
+//         const SizedBox(height: 6),
+//         if (item.tags.isNotEmpty)
+//           Row(
+//             children: [
+//               Icon(
+//                 Icons.local_fire_department,
+//                 size: 16,
+//                 color: theme.colorScheme.primary,
+//               ),
+//               const SizedBox(width: 4),
+//               Expanded(
+//                 child: Text(
+//                   item.tags.join(" · "),
+//                   style: TextStyle(
+//                     color: theme.colorScheme.onSurface.withOpacity(0.7),
+//                   ),
+//                   overflow: TextOverflow.ellipsis,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         const SizedBox(height: 6),
+//         Text(
+//           item.content.isNotEmpty ? item.content : "Delicious food item",
+//           style: TextStyle(
+//             color: theme.colorScheme.onSurface.withOpacity(0.7),
+//           ),
+//           maxLines: 2,
+//           overflow: TextOverflow.ellipsis,
+//         ),
+//         const SizedBox(height: 4),
+//         if (item.category.categoryName.isNotEmpty)
+//           Container(
+//             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+//             decoration: BoxDecoration(
+//               color: isDark ? Colors.grey[800]! : Colors.grey[100]!,
+//               borderRadius: BorderRadius.circular(12),
+//             ),
+//             child: Text(
+//               item.category.categoryName,
+//               style: TextStyle(
+//                 fontSize: 10,
+//                 color: theme.colorScheme.onSurface.withOpacity(0.6),
+//               ),
+//             ),
+//           ),
+//       ],
+//     );
+//   }
+
+//   Widget _buildProductImage(
+//     BuildContext context,
+//     dynamic item,
+//     String itemId,
+//     ThemeData theme,
+//     bool isDark,
+//     bool canInteractProduct,
+//     CartProvider cartProvider,
+//     bool isInCart,
+//     int cartQuantity,
+//     String productId,
+//     dynamic product,
+//     bool isRestaurantActive,
+//   ) {
+//     return Column(
+//       children: [
+//         Stack(
+//           clipBehavior: Clip.none,
+//           children: [
+//             ClipRRect(
+//               borderRadius: BorderRadius.circular(10),
+//               child: Image.network(
+//                 item.image,
+//                 width: 150,
+//                 height: 150,
+//                 fit: BoxFit.cover,
+//                 errorBuilder: (context, error, stackTrace) {
+//                   return Container(
+//                     width: 150,
+//                     height: 150,
+//                     color: isDark ? Colors.grey[700] : Colors.grey[200],
+//                     child: Icon(
+//                       Icons.image_not_supported,
+//                       color: theme.colorScheme.onSurface.withOpacity(0.5),
+//                       size: 40,
+//                     ),
+//                   );
+//                 },
+//               ),
+//             ),
+//             Consumer<WishlistProvider>(
+//               builder: (context, wishlistProvider, child) {
+//                 final isInWishlist = wishlistProvider.isInWishlist(itemId);
+//                 return Positioned(
+//                   top: 4,
+//                   right: 4,
+//                   child: _WishlistHeart(
+//                     isDark: isDark,
+//                     theme: theme,
+//                     enabled: isRestaurantActive,
+//                     initialIsInWishlist: isInWishlist,
+//                     onToggle: () async {
+//                       await wishlistProvider.toggleWishlist(
+//                         userId.toString(),
+//                         itemId,
+//                       );
+//                     },
+//                   ),
+//                 );
+//               },
+//             ),
+//             Positioned(
+//               left: 35,
+//               bottom: -20,
+//               child: _buildProductActionWidget(
+//                 context: context,
+//                 theme: theme,
+//                 isDark: isDark,
+//                 cartProvider: cartProvider,
+//                 canInteractProduct: canInteractProduct,
+//                 isInCart: isInCart,
+//                 cartQuantity: cartQuantity,
+//                 productId: productId,
+//                 product: product,
+//                 item: item,
+//                 restaurantId: widget.restaurantId,
+//                 userId: userId,
+//               ),
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 25),
+//       ],
+//     );
+//   }
+
 //   Widget _buildProductActionWidget({
 //     required BuildContext context,
 //     required ThemeData theme,
@@ -962,12 +1209,11 @@
 //     required bool isInCart,
 //     required int cartQuantity,
 //     required String productId,
-//     required RecommendedProduct? product,
-//     required RecommendedItem item,
+//     required dynamic product,
+//     required dynamic item,
 //     required String restaurantId,
 //     required String? userId,
 //   }) {
-//     // If restaurant or product inactive → show "Unavailable"
 //     if (!canInteractProduct) {
 //       return Container(
 //         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -1011,11 +1257,7 @@
 //               onPressed: cartProvider.isLoading
 //                   ? null
 //                   : () async {
-//                       if (cartQuantity > 1) {
-//                         await cartProvider.decrementQuantity(productId, userId);
-//                       } else {
-//                         await cartProvider.decrementQuantity(productId, userId);
-//                       }
+//                       await cartProvider.decrementQuantity(productId, userId);
 //                     },
 //               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
 //               padding: EdgeInsets.zero,
@@ -1058,9 +1300,7 @@
 //                   context: context,
 //                   isScrollControlled: true,
 //                   shape: const RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.vertical(
-//                       top: Radius.circular(25),
-//                     ),
+//                     borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
 //                   ),
 //                   builder: (context) => VegPannerBottomSheet(
 //                     item: item,
@@ -1151,7 +1391,6 @@
 //           Image.asset(
 //             "assets/images/no food.png",
 //             width: 180,
-//             color: isDark ? null : null,
 //           ),
 //           const SizedBox(height: 20),
 //           Text(
@@ -1176,10 +1415,10 @@
 //   }
 // }
 
-// /// Bottom sheet for selecting variation + quantity
+// // Bottom sheet and other classes remain the same...
 // class VegPannerBottomSheet extends StatefulWidget {
-//   final RecommendedItem item;
-//   final RecommendedProduct product;
+//   final dynamic item;
+//   final dynamic product;
 //   final String productId;
 //   final String restaurantId;
 //   final String userId;
@@ -1203,37 +1442,24 @@
 
 //   List<String> get availableVariations {
 //     final variations = <String>[];
-//     if (widget.item.halfPlatePrice > 0) {
-//       variations.add('Half');
-//     }
-//     if (widget.item.fullPlatePrice > 0) {
-//       variations.add('Full');
-//     }
-//     if (variations.isEmpty) {
-//       variations.add('Regular');
-//     }
+//     if (widget.item.halfPlatePrice > 0) variations.add('Half');
+//     if (widget.item.fullPlatePrice > 0) variations.add('Full');
+//     if (variations.isEmpty) variations.add('Regular');
 //     return variations;
 //   }
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     final vars = availableVariations;
-//     selectedVariation = vars.first;
+//     selectedVariation = availableVariations.first;
 //   }
 
 //   num _unitBasePrice() {
 //     switch (selectedVariation) {
 //       case 'Half':
-//         if (widget.item.halfPlatePrice > 0) {
-//           return widget.item.halfPlatePrice;
-//         }
-//         return widget.item.price;
+//         return widget.item.halfPlatePrice > 0 ? widget.item.halfPlatePrice : widget.item.price;
 //       case 'Full':
-//         if (widget.item.fullPlatePrice > 0) {
-//           return widget.item.fullPlatePrice;
-//         }
-//         return widget.item.price;
+//         return widget.item.fullPlatePrice > 0 ? widget.item.fullPlatePrice : widget.item.price;
 //       default:
 //         return widget.item.price;
 //     }
@@ -1247,9 +1473,7 @@
 //     return base;
 //   }
 
-//   num getPrice() {
-//     return _unitPriceWithDiscount() * quantity;
-//   }
+//   num getPrice() => _unitPriceWithDiscount() * quantity;
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -1332,31 +1556,21 @@
 //                         children: availableVariations.map((variation) {
 //                           num basePrice;
 //                           if (variation == 'Half') {
-//                             basePrice = widget.item.halfPlatePrice > 0
-//                                 ? widget.item.halfPlatePrice
-//                                 : widget.item.price;
+//                             basePrice = widget.item.halfPlatePrice > 0 ? widget.item.halfPlatePrice : widget.item.price;
 //                           } else if (variation == 'Full') {
-//                             basePrice = widget.item.fullPlatePrice > 0
-//                                 ? widget.item.fullPlatePrice
-//                                 : widget.item.price;
+//                             basePrice = widget.item.fullPlatePrice > 0 ? widget.item.fullPlatePrice : widget.item.price;
 //                           } else {
 //                             basePrice = widget.item.price;
 //                           }
 
 //                           final discounted = widget.item.discount > 0
-//                               ? (basePrice -
-//                                         (basePrice *
-//                                             widget.item.discount /
-//                                             100))
-//                                     .round()
+//                               ? (basePrice - (basePrice * widget.item.discount / 100)).round()
 //                               : basePrice;
 
 //                           return ListTile(
 //                             title: Text(
 //                               variation,
-//                               style: TextStyle(
-//                                 color: theme.colorScheme.onSurface,
-//                               ),
+//                               style: TextStyle(color: theme.colorScheme.onSurface),
 //                             ),
 //                             trailing: Row(
 //                               mainAxisSize: MainAxisSize.min,
@@ -1375,24 +1589,20 @@
 //                                     style: TextStyle(
 //                                       decoration: TextDecoration.lineThrough,
 //                                       fontSize: 12,
-//                                       color: theme.colorScheme.onSurface
-//                                           .withOpacity(0.6),
+//                                       color: theme.colorScheme.onSurface.withOpacity(0.6),
 //                                     ),
 //                                   ),
 //                                 ] else
 //                                   Text(
 //                                     '₹$basePrice',
-//                                     style: TextStyle(
-//                                       color: theme.colorScheme.onSurface,
-//                                     ),
+//                                     style: TextStyle(color: theme.colorScheme.onSurface),
 //                                   ),
 //                               ],
 //                             ),
 //                             leading: Radio<String>(
 //                               value: variation,
 //                               groupValue: selectedVariation,
-//                               onChanged: (val) =>
-//                                   setState(() => selectedVariation = val!),
+//                               onChanged: (val) => setState(() => selectedVariation = val!),
 //                             ),
 //                           );
 //                         }).toList(),
@@ -1406,7 +1616,6 @@
 //                 child: Row(
 //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //                   children: [
-//                     // Quantity selector
 //                     Container(
 //                       decoration: BoxDecoration(
 //                         border: Border.all(
@@ -1417,26 +1626,13 @@
 //                       child: Row(
 //                         children: [
 //                           IconButton(
-//                             onPressed: quantity > 1
-//                                 ? () => setState(() => quantity--)
-//                                 : null,
-//                             icon: Icon(
-//                               Icons.remove,
-//                               color: theme.colorScheme.onSurface,
-//                             ),
+//                             onPressed: quantity > 1 ? () => setState(() => quantity--) : null,
+//                             icon: Icon(Icons.remove, color: theme.colorScheme.onSurface),
 //                           ),
-//                           Text(
-//                             '$quantity',
-//                             style: TextStyle(
-//                               color: theme.colorScheme.onSurface,
-//                             ),
-//                           ),
+//                           Text('$quantity', style: TextStyle(color: theme.colorScheme.onSurface)),
 //                           IconButton(
 //                             onPressed: () => setState(() => quantity++),
-//                             icon: Icon(
-//                               Icons.add,
-//                               color: theme.colorScheme.onSurface,
-//                             ),
+//                             icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
 //                           ),
 //                         ],
 //                       ),
@@ -1446,10 +1642,7 @@
 //                         backgroundColor: theme.colorScheme.primary,
 //                         foregroundColor: theme.colorScheme.onPrimary,
 //                         shape: const StadiumBorder(),
-//                         padding: const EdgeInsets.symmetric(
-//                           horizontal: 24,
-//                           vertical: 12,
-//                         ),
+//                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
 //                       ),
 //                       onPressed: cartProvider.isLoading
 //                           ? null
@@ -1457,24 +1650,20 @@
 //                               final success = await addToCartWithVendorGuard(
 //                                 context: context,
 //                                 cartProvider: cartProvider,
-//                                 restaurantIdOfProduct: widget
-//                                     .restaurantId, // 🔑 vendor id of this product
+//                                 restaurantIdOfProduct: widget.restaurantId,
 //                                 restaurantProductId: widget.productId,
 //                                 recommendedId: widget.item.itemId,
 //                                 quantity: quantity,
-//                                 variation:
-//                                     selectedVariation, // "Half" / "Full" / "Regular"
+//                                 variation: selectedVariation,
 //                                 plateItems: 0,
-//                                 userId: widget.userId.toString(),
+//                                 userId: widget.userId,
 //                               );
 
 //                               if (success) {
 //                                 Navigator.pop(context);
 //                                 ScaffoldMessenger.of(context).showSnackBar(
 //                                   SnackBar(
-//                                     content: Text(
-//                                       '${widget.item.name} added to cart!',
-//                                     ),
+//                                     content: Text('${widget.item.name} added to cart!'),
 //                                     behavior: SnackBarBehavior.floating,
 //                                     shape: RoundedRectangleBorder(
 //                                       borderRadius: BorderRadius.circular(12),
@@ -1484,21 +1673,7 @@
 //                                 Navigator.push(
 //                                   context,
 //                                   MaterialPageRoute(
-//                                     builder: (context) =>
-//                                         NavbarScreen(initialIndex: 2),
-//                                   ),
-//                                 );
-//                               } else {
-//                                 ScaffoldMessenger.of(context).showSnackBar(
-//                                   SnackBar(
-//                                     content: Text(
-//                                       cartProvider.error ??
-//                                           'Failed to add item to cart',
-//                                     ),
-//                                     behavior: SnackBarBehavior.floating,
-//                                     shape: RoundedRectangleBorder(
-//                                       borderRadius: BorderRadius.circular(12),
-//                                     ),
+//                                     builder: (context) => NavbarScreen(initialIndex: 2),
 //                                   ),
 //                                 );
 //                               }
@@ -1514,12 +1689,7 @@
 //                                 ),
 //                               ),
 //                             )
-//                           : Text(
-//                               'Add Item | ₹${getPrice()}',
-//                               style: TextStyle(
-//                                 color: theme.colorScheme.onPrimary,
-//                               ),
-//                             ),
+//                           : Text('Add Item | ₹${getPrice()}'),
 //                     ),
 //                   ],
 //                 ),
@@ -1533,12 +1703,11 @@
 //   }
 // }
 
-// /// NEW SCREEN: Restaurant Reviews
 // class RestaurantReviewsScreen extends StatelessWidget {
 //   final String restaurantName;
 //   final int totalRatings;
 //   final int totalReviews;
-//   final List<RestaurantReview> reviews;
+//   final List<dynamic> reviews;
 
 //   const RestaurantReviewsScreen({
 //     super.key,
@@ -1570,29 +1739,20 @@
 //               children: [
 //                 Text(
 //                   restaurantName,
-//                   style: theme.textTheme.titleMedium?.copyWith(
-//                     fontWeight: FontWeight.bold,
-//                   ),
+//                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
 //                 ),
 //                 const SizedBox(height: 4),
 //                 Row(
 //                   children: [
 //                     Container(
-//                       padding: const EdgeInsets.symmetric(
-//                         horizontal: 10,
-//                         vertical: 4,
-//                       ),
+//                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
 //                       decoration: BoxDecoration(
 //                         color: theme.colorScheme.primary,
 //                         borderRadius: BorderRadius.circular(8),
 //                       ),
 //                       child: Row(
 //                         children: [
-//                           Icon(
-//                             Icons.star,
-//                             size: 16,
-//                             color: theme.colorScheme.onPrimary,
-//                           ),
+//                           Icon(Icons.star, size: 16, color: theme.colorScheme.onPrimary),
 //                           const SizedBox(width: 4),
 //                           Text(
 //                             avg.toStringAsFixed(1),
@@ -1607,9 +1767,7 @@
 //                     const SizedBox(width: 8),
 //                     Text(
 //                       '$totalReviews review${totalReviews == 1 ? '' : 's'}',
-//                       style: TextStyle(
-//                         color: theme.colorScheme.onSurface.withOpacity(0.7),
-//                       ),
+//                       style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
 //                     ),
 //                   ],
 //                 ),
@@ -1631,11 +1789,7 @@
 //                     itemCount: reviews.length,
 //                     itemBuilder: (context, index) {
 //                       final review = reviews[index];
-
-//                       final userName = review.username.isNotEmpty
-//                           ? review.username
-//                           : "User ${index + 1}";
-
+//                       final userName = review.username.isNotEmpty ? review.username : "User ${index + 1}";
 //                       final userImage = review.userimage.isNotEmpty
 //                           ? review.userimage
 //                           : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
@@ -1662,9 +1816,7 @@
 //                               children: List.generate(
 //                                 5,
 //                                 (i) => Icon(
-//                                   i < review.stars
-//                                       ? Icons.star
-//                                       : Icons.star_border,
+//                                   i < review.stars ? Icons.star : Icons.star_border,
 //                                   size: 16,
 //                                   color: theme.colorScheme.primary,
 //                                 ),
@@ -1677,23 +1829,15 @@
 //                           children: [
 //                             const SizedBox(height: 4),
 //                             Text(
-//                               review.comment.isNotEmpty
-//                                   ? review.comment
-//                                   : 'No comment',
-//                               style: TextStyle(
-//                                 color: theme.colorScheme.onSurface,
-//                               ),
+//                               review.comment.isNotEmpty ? review.comment : 'No comment',
+//                               style: TextStyle(color: theme.colorScheme.onSurface),
 //                             ),
 //                             const SizedBox(height: 4),
 //                             Text(
-//                               DateFormat(
-//                                 'dd MMM yyyy, hh:mm a',
-//                               ).format(review.createdAt.toLocal()),
+//                               DateFormat('dd MMM yyyy, hh:mm a').format(review.createdAt.toLocal()),
 //                               style: TextStyle(
 //                                 fontSize: 12,
-//                                 color: theme.colorScheme.onSurface.withOpacity(
-//                                   0.6,
-//                                 ),
+//                                 color: theme.colorScheme.onSurface.withOpacity(0.6),
 //                               ),
 //                             ),
 //                           ],
@@ -1740,9 +1884,7 @@
 //   @override
 //   void didUpdateWidget(covariant _WishlistHeart oldWidget) {
 //     super.didUpdateWidget(oldWidget);
-//     // Sync with provider if it changes externally (e.g. from another screen)
-//     if (!_isProcessing &&
-//         oldWidget.initialIsInWishlist != widget.initialIsInWishlist) {
+//     if (!_isProcessing && oldWidget.initialIsInWishlist != widget.initialIsInWishlist) {
 //       _isInWishlist = widget.initialIsInWishlist;
 //     }
 //   }
@@ -1750,7 +1892,6 @@
 //   Future<void> _handleTap() async {
 //     if (!widget.enabled || _isProcessing) return;
 
-//     // Optimistic UI update
 //     setState(() {
 //       _isInWishlist = !_isInWishlist;
 //       _isProcessing = true;
@@ -1759,8 +1900,6 @@
 //     try {
 //       await widget.onToggle();
 //     } catch (_) {
-//       // If API fails you COULD revert, but user only asked for UI,
-//       // so we keep current state and just stop processing.
 //     } finally {
 //       if (mounted) {
 //         setState(() {
@@ -1772,16 +1911,14 @@
 
 //   @override
 //   Widget build(BuildContext context) {
-//     final theme = widget.theme;
-
 //     return GestureDetector(
 //       onTap: _handleTap,
 //       child: CircleAvatar(
-//         backgroundColor: widget.isDark ? theme.cardColor : Colors.white,
+//         backgroundColor: widget.isDark ? widget.theme.cardColor : Colors.white,
 //         radius: 14,
 //         child: Icon(
 //           _isInWishlist ? Icons.favorite : Icons.favorite_border,
-//           color: _isInWishlist ? Colors.red : theme.colorScheme.onSurface,
+//           color: _isInWishlist ? Colors.red : widget.theme.colorScheme.onSurface,
 //           size: 18,
 //         ),
 //       ),
@@ -1808,25 +1945,17 @@
 
 
 
-
-
-
-
-
-
-
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:veegify/helper/cart_vendor_guard.dart';
 import 'package:veegify/helper/storage_helper.dart';
-import 'package:veegify/model/restaurant_product_model.dart' hide CartItem;
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/provider/RestaurantProvider/restaurant_products_provider.dart';
 import 'package:veegify/provider/WishListProvider/wishlist_provider.dart';
 import 'package:veegify/views/Cart/cart_screen.dart';
-import 'package:veegify/views/Navbar/navbar_screen.dart';
 import 'package:veegify/views/home/detail_screen.dart';
 import 'package:veegify/widgets/Restaurants/swinging_closed_banner.dart';
 
@@ -1851,8 +1980,16 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   Timer? _availabilityTimer;
   bool _hasLoadedOnce = false;
-
   
+  // Pagination variables
+  static const int _initialLoadCount = 6;
+  static const int _loadMoreCount = 4;
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
+  bool _hasMoreItems = true;
+  int _displayedItemsCount = 0;
+  List<dynamic> _displayedItems = [];
+  List<dynamic> _allFilteredItems = [];
 
   @override
   void initState() {
@@ -1862,21 +1999,36 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       await context.read<WishlistProvider>().fetchWishlist(userId.toString());
       _startAvailabilityPolling();
     });
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _availabilityTimer?.cancel();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore &&
+        _hasMoreItems &&
+        _displayedItemsCount < _allFilteredItems.length) {
+      _loadMoreItems();
+    }
   }
 
   Future<void> _initializeData() async {
     try {
+      EasyLoading.show(status: 'Loading restaurant...');
+      
       await _loadUserId();
 
       if (userId == null) {
         debugPrint("User ID not found!");
+        EasyLoading.dismiss();
         return;
       }
 
@@ -1893,8 +2045,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         });
       }
 
+      EasyLoading.dismiss();
       debugPrint("Data initialized successfully ✅");
     } catch (e, stack) {
+      EasyLoading.dismiss();
+      EasyLoading.showError('Failed to load restaurant data');
       debugPrint("Error initializing data: $e\n$stack");
     }
   }
@@ -1933,6 +2088,50 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     });
   }
 
+  void _filterAndPaginateItems(List<dynamic> allItems) {
+    _allFilteredItems = allItems;
+    _hasMoreItems = _allFilteredItems.length > _initialLoadCount;
+    _displayedItemsCount = _allFilteredItems.length > _initialLoadCount 
+        ? _initialLoadCount 
+        : _allFilteredItems.length;
+    _displayedItems = _allFilteredItems.take(_displayedItemsCount).toList();
+  }
+
+  Future<void> _loadMoreItems() async {
+    if (_isLoadingMore || !_hasMoreItems) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate network delay for smooth UX
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (mounted) {
+      setState(() {
+        final nextBatch = _displayedItemsCount + _loadMoreCount;
+        if (nextBatch >= _allFilteredItems.length) {
+          _displayedItems = _allFilteredItems;
+          _displayedItemsCount = _allFilteredItems.length;
+          _hasMoreItems = false;
+        } else {
+          _displayedItems = _allFilteredItems.take(nextBatch).toList();
+          _displayedItemsCount = nextBatch;
+        }
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _handleSearch(String query) {
+    setState(() {
+      _searchQuery = query;
+      final provider = context.read<RestaurantProductsProvider>();
+      final searchResults = provider.searchItems(query);
+      _filterAndPaginateItems(searchResults);
+    });
+  }
+
   // Responsive helper methods
   bool _isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 600;
@@ -1945,39 +2144,24 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   bool _isDesktop(BuildContext context) =>
       MediaQuery.of(context).size.width >= 1024;
 
-  // int _getCrossAxisCount(BuildContext context) {
-  //   if (_isDesktop(context)) return 3;
-  //   if (_isTablet(context)) return 2;
-  //   return 1;
-  // }
-
-
   int _getCrossAxisCount(BuildContext context) {
-  final w = MediaQuery.of(context).size.width;
+    final w = MediaQuery.of(context).size.width;
 
-  if (w >= 1600) return 5;
-  if (w >= 1300) return 4;
-  if (w >= 1024) return 3;
-  if (w >= 700) return 2;
-  return 1;
-}
-
-
-  // double _getMaxWidth(BuildContext context) {
-  //   if (_isDesktop(context)) return 1400;
-  //   return double.infinity;
-  // }
-
+    if (w >= 1600) return 5;
+    if (w >= 1300) return 4;
+    if (w >= 1024) return 3;
+    if (w >= 700) return 2;
+    return 1;
+  }
 
   double _getMaxWidth(BuildContext context) {
-  final w = MediaQuery.of(context).size.width;
+    final w = MediaQuery.of(context).size.width;
 
-  if (w >= 1600) return 1300;
-  if (w >= 1200) return 1800;
-  if (w >= 1024) return 1100;
-  return double.infinity;
-}
-
+    if (w >= 1600) return 1300;
+    if (w >= 1200) return 1800;
+    if (w >= 1024) return 1100;
+    return double.infinity;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2008,9 +2192,16 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               return _buildErrorUI(restaurantProvider, theme);
             }
 
-            final recommendedItems = _searchQuery.isEmpty
-                ? restaurantProvider.allRecommendedItems
-                : restaurantProvider.searchItems(_searchQuery);
+            // Initialize or update displayed items when provider data changes
+            if (_allFilteredItems.isEmpty || !_hasLoadedOnce) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _filterAndPaginateItems(restaurantProvider.allRecommendedItems);
+                  });
+                }
+              });
+            }
 
             final rating = restaurantProvider.rating > 0
                 ? restaurantProvider.rating.toStringAsFixed(1)
@@ -2023,6 +2214,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 'active';
 
             return SingleChildScrollView(
+              controller: _scrollController,
               child: Center(
                 child: Container(
                   constraints: BoxConstraints(
@@ -2093,11 +2285,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                                         vertical: 0,
                                       ),
                                     ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _searchQuery = value;
-                                      });
-                                    },
+                                    onChanged: _handleSearch,
                                   ),
                                 ),
                               ),
@@ -2131,7 +2319,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                               ),
                             ),
                             Text(
-                              '${restaurantProvider.totalRecommendedItems} items',
+                              '${_allFilteredItems.length} items',
                               style: TextStyle(
                                 color: theme.colorScheme.onSurface
                                     .withOpacity(0.6),
@@ -2143,7 +2331,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       ),
 
                       // Products Grid/List
-                      recommendedItems.isEmpty
+                      _displayedItems.isEmpty
                           ? Padding(
                               padding: const EdgeInsets.all(32.0),
                               child: Column(
@@ -2156,7 +2344,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No items found',
+                                    _searchQuery.isEmpty 
+                                        ? 'No items available'
+                                        : 'No items found',
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.onSurface
                                           .withOpacity(0.6),
@@ -2167,12 +2357,38 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                             )
                           : _buildProductsGrid(
                               context,
-                              recommendedItems,
+                              _displayedItems,
                               restaurantProvider,
                               theme,
                               isDark,
                               isRestaurantActive,
                             ),
+
+                      // Loading More Indicator
+                      if (_isLoadingMore)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // No More Items Indicator
+                      if (!_hasMoreItems && _displayedItems.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'No more items',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
 
                       SizedBox(height: isDesktop ? 150 : 100),
                     ],
@@ -2438,7 +2654,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   Widget _buildProductsGrid(
     BuildContext context,
-    List<dynamic> recommendedItems,
+    List<dynamic> items,
     RestaurantProductsProvider restaurantProvider,
     ThemeData theme,
     bool isDark,
@@ -2453,11 +2669,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32 : 8),
-        itemCount: recommendedItems.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
           return _buildProductCard(
             context,
-            recommendedItems[index],
+            items[index],
             restaurantProvider,
             theme,
             isDark,
@@ -2475,16 +2691,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
           childAspectRatio: _isDesktop(context) ? 0.82 : 0.75,
-
-          // childAspectRatio: isDesktop ? 0.75 : 0.7,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: recommendedItems.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
           return _buildProductCard(
             context,
-            recommendedItems[index],
+            items[index],
             restaurantProvider,
             theme,
             isDark,
@@ -2775,7 +2989,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       Row(
                         children: [
                           Text(
-                            "₹${(item.price - (item.price * item.discount / 100))}",
+                            "₹${(item.price - (item.price * item.discount / 100)).toStringAsFixed(0)}",
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.onSurface,
@@ -2847,7 +3061,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         Row(
           children: [
             Text(
-              "₹${(item.price - (item.price * item.discount / 100))}",
+              "₹${(item.price - (item.price * item.discount / 100)).toStringAsFixed(0)}",
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
@@ -3074,7 +3288,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               onPressed: cartProvider.isLoading
                   ? null
                   : () async {
+                      EasyLoading.show(status: 'Updating cart...');
                       await cartProvider.decrementQuantity(productId, userId);
+                      EasyLoading.dismiss();
                     },
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               padding: EdgeInsets.zero,
@@ -3098,7 +3314,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               onPressed: cartProvider.isLoading
                   ? null
                   : () async {
+                      EasyLoading.show(status: 'Updating cart...');
                       await cartProvider.incrementQuantity(productId, userId);
+                      EasyLoading.dismiss();
                     },
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               padding: EdgeInsets.zero,
@@ -3179,10 +3397,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
+              EasyLoading.show(status: 'Retrying...');
               provider.fetchRestaurantProducts(
                 widget.restaurantId,
                 widget.categoryName,
-              );
+              ).then((_) {
+                EasyLoading.dismiss();
+              }).catchError((error) {
+                EasyLoading.showError('Failed to load');
+              });
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
@@ -3464,6 +3687,8 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                       onPressed: cartProvider.isLoading
                           ? null
                           : () async {
+                              EasyLoading.show(status: 'Adding to cart...');
+                              
                               final success = await addToCartWithVendorGuard(
                                 context: context,
                                 cartProvider: cartProvider,
@@ -3476,23 +3701,19 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                                 userId: widget.userId,
                               );
 
-                              if (success) {
+                              EasyLoading.dismiss();
+
+                              if (success && mounted) {
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('${widget.item.name} added to cart!'),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => NavbarScreen(initialIndex: 2),
-                                  ),
-                                );
+                                EasyLoading.showSuccess('Added to cart!');
+                                
+                                // Optional: Navigate to cart
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => NavbarScreen(initialIndex: 2),
+                                //   ),
+                                // );
                               }
                             },
                       child: cartProvider.isLoading
@@ -3716,7 +3937,13 @@ class _WishlistHeartState extends State<_WishlistHeart> {
 
     try {
       await widget.onToggle();
+      if (mounted) {
+        EasyLoading.showSuccess(_isInWishlist ? 'Added to wishlist' : 'Removed from wishlist');
+      }
     } catch (_) {
+      if (mounted) {
+        EasyLoading.showError('Failed to update wishlist');
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -3733,11 +3960,22 @@ class _WishlistHeartState extends State<_WishlistHeart> {
       child: CircleAvatar(
         backgroundColor: widget.isDark ? widget.theme.cardColor : Colors.white,
         radius: 14,
-        child: Icon(
-          _isInWishlist ? Icons.favorite : Icons.favorite_border,
-          color: _isInWishlist ? Colors.red : widget.theme.colorScheme.onSurface,
-          size: 18,
-        ),
+        child: _isProcessing
+            ? SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    widget.theme.colorScheme.primary,
+                  ),
+                ),
+              )
+            : Icon(
+                _isInWishlist ? Icons.favorite : Icons.favorite_border,
+                color: _isInWishlist ? Colors.red : widget.theme.colorScheme.onSurface,
+                size: 18,
+              ),
       ),
     );
   }

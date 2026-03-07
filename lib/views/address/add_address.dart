@@ -633,30 +633,62 @@ class _AddAddressState extends State<AddAddress> {
 
   // ------------------ LOCATION PICKER ------------------
 
+  // Future<void> _openLocationPicker() async {
+  //   final result = await Navigator.push<Map<String, dynamic>>(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => LocationPickerScreen(
+  //         isEditing: widget.address != null,
+  //         userId: 'current_user_id', // Replace with actual user ID
+  //       ),
+  //     ),
+  //   );
+
+  //   if (result != null) {
+  //     final LatLng location = result['location'];
+  //     final String fullAddress = result['address'];
+
+  //     setState(() {
+  //       _selectedLatLng = location;
+  //       _selectedLocation = fullAddress;
+  //     });
+
+  //     // Parse and auto-fill address fields
+  //     _parseAndFillAddress(fullAddress);
+  //   }
+  // }
+
+
   Future<void> _openLocationPicker() async {
-    final result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LocationPickerScreen(
-          isEditing: widget.address != null,
-          userId: 'current_user_id', // Replace with actual user ID
-        ),
+  final result = await Navigator.push<Map<String, dynamic>>(
+    context,
+    MaterialPageRoute(
+      builder: (context) => LocationPickerScreen(
+        isEditing: widget.address != null,
+        userId: 'current_user_id',
       ),
+    ),
+  );
+
+  if (result != null) {
+
+    final googleMapsLatLng = result['location']; // google LatLng
+
+    final LatLng location = LatLng(
+      googleMapsLatLng.latitude,
+      googleMapsLatLng.longitude,
     );
 
-    if (result != null) {
-      final LatLng location = result['location'];
-      final String fullAddress = result['address'];
+    final String fullAddress = result['address'];
 
-      setState(() {
-        _selectedLatLng = location;
-        _selectedLocation = fullAddress;
-      });
+    setState(() {
+      _selectedLatLng = location;
+      _selectedLocation = fullAddress;
+    });
 
-      // Parse and auto-fill address fields
-      _parseAndFillAddress(fullAddress);
-    }
+    _parseAndFillAddress(fullAddress);
   }
+}
 
   void _parseAndFillAddress(String fullAddress) {
     try {

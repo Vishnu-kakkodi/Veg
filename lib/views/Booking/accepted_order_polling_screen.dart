@@ -2085,23 +2085,19 @@ Widget _noOrderAnimation() {
 
   VoidCallback _navigateToTracking(AcceptedOrder order) {
     return () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => TrackingScreenGoogle(
-            deliveryBoyId: '${order.riderDetails?.id.toString()}',
-            userId: '$userId',
-            initialCenter: LatLng(
-              order.deliveryFlow?.user?.address?.location
-                      ?.coordinates?[1] ??
-                  0.0,
-              order.deliveryFlow?.user?.address?.location
-                      ?.coordinates?[0] ??
-                  0.0,
-            ),
-          ),
-        ),
-      );
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => TrackingScreenGoogle(
+      deliveryBoyId: '${order.riderDetails?.id.toString()}',
+      userId: '$userId',
+      destination: LatLng(
+        order.deliveryFlow?.user?.address?.location?.coordinates?[1] ?? 0.0,
+        order.deliveryFlow?.user?.address?.location?.coordinates?[0] ?? 0.0,
+      ),
+    ),
+  ),
+);
     };
   }
 

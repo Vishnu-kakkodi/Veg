@@ -719,10 +719,11 @@ class _CategoryBasedScreenState extends State<CategoryBasedScreen> {
     });
 
     try {
-      debugPrint("Category ID: ${widget.categoryId}");
+      debugPrint("Category ID: ${widget.userId}");
+      print("pppppppppppppppppppppppppp${widget.title}");
       final response = await http.get(
         Uri.parse(
-          'https://api.vegiffyy.com/api/resturentbycat/${widget.userId}?categoryName=${Uri.encodeComponent(widget.title)}',
+          'https://api.vegiffyy.com/api/resturentbycat/${widget.userId}?categoryId=${widget.categoryId}',
         ),
       );
       debugPrint("Response status: ${response.statusCode}");

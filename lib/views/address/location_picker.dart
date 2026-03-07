@@ -444,7 +444,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   String _address = "Loading address...";
   bool _isLoadingAddress = false;
 
-  final String googleApiKey = "YOUR_GOOGLE_API_KEY";
+  final String googleApiKey = "AIzaSyCLpJY_qUkHA0sFo-Ywiu-9aDW4w-H2RiY";
 
   @override
   void initState() {

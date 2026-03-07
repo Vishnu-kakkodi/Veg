@@ -26,8 +26,9 @@ import 'package:veegify/provider/theme_provider.dart';
 import 'package:veegify/services/BookingService/booking_service.dart';
 import 'package:veegify/views/MaintenanceScreen/maintenance_screen.dart';
 import 'package:veegify/views/Version/global_watcher.dart';
+import 'package:veegify/views/onboard/start.dart';
 import 'package:veegify/views/theme/app_theme.dart';
-import 'package:veegify/views/splash_screen.dart';
+// import 'package:veegify/views/splash_screen.dart';
 import 'package:veegify/widgets/bottom_navbar.dart';
 
 void main() {
@@ -133,7 +134,7 @@ class _AppView extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
-      home: const SplashScreen(),
+      home: const Start(),
       builder: (context, child) {
         Widget screen = child ?? const SizedBox.shrink();
 
