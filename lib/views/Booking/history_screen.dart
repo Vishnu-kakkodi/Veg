@@ -8,6 +8,7 @@ import 'package:veegify/model/previous_order.dart';
 import 'package:veegify/model/user_model.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
 import 'package:veegify/provider/Credential/credential_provider.dart';
+import 'package:veegify/services/pdf_download_service.dart';
 import 'package:veegify/utils/previous_order.dart';
 import 'package:veegify/views/ProfileScreen/help_screen.dart';
 import 'package:veegify/views/Booking/booking_screen.dart';
@@ -151,6 +152,9 @@ debugPrint("USER ID: ${user?.userId}");
       final url =
           Uri.parse("$_apiHost/api/userpreviousorders/${user?.userId}");
       final response = await http.get(url);
+
+            debugPrint("Orders response: $url");
+
 
       debugPrint("Orders response: ${response.statusCode} -> ${response.body}");
 
@@ -545,34 +549,44 @@ debugPrint("USER ID: ${user?.userId}");
 
   // ---------- INVOICE DOWNLOAD USING Order MODEL ----------
 
-  Future<void> _downloadInvoice(Order orderModel) async {
-    final theme = Theme.of(context);
+  // Future<void> _downloadInvoice(Order orderModel) async {
+  //   final theme = Theme.of(context);
 
-    try {
-      // 1) Build Veegify HTML
-      final htmlContent = buildInvoiceHtml(orderModel);
-      debugPrint("Invoice HTML: $htmlContent");
+  //   try {
+  //     // 1) Build Veegify HTML
+  //     final htmlContent = buildInvoiceHtml(orderModel);
+  //     debugPrint("Invoice HTML: $htmlContent");
 
-      // await Printing.layoutPdf(
-      //   onLayout: (PdfPageFormat format) async {
-      //     final pdfBytes = await Printing.convertHtml(
-      //       format: format,
-      //       html: htmlContent,
-      //     );
-      //     return pdfBytes;
-      //   },
-      // );
-    } catch (e, st) {
-      debugPrint('Invoice error: $e\n$st');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to download invoice: $e'),
-          backgroundColor: theme.colorScheme.error,
-        ),
-      );
-    }
-  }
+  //     // await Printing.layoutPdf(
+  //     //   onLayout: (PdfPageFormat format) async {
+  //     //     final pdfBytes = await Printing.convertHtml(
+  //     //       format: format,
+  //     //       html: htmlContent,
+  //     //     );
+  //     //     return pdfBytes;
+  //     //   },
+  //     // );
+  //   } catch (e, st) {
+  //     debugPrint('Invoice error: $e\n$st');
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Failed to download invoice: $e'),
+  //         backgroundColor: theme.colorScheme.error,
+  //       ),
+  //     );
+  //   }
+  // }
+
+
+
+  Future<void> _downloadInvoice(Order order) async {
+  await PdfDownloadService.downloadInvoice(
+    context: context,
+    invoiceUrl: order.invoice,
+    orderId: order.id,
+  );
+}
 
   Widget _buildBody() {
     final theme = Theme.of(context);

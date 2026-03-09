@@ -1348,6 +1348,13 @@ class AvailableDeliveryBoy {
 
 // =======================================================
 
+
+String _asString(dynamic value, {String defaultValue = ''}) {
+  if (value == null) return defaultValue;
+  if (value is String) return value;
+  return value.toString();
+}
+
 class Order {
   final String id;
   final String userId;
@@ -1378,6 +1385,7 @@ class Order {
   final String? transactionId;
   final dynamic packingCharges;
   final dynamic gstOnDelivery;
+  final String? invoice;
 
   final dynamic amountSavedOnOrder;
 
@@ -1411,7 +1419,9 @@ class Order {
     this.transactionId,
     this.packingCharges,
     this.gstOnDelivery,
-    this.amountSavedOnOrder
+    this.amountSavedOnOrder,
+        this.invoice,
+
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -1525,6 +1535,8 @@ class Order {
                   json['transactionId'] != '')
               ? json['transactionId']
               : null,
+                    invoice: _asString(json['invoiceUrl'], defaultValue: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'),
+
     );
   }
 

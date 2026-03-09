@@ -716,7 +716,11 @@ class AvailableDeliveryBoy {
 }
 
 // =======================================================
-
+String _asString(dynamic value, {String defaultValue = ''}) {
+  if (value == null) return defaultValue;
+  if (value is String) return value;
+  return value.toString();
+}
 class Order {
   final String id;
   final String userId;
@@ -749,6 +753,8 @@ class Order {
   final String? transactionId;
   final dynamic packingCharges;
   final dynamic gstOnDelivery;
+    final String? invoice;
+
 
   Order({
     required this.id,
@@ -782,6 +788,8 @@ class Order {
     this.transactionId,
     this.packingCharges,
     this.gstOnDelivery,
+            this.invoice,
+
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
@@ -890,6 +898,8 @@ class Order {
               ? json['platformCharge'].toDouble()
               : null,
       transactionId: json['transactionId']?.toString(),
+                          invoice: _asString(json['invoiceUrl'], defaultValue: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'),
+
     );
   }
 
