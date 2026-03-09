@@ -58,6 +58,61 @@ class AddressProvider extends ChangeNotifier {
     }
   }
 
+  // Add this to your AddressProvider class
+Future<bool> setAddressAsDefault(String addressId) async {
+  try {
+    setLoading(true);
+    clearError();
+
+    print("Setting address as default - Provider Address Id: $addressId");
+
+    final result = await AddressService.setAddressAsDefault(addressId);
+
+    if (result['success']) {
+      // Update the local list to reflect which address is default
+      // You'll need to know which field indicates default status
+      // Assuming your Address model has an 'isDefault' field
+      
+      // First, set all addresses to non-default
+      for (var address in _addresses) {
+        address.isDefault = false;
+      }
+      
+      // Then set the selected address as default
+      final defaultAddress = _addresses.firstWhere(
+        (address) => address.id == addressId,
+        // orElse: () => Address(), // Return empty address if not found
+      );
+      
+      if (defaultAddress.id != null) {
+        defaultAddress.isDefault = true;
+      }
+      
+      setLoading(false);
+      notifyListeners();
+      
+      return true;
+    } else {
+      setError(result['message'] ?? 'Failed to set address as default');
+      setLoading(false);
+      return false;
+    }
+  } catch (e) {
+    setError('Error setting address as default: ${e.toString()}');
+    setLoading(false);
+    return false;
+  }
+}
+
+// Helper method to get the default address
+Address? get defaultAddress {
+  try {
+    return _addresses.firstWhere((address) => address.isDefault);
+  } catch (e) {
+    return null;
+  }
+}
+
   // Add new address
   Future<bool> addAddress(Address address) async {
     try {

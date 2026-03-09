@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:veegify/model/restaurant_product_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,30 +7,39 @@ class RestaurantService {
 
   static Future<RestaurantProductResponse> getRestaurantProducts(String restaurantId, String? categoryName) async {
     try {
-      print("lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll$restaurantId");
-            print("lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll$categoryName");
+      print("🆔 Restaurant ID: $restaurantId");
+      print("📁 Category Name: $categoryName");
 
       final String endpoint;
-     if(categoryName ==" " || categoryName == null){
-      endpoint = '$_baseUrl/restaurant-products/$restaurantId';
-     }else{
-       endpoint = '$_baseUrl/restaurant-products/$restaurantId?categoryName=$categoryName';
-     }
+      if(categoryName == null || categoryName.isEmpty || categoryName == " "){
+        endpoint = '$_baseUrl/restaurant-products/$restaurantId';
+      } else {
+        endpoint = '$_baseUrl/restaurant-products/$restaurantId?categoryName=$categoryName';
+      }
 
-     print(endpoint);
+      print("🔗 Endpoint: $endpoint");
 
-            final response = await http.get(
+      final response = await http.get(
         Uri.parse(endpoint),
         headers: {'Content-Type': 'application/json'},
       );
 
-      print("Response ${response.statusCode} → ${response.body}");
+      print("📥 Response Status: ${response.statusCode}");
+      print("📦 Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
-        return RestaurantProductResponse.fromJson(json.decode(response.body));
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        
+        // Log the new fields to verify they exist
+        print("✅ fssaiNo: ${jsonData['fssaiNo']}");
+        print("✅ fullAddress: ${jsonData['fullAddress']}");
+        print("✅ disclaimers: ${jsonData['disclaimers']}");
+        
+        return RestaurantProductResponse.fromJson(jsonData);
       }
 
       if (response.statusCode == 404) {
+        print("❌ 404 - No products found");
         return RestaurantProductResponse(
           success: false,
           message: "No products found",
@@ -40,13 +48,16 @@ class RestaurantService {
         );
       }
 
+      print("❌ Server error: ${response.statusCode}");
       return RestaurantProductResponse(
         success: false,
         message: "Server error",
         recommendedProducts: [],
         totalRecommendedItems: 0,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print("🔥 Exception: $e");
+      print("📚 Stack trace: $stackTrace");
       return RestaurantProductResponse(
         success: false,
         message: "Request failed",

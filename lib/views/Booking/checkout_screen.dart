@@ -875,12 +875,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildAddressSection(
+Widget _buildAddressSection(
     AddressProvider addressProvider,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
     final isDesktop = Responsive.isDesktop(context);
+    
+    // Sort addresses: default first, then others
+    final sortedAddresses = List.from(addressProvider.addresses)
+      ..sort((a, b) {
+        if (a.isDefault && !b.isDefault) return -1;
+        if (!a.isDefault && b.isDefault) return 1;
+        return 0;
+      });
+    
+    // Get only first 2 addresses to display
+    final displayAddresses = sortedAddresses.take(2).toList();
+    final hasMoreAddresses = sortedAddresses.length > 2;
 
     return Container(
       padding: EdgeInsets.all(isDesktop ? 20 : 16),
@@ -903,30 +915,54 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Delivery Address',
+                'Address',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: isDesktop ? 18 : 16,
                 ),
               ),
-              TextButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => AddressList()),
-                  ).then((_) {
-                    // Refresh addresses when returning
-                    addressProvider.loadAddresses();
-                  });
-                },
-                icon: Icon(Icons.add, size: isDesktop ? 20 : 18, color: colorScheme.primary),
-                label: Text(
-                  'Add New',
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: isDesktop ? 14 : 12,
+              Row(
+                children: [
+                  if (hasMoreAddresses)
+                    TextButton.icon(
+                      onPressed: () {
+                        _showAllAddressesBottomSheet(
+                          context, 
+                          sortedAddresses, 
+                          addressProvider,
+                          theme,
+                          colorScheme,
+                        );
+                      },
+                      icon: Icon(Icons.list, size: isDesktop ? 20 : 18, color: colorScheme.primary),
+                      label: Text(
+                        'View All (${sortedAddresses.length})',
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: isDesktop ? 14 : 12,
+                        ),
+                      ),
+                    ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AddressList()),
+                      ).then((_) {
+                        // Refresh addresses when returning
+                        addressProvider.loadAddresses();
+                      });
+                    },
+                    icon: Icon(Icons.add, size: isDesktop ? 20 : 18, color: colorScheme.primary),
+                    label: Text(
+                      'Add New',
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontSize: isDesktop ? 14 : 12,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -955,92 +991,314 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             )
           else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: addressProvider.addresses.length,
-              itemBuilder: (context, index) {
-                final address = addressProvider.addresses[index];
-                final isSelected = _selectedAddressId == address.id;
+            Column(
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: displayAddresses.length,
+                  itemBuilder: (context, index) {
+                    final address = displayAddresses[index];
+                    final isSelected = _selectedAddressId == address.id;
 
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedAddressId = address.id;
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? colorScheme.primary.withOpacity(0.1)
-                          : colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.outline.withOpacity(0.3),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isSelected
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_unchecked,
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedAddressId = address.id;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
                           color: isSelected
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
-                          size: isDesktop ? 22 : 20,
+                              ? colorScheme.primary.withOpacity(0.1)
+                              : colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.outline.withOpacity(0.3),
+                            width: isSelected ? 2 : 1,
+                          ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
+                              size: isDesktop ? 22 : 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      address.addressType,
-                                      style: TextStyle(
-                                        color: colorScheme.onPrimary,
-                                        fontSize: isDesktop ? 12 : 10,
-                                        fontWeight: FontWeight.w600,
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              address.addressType,
+                                              style: TextStyle(
+                                                color: colorScheme.onPrimary,
+                                                fontSize: isDesktop ? 12 : 10,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            if (address.isDefault) ...[
+                                              const SizedBox(width: 4),
+                                              Container(
+                                                width: 4,
+                                                height: 4,
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme.onPrimary,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'Default',
+                                                style: TextStyle(
+                                                  color: colorScheme.onPrimary,
+                                                  fontSize: isDesktop ? 12 : 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    address.fullAddress ?? address.formattedAddress,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontSize: isDesktop ? 14 : 12,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                address.fullAddress ?? address.formattedAddress,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontSize: isDesktop ? 14 : 12,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                if (hasMoreAddresses)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: TextButton(
+                        onPressed: () {
+                          _showAllAddressesBottomSheet(
+                            context, 
+                            sortedAddresses, 
+                            addressProvider,
+                            theme,
+                            colorScheme,
+                          );
+                        },
+                        child: Text(
+                          '+ ${sortedAddresses.length - 2} more addresses',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                );
-              },
+              ],
             ),
         ],
+      ),
+    );
+  }
+
+  void _showAllAddressesBottomSheet(
+    BuildContext context,
+    List<dynamic> addresses,
+    AddressProvider addressProvider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    final isDesktop = Responsive.isDesktop(context);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(isDesktop ? 24 : 16),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select Delivery Address',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: addresses.length,
+                itemBuilder: (context, index) {
+                  final address = addresses[index];
+                  final isSelected = _selectedAddressId == address.id;
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedAddressId = address.id;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colorScheme.primary.withOpacity(0.1)
+                            : colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.outline.withOpacity(0.3),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            address.addressType,
+                                            style: TextStyle(
+                                              color: colorScheme.onPrimary,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          if (address.isDefault) ...[
+                                            const SizedBox(width: 4),
+                                            Container(
+                                              width: 4,
+                                              height: 4,
+                                              decoration: BoxDecoration(
+                                                color: colorScheme.onPrimary,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Default',
+                                              style: TextStyle(
+                                                color: colorScheme.onPrimary,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  address.fullAddress ?? address.formattedAddress,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Navigate to add new address
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AddressList()),
+                  ).then((_) {
+                    addressProvider.loadAddresses();
+                  });
+                },
+                child: const Text('Add New Address'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

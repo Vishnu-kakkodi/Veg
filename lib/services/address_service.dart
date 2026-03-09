@@ -56,6 +56,53 @@ class AddressService {
   }
 
 
+  // Add this to your AddressService class
+static Future<Map<String, dynamic>> setAddressAsDefault(String addressId) async {
+  try {
+    final url = '$baseUrl/setaddressdefault/${user?.userId}';
+    
+    print('Setting address as default - URL: $url');
+    print('Setting address as default - AddressId: $addressId');
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'addressId': addressId,
+      }),
+    );
+
+    print('Set Default Address Response: ${response.statusCode}');
+    print('Set Default Address Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return {
+        'success': true,
+        'message': 'Address set as default successfully',
+        'data': responseData,
+      };
+    } else {
+      final errorData = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': errorData['message'] ?? 'Failed to set address as default',
+        'data': null,
+      };
+    }
+  } catch (e) {
+    print('Error setting address as default: $e');
+    return {
+      'success': false,
+      'message': 'Network error: ${e.toString()}',
+      'data': null,
+    };
+  }
+}
+
+
   // Fixed getAllAddresses method for your AddressService class
 static Future<Map<String, dynamic>> getAllAddresses() async {
   try {

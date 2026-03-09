@@ -154,6 +154,7 @@ class Address {
   final double? latitude;
   final double? longitude;
   final String? fullAddress;
+  bool isDefault;
 
   Address({
     this.id,
@@ -166,6 +167,7 @@ class Address {
     this.latitude,
     this.longitude,
     this.fullAddress,
+    this.isDefault = false,
   });
 
   // Convert Address to JSON
@@ -204,6 +206,7 @@ class Address {
       latitude: _toDouble(json['latitude']),
       longitude: _toDouble(json['longitude']),
       fullAddress: json['fullAddress']?.toString(),
+      isDefault: json['isDefault'] ?? false, 
     );
   }
 
@@ -219,6 +222,7 @@ class Address {
     double? latitude,
     double? longitude,
     String? fullAddress,
+    bool? isDefault
   }) {
     return Address(
       id: id ?? this.id,
@@ -231,6 +235,7 @@ class Address {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       fullAddress: fullAddress ?? this.fullAddress,
+      isDefault: isDefault ?? this.isDefault
     );
   }
 

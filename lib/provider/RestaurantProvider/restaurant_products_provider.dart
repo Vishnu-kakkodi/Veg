@@ -357,6 +357,171 @@
 
 
 
+// import 'package:flutter/material.dart';
+// import 'package:veegify/model/restaurant_product_model.dart';
+// import 'package:veegify/services/restaurant_product_service.dart';
+
+// class RestaurantProductsProvider with ChangeNotifier {
+//   List<RecommendedProduct> _recommendedProducts = [];
+//   List<RestaurantReview> _restaurantReviews = [];
+
+//   bool _isLoading = false;
+//   String? _error;
+//   String _restaurantName = '';
+//   String _locationName = '';
+//   double _rating = 0.0;
+//   int _totalRecommendedItems = 0;
+//   int _totalRatings = 0;
+//   int _totalReviews = 0;
+//     String _restaurantStatus = "";
+//     String _resImage = "";
+
+
+//   // Getters
+//   List<RecommendedProduct> get recommendedProducts => _recommendedProducts;
+//   List<RestaurantReview> get restaurantReviews => _restaurantReviews;
+
+//   bool get isLoading => _isLoading;
+//   String? get error => _error;
+//   String get restaurantName => _restaurantName;
+//   String get locationName => _locationName;
+//   double get rating => _rating;
+//   int get totalRecommendedItems => _totalRecommendedItems;
+//   int get totalRatings => _totalRatings;
+//   int get totalReviews => _totalReviews;
+//     String get restaurantStatus => _restaurantStatus;
+//     String get resImage => _resImage;
+
+
+//   // Get all recommended items for display with their product IDs
+//   List<RecommendedItemWithId> get allRecommendedItems {
+//     return _recommendedProducts
+//         .map(
+//           (product) => RecommendedItemWithId(
+//             productId: product.productId,
+//             recommendedItem: product.recommendedItem,
+//           ),
+//         )
+//         .toList();
+//   }
+
+//   Future<void> fetchRestaurantProducts(String restaurantId, String? categoryName) async {
+//     _isLoading = true;
+//     _error = null;
+//     notifyListeners();
+
+//     try {
+//       final response =
+//           await RestaurantService.getRestaurantProducts(restaurantId,categoryName);
+
+//       if (response.success && response.recommendedProducts.isNotEmpty) {
+//         _recommendedProducts = response.recommendedProducts;
+//         _totalRecommendedItems = response.totalRecommendedItems;
+//                 _restaurantStatus = response.restaurantStatus;
+//                                 _resImage = response.restaurantImage;
+
+
+
+//         _restaurantReviews = response.restaurantReviews;
+//         _totalRatings = response.totalRatings;
+//         _totalReviews = response.totalReviews;
+
+//         // Restaurant info from first product
+//         final first = _recommendedProducts.first;
+//         _restaurantName = first.restaurantName;
+//         _locationName = first.locationName;
+
+//         // Derive rating from totalRatings / totalReviews if available
+//         if (_totalReviews > 0) {
+//           _rating = _totalRatings / _totalReviews;
+//         } else {
+//           _rating = first.rating; // fallback if backend still sends rating
+//         }
+
+//         _error = null;
+//       } else {
+//         _recommendedProducts = [];
+//         _restaurantReviews = [];
+//         _totalRecommendedItems = 0;
+//         _totalRatings = 0;
+//         _totalReviews = 0;
+//         _restaurantName = "";
+//         _locationName = "";
+//         _rating = 0.0;
+//         _error = "NO_PRODUCTS";
+//       }
+//     } catch (e) {
+//       _error = "ERROR";
+//       _recommendedProducts = [];
+//       _restaurantReviews = [];
+//       _totalRecommendedItems = 0;
+//       _totalRatings = 0;
+//       _totalReviews = 0;
+//       _restaurantName = "";
+//       _locationName = "";
+//       _rating = 0.0;
+//     } finally {
+//       _isLoading = false;
+//       notifyListeners();
+//     }
+//   }
+
+//   void clearData() {
+//     _recommendedProducts = [];
+//     _restaurantReviews = [];
+//     _error = null;
+//     _restaurantName = '';
+//     _locationName = '';
+//     _rating = 0.0;
+//     _totalRecommendedItems = 0;
+//     _totalRatings = 0;
+//     _totalReviews = 0;
+//     notifyListeners();
+//   }
+
+//   // Search functionality
+//   List<RecommendedItemWithId> searchItems(String query) {
+//     if (query.isEmpty) return allRecommendedItems;
+
+//     return allRecommendedItems.where((itemWithId) {
+//       final name = itemWithId.recommendedItem.name.toLowerCase();
+//       final category =
+//           itemWithId.recommendedItem.category.categoryName.toLowerCase();
+//       return name.contains(query.toLowerCase()) ||
+//           category.contains(query.toLowerCase());
+//     }).toList();
+//   }
+
+//   // Get product by recommended item
+//   RecommendedProduct? getProductByRecommendedItem(RecommendedItem item) {
+//     try {
+//       return _recommendedProducts.firstWhere(
+//         (product) => product.recommendedItem.itemId == item.itemId,
+//       );
+//     } catch (e) {
+//       return null;
+//     }
+//   }
+
+//   // Get product ID by recommended item
+//   String? getProductIdByItem(RecommendedItem item) {
+//     final product = getProductByRecommendedItem(item);
+//     return product?.productId;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
 import 'package:flutter/material.dart';
 import 'package:veegify/model/restaurant_product_model.dart';
 import 'package:veegify/services/restaurant_product_service.dart';
@@ -373,9 +538,13 @@ class RestaurantProductsProvider with ChangeNotifier {
   int _totalRecommendedItems = 0;
   int _totalRatings = 0;
   int _totalReviews = 0;
-    String _restaurantStatus = "";
-    String _resImage = "";
-
+  String _restaurantStatus = "";
+  String _resImage = "";
+  
+  // New fields
+  List<String> _disclaimers = [];
+  String? _fssaiNo;
+  String? _fullAddress;
 
   // Getters
   List<RecommendedProduct> get recommendedProducts => _recommendedProducts;
@@ -389,9 +558,13 @@ class RestaurantProductsProvider with ChangeNotifier {
   int get totalRecommendedItems => _totalRecommendedItems;
   int get totalRatings => _totalRatings;
   int get totalReviews => _totalReviews;
-    String get restaurantStatus => _restaurantStatus;
-    String get resImage => _resImage;
-
+  String get restaurantStatus => _restaurantStatus;
+  String get resImage => _resImage;
+  
+  // New getters
+  List<String> get disclaimers => _disclaimers;
+  String? get fssaiNo => _fssaiNo;
+  String? get fullAddress => _fullAddress;
 
   // Get all recommended items for display with their product IDs
   List<RecommendedItemWithId> get allRecommendedItems {
@@ -405,77 +578,86 @@ class RestaurantProductsProvider with ChangeNotifier {
         .toList();
   }
 
-  Future<void> fetchRestaurantProducts(String restaurantId, String? categoryName) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+Future<void> fetchRestaurantProducts(String restaurantId, String? categoryName) async {
+  _isLoading = true;
+  _error = null;
+  notifyListeners();
 
-    try {
-      final response =
-          await RestaurantService.getRestaurantProducts(restaurantId,categoryName);
+  try {
+    final response =
+        await RestaurantService.getRestaurantProducts(restaurantId, categoryName);
 
-      if (response.success && response.recommendedProducts.isNotEmpty) {
-        _recommendedProducts = response.recommendedProducts;
-        _totalRecommendedItems = response.totalRecommendedItems;
-                _restaurantStatus = response.restaurantStatus;
-                                _resImage = response.restaurantImage;
+    // 👇 ADD DEBUG PRINTS
+    print("📊 Provider - Response success: ${response.success}");
+    print("📊 Provider - fssaiNo: ${response.fssaiNo}");
+    print("📊 Provider - fullAddress: ${response.fullAddress}");
+    print("📊 Provider - disclaimers: ${response.disclaimers}");
 
+    if (response.success && response.recommendedProducts.isNotEmpty) {
+      _recommendedProducts = response.recommendedProducts;
+      _totalRecommendedItems = response.totalRecommendedItems;
+      _restaurantStatus = response.restaurantStatus;
+      _resImage = response.restaurantImage;
+      
+      // New fields from response
+      _disclaimers = response.disclaimers;
+      _fssaiNo = response.fssaiNo;
+      _fullAddress = response.fullAddress;
 
+      // 👇 ADD MORE DEBUG PRINTS
+      print("✅ Provider - _fssaiNo set to: $_fssaiNo");
+      print("✅ Provider - _fullAddress set to: $_fullAddress");
+      print("✅ Provider - _disclaimers count: ${_disclaimers.length}");
 
-        _restaurantReviews = response.restaurantReviews;
-        _totalRatings = response.totalRatings;
-        _totalReviews = response.totalReviews;
+      _restaurantReviews = response.restaurantReviews;
+      _totalRatings = response.totalRatings;
+      _totalReviews = response.totalReviews;
 
-        // Restaurant info from first product
-        final first = _recommendedProducts.first;
-        _restaurantName = first.restaurantName;
-        _locationName = first.locationName;
+      // Restaurant info from first product
+      final first = _recommendedProducts.first;
+      _restaurantName = first.restaurantName;
+      _locationName = first.locationName;
 
-        // Derive rating from totalRatings / totalReviews if available
-        if (_totalReviews > 0) {
-          _rating = _totalRatings / _totalReviews;
-        } else {
-          _rating = first.rating; // fallback if backend still sends rating
-        }
-
-        _error = null;
+      // Derive rating from totalRatings / totalReviews if available
+      if (_totalReviews > 0) {
+        _rating = _totalRatings / _totalReviews;
       } else {
-        _recommendedProducts = [];
-        _restaurantReviews = [];
-        _totalRecommendedItems = 0;
-        _totalRatings = 0;
-        _totalReviews = 0;
-        _restaurantName = "";
-        _locationName = "";
-        _rating = 0.0;
-        _error = "NO_PRODUCTS";
+        _rating = first.rating; // fallback if backend still sends rating
       }
-    } catch (e) {
-      _error = "ERROR";
-      _recommendedProducts = [];
-      _restaurantReviews = [];
-      _totalRecommendedItems = 0;
-      _totalRatings = 0;
-      _totalReviews = 0;
-      _restaurantName = "";
-      _locationName = "";
-      _rating = 0.0;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
 
-  void clearData() {
+      _error = null;
+    } else {
+      _clearAllData();
+      _error = "NO_PRODUCTS";
+    }
+  } catch (e) {
+    print("🔥 Provider Error: $e");
+    _clearAllData();
+    _error = "ERROR";
+  } finally {
+    _isLoading = false;
+    notifyListeners();
+  }
+}
+
+  void _clearAllData() {
     _recommendedProducts = [];
     _restaurantReviews = [];
-    _error = null;
-    _restaurantName = '';
-    _locationName = '';
-    _rating = 0.0;
     _totalRecommendedItems = 0;
     _totalRatings = 0;
     _totalReviews = 0;
+    _restaurantName = "";
+    _locationName = "";
+    _rating = 0.0;
+    _restaurantStatus = "";
+    _resImage = "";
+    _disclaimers = [];
+    _fssaiNo = null;
+    _fullAddress = null;
+  }
+
+  void clearData() {
+    _clearAllData();
     notifyListeners();
   }
 

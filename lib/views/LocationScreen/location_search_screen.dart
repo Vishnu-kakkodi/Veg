@@ -734,7 +734,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _suggestions = [];
 
-  final String googleApiKey = "AIzaSyCLpJY_qUkHA0sFo-Ywiu-9aDW4w-H2RiY";
+  final String googleApiKey = "AIzaSyDaJzdZ5-Q2Lv2KArStqAtGXf4SukdHwig";
 
   Future<void> _searchPlaces(String query) async {
     print("Response printing : $query");

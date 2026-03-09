@@ -738,16 +738,21 @@ DateTime _toDateTime(dynamic value) {
 
 /// ---------- TOP LEVEL RESPONSE ----------
 
+/// ---------- TOP LEVEL RESPONSE ----------
+
 class RestaurantProductResponse {
   final bool success;
   final String message;
   final int totalRecommendedItems;
   final int totalRatings;
   final int totalReviews;
+  final String fssaiNo;
+  final String fullAddress;
   final List<RecommendedProduct> recommendedProducts;
   final List<RestaurantReview> restaurantReviews;
   final String restaurantStatus;
   final String restaurantImage;
+  final List<String> disclaimers;
 
   RestaurantProductResponse({
     this.success = false,
@@ -759,6 +764,9 @@ class RestaurantProductResponse {
     this.restaurantReviews = const [],
     this.restaurantStatus = '',
     this.restaurantImage = '',
+    this.fssaiNo = '',
+    this.fullAddress = '',
+    this.disclaimers = const []
   });
 
   factory RestaurantProductResponse.fromJson(Map<String, dynamic>? json) {
@@ -789,6 +797,10 @@ class RestaurantProductResponse {
       totalReviews: _toInt(json['totalReviews']),
       recommendedProducts: recProducts,
       restaurantReviews: reviews,
+      // 👇 ADD THESE NEW FIELDS
+      fssaiNo: _toStringValue(json['fssaiNo']),
+      fullAddress: _toStringValue(json['fullAddress']),
+      disclaimers: _toStringList(json['disclaimers']),
     );
   }
 }
