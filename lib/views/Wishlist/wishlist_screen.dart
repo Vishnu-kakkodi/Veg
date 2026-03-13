@@ -676,7 +676,6 @@ class _WishlistListItemState extends State<WishlistListItem> {
                   MaterialPageRoute(
                     builder: (context) => DetailScreen(
                       productId: widget.product.id,
-                      currentUserId: widget.userId.toString(),
                       restaurantId: widget.restaurantId,
                     ),
                   ),

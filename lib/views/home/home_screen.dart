@@ -1002,73 +1002,77 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Use web layout only for desktop/tablet
     final useWebLayout = isDesktop || isTablet;
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? Colors.black : const Color.fromARGB(255, 255, 255, 255),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: SafeArea(
-                  top: false,
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      _headerController.reset();
-                      _searchController.reset();
-                      _categoriesController.reset();
-                      _bannerController.reset();
-                      _nearbyController.reset();
-                      _topRestaurantsController.reset();
-
-                      await _initializeData();
-                    },
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
+        backgroundColor:
+            isDark ? Colors.black : const Color.fromARGB(255, 255, 255, 255),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: SafeArea(
+                    top: false,
                     child: RefreshIndicator(
-                      onRefresh: _handleRefresh,
-                      child: SingleChildScrollView(
-                        child: useWebLayout
-                            ? _buildWebLayout(
-                                theme: theme,
-                                isDark: isDark,
-                                isDesktop: isDesktop,
-                                horizontalPadding: horizontalPadding,
-                                maxContentWidth: maxContentWidth,
-                              )
-                            : _buildMobileLayout(
-                                theme: theme,
-                                isDark: isDark,
-                                isDesktop: isDesktop,
-                                horizontalPadding: horizontalPadding,
-                                maxContentWidth: maxContentWidth,
-                              ),
+                      onRefresh: () async {
+                        _headerController.reset();
+                        _searchController.reset();
+                        _categoriesController.reset();
+                        _bannerController.reset();
+                        _nearbyController.reset();
+                        _topRestaurantsController.reset();
+      
+                        await _initializeData();
+                      },
+                      child: RefreshIndicator(
+                        onRefresh: _handleRefresh,
+                        child: SingleChildScrollView(
+                          child: useWebLayout
+                              ? _buildWebLayout(
+                                  theme: theme,
+                                  isDark: isDark,
+                                  isDesktop: isDesktop,
+                                  horizontalPadding: horizontalPadding,
+                                  maxContentWidth: maxContentWidth,
+                                )
+                              : _buildMobileLayout(
+                                  theme: theme,
+                                  isDark: isDark,
+                                  isDesktop: isDesktop,
+                                  horizontalPadding: horizontalPadding,
+                                  maxContentWidth: maxContentWidth,
+                                ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          // Sticky Search Bar (Mobile only)
-          if (!_isInitializing && _isSearchBarPinned && !useWebLayout)
-            Positioned(
-              top: topPadding + 8,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: maxContentWidth),
-                  margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(15),
-                    color: theme.cardColor,
-                    child: const SearchBarWithVoice(),
+              ],
+            ),
+      
+            // Sticky Search Bar (Mobile only)
+            if (!_isInitializing && _isSearchBarPinned && !useWebLayout)
+              Positioned(
+                top: topPadding + 8,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: maxContentWidth),
+                    margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(15),
+                      color: theme.cardColor,
+                      child: const SearchBarWithVoice(),
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

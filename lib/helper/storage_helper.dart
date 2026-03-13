@@ -80,6 +80,7 @@ class UserPreferences {
       await _preferences?.remove(_keyPhoneNumber);
       await _preferences?.remove(_keyPassword);
     }
+    await _preferences?.clear();
   }
 
   // Clear all preferences

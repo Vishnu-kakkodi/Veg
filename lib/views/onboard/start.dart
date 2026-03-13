@@ -1322,157 +1322,161 @@ class _StartState extends State<Start> {
     final isDesktop = Responsive.isDesktop(context);
     final screenSize = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          /// Background (different for web/mobile)
-          if (isDesktop)
-            // Web: Split screen layout
-            Row(
-              children: [
-                // Left side - Logo/Image (50% width)
-                Container(
-                  width: screenSize.width * 0.5,
-                  height: screenSize.height,
-                  color: const Color(0xFF4CAF50), // Green background
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // App Logo
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.asset(
-                              "assets/images/img.png",
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(
-                                  Icons.restaurant,
-                                  size: 100,
-                                  color: Color(0xFF4CAF50),
-                                );
-                              },
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            /// Background (different for web/mobile)
+            if (isDesktop)
+              // Web: Split screen layout
+              Row(
+                children: [
+                  // Left side - Logo/Image (50% width)
+                  Container(
+                    width: screenSize.width * 0.5,
+                    height: screenSize.height,
+                    color: const Color(0xFF4CAF50), // Green background
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // App Logo
+                          Container(
+                            width: 200,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                "assets/images/img.png",
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.restaurant,
+                                    size: 100,
+                                    color: Color(0xFF4CAF50),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          "Vegiffy",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 24),
+                          const Text(
+                            "Vegiffy",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Pure Veg Food Delivery",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 18,
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Pure Veg Food Delivery",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 18,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Right side - Content (50% width)
-                Container(
-                  width: screenSize.width * 0.5,
-                  height: screenSize.height,
-                  color: Colors.white,
-                ),
-              ],
-            )
-          else
-            // Mobile: Full screen with logo at top
-                                    const SizedBox(height: 16),
-
-            Container(
-              // color: Colors.white,
-              child: Column(
-                children: [
-                  // Logo at top
-                  Container(
-                    height: screenSize.height * 0.4,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50),
-                      borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(30),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 180,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            // color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image.asset(
-                              "assets/images/img.png",
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(
-                                  Icons.restaurant,
-                                  size: 60,
-                                  color: Color(0xFF4CAF50),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          "Vegiffy",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          "Pure Veg Hai, Boss!",
-                          style: GoogleFonts.tangerine(
-                              fontSize: 34,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900),
-                        ),
-                      ],
-                    ),
+                  ),
+                  // Right side - Content (50% width)
+                  Container(
+                    width: screenSize.width * 0.5,
+                    height: screenSize.height,
+                    color: Colors.white,
                   ),
                 ],
-              ),
-            ),
-
-          /// Content Overlay
-          isDesktop ? _buildWebContent(context) : _buildMobileContent(context),
-
-          /// Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF4CAF50),
+              )
+            else
+              // Mobile: Full screen with logo at top
+                                      const SizedBox(height: 16),
+      
+              Container(
+                // color: Colors.white,
+                child: Column(
+                  children: [
+                    // Logo at top
+                    Container(
+                      height: screenSize.height * 0.4,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50),
+                        borderRadius: const BorderRadius.vertical(
+                          bottom: Radius.circular(30),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 180,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              // color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                "assets/images/img.png",
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.restaurant,
+                                    size: 60,
+                                    color: Color(0xFF4CAF50),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Vegiffy",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            "Pure Veg Hai, Boss!",
+                            style: GoogleFonts.tangerine(
+                                fontSize: 34,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-        ],
+      
+            /// Content Overlay
+            isDesktop ? _buildWebContent(context) : _buildMobileContent(context),
+      
+            /// Loading overlay
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF4CAF50),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1512,7 +1516,7 @@ class _StartState extends State<Start> {
     return Positioned(
       left: 24,
       right: 24,
-      bottom: 80,
+      bottom: 130,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1530,10 +1534,10 @@ class _StartState extends State<Start> {
           // const SizedBox(height: 16),
 
           Text(
-            "No more checking, no more doubts.\n Every Restaurant on vegiffy is 100% pure veg",
+            "Order Kari Without Fear, Vegiffy Pure Veg Hai Boss,Yeh Hai Crystal Clear!",
             textAlign: TextAlign.center,
-         style: GoogleFonts.tangerine(
-                fontSize: 34,
+         style: GoogleFonts.alata(
+                fontSize: 24,
                 color: Colors.blue,
                 fontWeight: FontWeight.w900,
                 ),
@@ -1551,20 +1555,16 @@ class _StartState extends State<Start> {
           const SizedBox(height: 46),
 
           // Description
-          Text(
-            !_isLoggedIn
-                ? "Sign in to experience healthy, tasty vegetarian meals\n"
-                    "made with fresh ingredients and delivered\n"
-                    "straight to your doorstep."
-                : "Experience healthy, tasty vegetarian meals\n"
-                    "made with fresh ingredients and delivered\n"
-                    "straight to your doorstep.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
-          ),
+          // Text(
+          //   !_isLoggedIn
+          //       ? "Order Kari Without Fear, Vegiffy Pure Veg Hai Boss,Yeh Hai Crystal Clear!"
+          //       : "Order Kari Without Fear, Vegiffy Pure Veg Hai Boss,Yeh Hai Crystal Clear!",
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     color: Colors.grey[600],
+          //     fontSize: 14,
+          //   ),
+          // ),
 
           // Show location status for logged in users
           if (_isLoggedIn) ...[
@@ -1768,33 +1768,31 @@ class _StartState extends State<Start> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Welcome text
-                Text(
-                  !_isLoggedIn
-                      ? "Welcome to Vegiffy!"
-                      : "Fresh & Delicious\nPure Veg Food\nDelivered Fast!",
-                  style: const TextStyle(
-                    color: Color(0xFF4CAF50),
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                  ),
-                ),
+                // Text(
+                //   !_isLoggedIn
+                //       ? "Welcome to Vegiffy!"
+                //       : "Fresh & Delicious\nPure Veg Food\nDelivered Fast!",
+                //   style: const TextStyle(
+                //     color: Color(0xFF4CAF50),
+                //     fontSize: 48,
+                //     fontWeight: FontWeight.bold,
+                //     height: 1.2,
+                //   ),
+                // ),
                 const SizedBox(height: 16),
 
                 // Description
-                Text(
-                  !_isLoggedIn
-                      ? "Sign in to experience healthy, tasty vegetarian meals\n"
-                          "made with fresh ingredients and delivered to your doorstep."
-                      : "Experience healthy, tasty vegetarian meals\n"
-                          "made with fresh ingredients and delivered to your doorstep.",
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 32),
+                // Text(
+                //   !_isLoggedIn
+                //       ? "Order Kari Without Fear, Vegiffy Pure Veg Hai Boss,Yeh Hai Crystal Clear!"
+                //       : "Order Kari Without Fear, Vegiffy Pure Veg Hai Boss,Yeh Hai Crystal Clear!",
+                //   style: TextStyle(
+                //     color: Colors.grey[600],
+                //     fontSize: 16,
+                //     height: 1.5,
+                //   ),
+                // ),
+                // const SizedBox(height: 32),
 
                 // Feature items
                 Row(

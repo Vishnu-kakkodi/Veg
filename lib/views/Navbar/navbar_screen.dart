@@ -113,122 +113,126 @@ void initState() {
       }
     });
 
-    return Scaffold(
-      body: Column(
-        children: [
-          if (isDesktop)
-            DesktopTopNavbar(
-              currentIndex: navProvider.currentIndex,
-              onTap: _onTabChange,
-              cartItemCount: cartProvider.totalItems,
+    return SafeArea(
+      top: false,
+      bottom: true,
+      child: Scaffold(
+        body: Column(
+          children: [
+            if (isDesktop)
+              DesktopTopNavbar(
+                currentIndex: navProvider.currentIndex,
+                onTap: _onTabChange,
+                cartItemCount: cartProvider.totalItems,
+              ),
+            Expanded(
+              child: IndexedStack(
+                index: navProvider.currentIndex,
+                children: pages,
+              ),
             ),
-          Expanded(
-            child: IndexedStack(
-              index: navProvider.currentIndex,
-              children: pages,
-            ),
-          ),
-        ],
-      ),
-
-      /// ✅ MOBILE CUSTOM NAVBAR WITH FLOATING CART
-      bottomNavigationBar: isDesktop
-          ? null
-          : Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Bottom navigation bar
-                CustomMobileNavbar(
-                  currentIndex: navProvider.currentIndex,
-                  onTap: _onTabChange,
-                ),
-                
-                // Floating cart button
-                Positioned(
-                  top: -20, // Adjust this value to control how high it floats
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () => _onTabChange(2),
-                      child: Container(
-                        height: 65,
-                        width: 65,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [orangePrimary, orangeLight],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: orangePrimary.withOpacity(0.4),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                              spreadRadius: 2,
+          ],
+        ),
+      
+        /// ✅ MOBILE CUSTOM NAVBAR WITH FLOATING CART
+        bottomNavigationBar: isDesktop
+            ? null
+            : Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Bottom navigation bar
+                  CustomMobileNavbar(
+                    currentIndex: navProvider.currentIndex,
+                    onTap: _onTabChange,
+                  ),
+                  
+                  // Floating cart button
+                  Positioned(
+                    top: -20, // Adjust this value to control how high it floats
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () => _onTabChange(2),
+                        child: Container(
+                          height: 65,
+                          width: 65,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [orangePrimary, orangeLight],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          ],
-                        ),
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Center(
-                              child: Icon(
-                                Icons.shopping_bag_outlined,
-                                color: Colors.white,
-                                size: 28,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: orangePrimary.withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                                spreadRadius: 2,
                               ),
-                            ),
-                            
-                            // Cart badge - using cartProvider.totalItems
-                            if (cartProvider.totalItems > 0)
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Text(
-                                    '${cartProvider.totalItems}',
-                                    style: const TextStyle(
-                                      color: orangePrimary,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                            ],
+                          ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Center(
+                                child: Icon(
+                                  Icons.shopping_bag_outlined,
+                                  color: Colors.white,
+                                  size: 28,
                                 ),
                               ),
                               
-                            // Show "!" if vendor is inactive
-                            if (cartProvider.hasItems && !cartProvider.isVendorActive)
-                              Positioned(
-                                bottom: 8,
-                                left: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: Colors.white,
-                                    size: 12,
+                              // Cart badge - using cartProvider.totalItems
+                              if (cartProvider.totalItems > 0)
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      '${cartProvider.totalItems}',
+                                      style: const TextStyle(
+                                        color: orangePrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                                
+                              // Show "!" if vendor is inactive
+                              if (cartProvider.hasItems && !cartProvider.isVendorActive)
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 

@@ -440,7 +440,7 @@ class LocationPickerScreen extends StatefulWidget {
 class _LocationPickerScreenState extends State<LocationPickerScreen> {
   GoogleMapController? _mapController;
 
-  LatLng _currentLatLng = const LatLng(12.9716, 77.5946);
+  LatLng _currentLatLng = const LatLng(17.4065, 78.4483);
   String _address = "Loading address...";
   bool _isLoadingAddress = false;
 

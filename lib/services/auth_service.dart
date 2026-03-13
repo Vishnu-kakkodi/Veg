@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:veegify/constants/api.dart';
+import 'package:veegify/helper/toast_helper.dart';
 
 // Custom exception classes for better error handling
 class AuthException implements Exception {
@@ -422,7 +423,7 @@ final response = await http.post(
 
 
   // 3. Reset Password after OTP Verification
-  Future<void> resetPassword({
+  Future<bool> resetPassword({
     required String userId,
     required String newPassword,
     required String confirmPassword,
@@ -448,7 +449,16 @@ final response = await http.post(
         }),
       );
 
-      _handleResponse(response); // No return needed unless required
+      if(response.statusCode == 200 || response.statusCode ==201){
+                ToastHelper.showSuccessToast("Password Updated");
+
+        return true;
+      }else{
+                ToastHelper.showSuccessToast("Password not Updated");
+
+        return false;
+      }
+
     });
   }
 

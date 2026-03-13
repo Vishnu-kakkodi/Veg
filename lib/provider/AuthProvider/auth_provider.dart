@@ -359,7 +359,7 @@ Future<Map<String, dynamic>?> verifyForgotPasswordOtp({
 
 
 // Reset password
-Future<void> resetPassword({
+Future<bool> resetPassword({
   required String userId,
   required String newPassword,
   required String confirmPassword,
@@ -367,6 +367,8 @@ Future<void> resetPassword({
 }) async {
   // POST /forgot-password/reset/{userId}
   // {"newPassword": "NewSecurePassword@123", "confirmPassword": "NewSecurePassword@123"}
+   final res =  await _authService.resetPassword(userId: userId, newPassword: newPassword, confirmPassword: confirmPassword);
+return res;
 }
 
 }

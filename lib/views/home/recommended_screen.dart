@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -27,17 +26,17 @@ class RestaurantDetailScreen extends StatefulWidget {
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
 }
 
-class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
+class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? userId;
 
   Timer? _availabilityTimer;
   bool _hasLoadedOnce = false;
-  
+
   // Pagination variables
-  static const int _initialLoadCount = 6;
-  static const int _loadMoreCount = 4;
+  static const int _initialLoadCount = 10;
+  static const int _loadMoreCount = 20;
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   bool _hasMoreItems = true;
@@ -48,6 +47,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeData();
       await context.read<WishlistProvider>().fetchWishlist(userId.toString());
@@ -58,15 +58,87 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _availabilityTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
+   void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // App came to foreground - refresh data
+        debugPrint("App resumed - refreshing restaurant data");
+        _refreshDataOnResume();
+        break;
+      case AppLifecycleState.paused:
+        // App going to background
+        debugPrint("App paused - stopping polling");
+        _availabilityTimer?.cancel();
+        break;
+      case AppLifecycleState.inactive:
+        // App is inactive (e.g., phone call)
+        debugPrint("App inactive");
+        break;
+      case AppLifecycleState.detached:
+        // App is detached
+        debugPrint("App detached");
+        break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
+        break;
+    }
+  }
+
+    Future<void> _refreshDataOnResume() async {
+    if (!mounted) return;
+
+    try {
+      // Show loading only if data is empty
+      final restaurantProvider = context.read<RestaurantProductsProvider>();
+      final cartProvider = context.read<CartProvider>();
+      final wishlistProvider = context.read<WishlistProvider>();
+      
+      // Check if data is empty (memory might have been cleared)
+      if (restaurantProvider.allRecommendedItems.isEmpty) {
+        EasyLoading.show(status: 'Refreshing...');
+        
+        // Reload all data
+        await _loadUserId();
+        if (userId != null) {
+          await restaurantProvider.fetchRestaurantProducts(
+            widget.restaurantId,
+            widget.categoryName,
+          );
+          await cartProvider.loadCart(userId!);
+          await wishlistProvider.fetchWishlist(userId.toString());
+          
+          // Reset pagination
+          if (mounted) {
+            setState(() {
+              _filterAndPaginateItems(restaurantProvider.allRecommendedItems);
+            });
+          }
+        }
+        
+        EasyLoading.dismiss();
+      }
+      
+      // Restart polling
+      _startAvailabilityPolling();
+      
+    } catch (e) {
+      debugPrint("Error refreshing on resume: $e");
+      EasyLoading.dismiss();
+    }
+  }
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
-        _scrollController.position.maxScrollExtent - 200 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore &&
         _hasMoreItems &&
         _displayedItemsCount < _allFilteredItems.length) {
@@ -77,7 +149,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   Future<void> _initializeData() async {
     try {
       EasyLoading.show(status: 'Loading restaurant...');
-      
+
       await _loadUserId();
 
       if (userId == null) {
@@ -145,8 +217,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   void _filterAndPaginateItems(List<dynamic> allItems) {
     _allFilteredItems = allItems;
     _hasMoreItems = _allFilteredItems.length > _initialLoadCount;
-    _displayedItemsCount = _allFilteredItems.length > _initialLoadCount 
-        ? _initialLoadCount 
+    _displayedItemsCount = _allFilteredItems.length > _initialLoadCount
+        ? _initialLoadCount
         : _allFilteredItems.length;
     _displayedItems = _allFilteredItems.take(_displayedItemsCount).toList();
   }
@@ -217,6 +289,62 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return double.infinity;
   }
 
+  List<String> _getDisclaimers(RestaurantProductsProvider provider) {
+  // Default Vegiffy disclaimers
+  const defaultDisclaimers = [
+    "Prices of menu items listed on Vegiffy are determined and updated directly by the respective restaurant partners. Vegiffy does not control or modify restaurant pricing.",
+    "Nutritional information displayed on the app is provided by restaurant partners and is indicative only. Actual values may vary depending on ingredients, preparation methods, and portion sizes.",
+    "Daily calorie needs vary by individual. The general guideline of 2,000 kcal per day is used for reference for an average active adult.",
+    "Dish descriptions, images, and food details may be generated or enhanced using AI or other digital tools to improve the user experience. Actual dishes may vary.",
+    "Vegiffy acts as a technology platform connecting customers with vegetarian restaurants and does not prepare food directly.",
+    "Customer Support (WhatsApp): +91 6309100101"
+  ];
+
+  // If restaurant has disclaimers, use them, otherwise use default
+  if (provider.disclaimers != null && provider.disclaimers!.isNotEmpty) {
+    // return provider.disclaimers!;
+      return defaultDisclaimers;
+
+  }
+  
+  return defaultDisclaimers;
+}
+
+void _openWhatsApp() {
+  const phoneNumber = "+916309100101"; // Remove spaces for URL
+  const message = "Hello, I need help with Vegiffy";
+  
+  final whatsappUrl = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
+  
+  // Use url_launcher to open WhatsApp
+  // Make sure to add url_launcher dependency in pubspec.yaml
+  // import 'package:url_launcher/url_launcher.dart';
+  
+  // _launchURL(whatsappUrl);
+  
+  // For now, show a snackbar or dialog
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Opening WhatsApp...'),
+      duration: Duration(seconds: 2),
+    ),
+  );
+  
+  // Uncomment when you add url_launcher
+  /*
+  if (await canLaunch(whatsappUrl)) {
+    await launch(whatsappUrl);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Could not open WhatsApp. Please make sure WhatsApp is installed.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+  */
+}
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -251,7 +379,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   setState(() {
-                    _filterAndPaginateItems(restaurantProvider.allRecommendedItems);
+                    _filterAndPaginateItems(
+                        restaurantProvider.allRecommendedItems);
                   });
                 }
               });
@@ -265,7 +394,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
             final bool isRestaurantActive =
                 (restaurantProvider.restaurantStatus ?? '').toLowerCase() ==
-                'active';
+                    'active';
 
             return SingleChildScrollView(
               controller: _scrollController,
@@ -274,180 +403,567 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   constraints: BoxConstraints(
                     maxWidth: _getMaxWidth(context),
                   ),
-                  child: Column(
-                    children: [
-                      // Hero Section
-                      _buildHeroSection(
-                        context,
-                        restaurantProvider,
-                        theme,
-                        isDark,
-                        isRestaurantActive,
-                        rating,
-                        totalReviews,
-                        isMobile,
-                        isDesktop,
-                      ),
+                  // child: Column(
+                  //   children: [
+                  //     // Hero Section
+                  //     _buildHeroSection(
+                  //       context,
+                  //       restaurantProvider,
+                  //       theme,
+                  //       isDark,
+                  //       isRestaurantActive,
+                  //       rating,
+                  //       totalReviews,
+                  //       isMobile,
+                  //       isDesktop,
+                  //     ),
 
-                      SizedBox(height: isDesktop ? 40 : 20),
+                  //     SizedBox(height: isDesktop ? 40 : 20),
 
-                      // Search Bar
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 32 : 16,
-                          vertical: 8,
-                        ),
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 800),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 32, 203, 20),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 50,
-                                  child: TextFormField(
-                                    controller: _searchController,
-                                    style: TextStyle(
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Search your food',
-                                      hintStyle: TextStyle(
-                                        color: theme.colorScheme.onSurface
-                                            .withOpacity(0.6),
-                                      ),
-                                      prefixIcon: Icon(
-                                        Icons.search,
-                                        color: theme.colorScheme.onSurface
-                                            .withOpacity(0.6),
-                                      ),
-                                      filled: true,
-                                      fillColor: isDark
-                                          ? theme.cardColor
-                                          : Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                        vertical: 0,
-                                      ),
-                                    ),
-                                    onChanged: _handleSearch,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                            ],
-                          ),
-                        ),
-                      ),
+                  //     // Search Bar
+                  //     Padding(
+                  //       padding: EdgeInsets.symmetric(
+                  //         horizontal: isDesktop ? 32 : 16,
+                  //         vertical: 8,
+                  //       ),
+                  //       child: Container(
+                  //         constraints: const BoxConstraints(maxWidth: 800),
+                  //         decoration: BoxDecoration(
+                  //           border: Border.all(
+                  //             color: const Color.fromARGB(255, 32, 203, 20),
+                  //           ),
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //         child: Row(
+                  //           children: [
+                  //             Expanded(
+                  //               child: SizedBox(
+                  //                 height: 50,
+                  //                 child: TextFormField(
+                  //                   controller: _searchController,
+                  //                   style: TextStyle(
+                  //                     color: theme.colorScheme.onSurface,
+                  //                   ),
+                  //                   decoration: InputDecoration(
+                  //                     hintText: 'Search your food',
+                  //                     hintStyle: TextStyle(
+                  //                       color: theme.colorScheme.onSurface
+                  //                           .withOpacity(0.6),
+                  //                     ),
+                  //                     prefixIcon: Icon(
+                  //                       Icons.search,
+                  //                       color: theme.colorScheme.onSurface
+                  //                           .withOpacity(0.6),
+                  //                     ),
+                  //                     filled: true,
+                  //                     fillColor: isDark
+                  //                         ? theme.cardColor
+                  //                         : Colors.white,
+                  //                     border: OutlineInputBorder(
+                  //                       borderRadius: BorderRadius.circular(30),
+                  //                       borderSide: BorderSide.none,
+                  //                     ),
+                  //                     contentPadding:
+                  //                         const EdgeInsets.symmetric(
+                  //                       vertical: 0,
+                  //                     ),
+                  //                   ),
+                  //                   onChanged: _handleSearch,
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //             const SizedBox(width: 10),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
 
-                      Divider(
-                        height: 30,
-                        color: isDark ? Colors.grey[700] : Colors.grey[300],
-                        indent: isDesktop ? 32 : 16,
-                        endIndent: isDesktop ? 32 : 16,
-                      ),
+                  //     Divider(
+                  //       height: 30,
+                  //       color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  //       indent: isDesktop ? 32 : 16,
+                  //       endIndent: isDesktop ? 32 : 16,
+                  //     ),
 
-                      // Recommended Header
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 32 : 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recommended',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            Text(
-                              '${_allFilteredItems.length} items',
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurface
-                                    .withOpacity(0.6),
-                                fontSize: isDesktop ? 16 : 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  //     // Recommended Header
+                  //     Padding(
+                  //       padding: EdgeInsets.symmetric(
+                  //         horizontal: isDesktop ? 32 : 16,
+                  //         vertical: 8,
+                  //       ),
+                  //       child: Row(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //         children: [
+                  //           Text(
+                  //             'Recommended',
+                  //             style: theme.textTheme.titleLarge?.copyWith(
+                  //               fontWeight: FontWeight.bold,
+                  //               color: theme.colorScheme.onSurface,
+                  //             ),
+                  //           ),
+                  //           Text(
+                  //             '${_allFilteredItems.length} items',
+                  //             style: TextStyle(
+                  //               color: theme.colorScheme.onSurface
+                  //                   .withOpacity(0.6),
+                  //               fontSize: isDesktop ? 16 : 14,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
 
-                      // Products Grid/List
-                      _displayedItems.isEmpty
-                          ? Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 64,
-                                    color: theme.colorScheme.onSurface
-                                        .withOpacity(0.5),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    _searchQuery.isEmpty 
-                                        ? 'No items available'
-                                        : 'No items found',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.6),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : _buildProductsGrid(
-                              context,
-                              _displayedItems,
-                              restaurantProvider,
-                              theme,
-                              isDark,
-                              isRestaurantActive,
-                            ),
+                  //     // Products Grid/List
+                  //     _displayedItems.isEmpty
+                  //         ? Padding(
+                  //             padding: const EdgeInsets.all(32.0),
+                  //             child: Column(
+                  //               children: [
+                  //                 Icon(
+                  //                   Icons.search_off,
+                  //                   size: 64,
+                  //                   color: theme.colorScheme.onSurface
+                  //                       .withOpacity(0.5),
+                  //                 ),
+                  //                 const SizedBox(height: 16),
+                  //                 Text(
+                  //                   _searchQuery.isEmpty
+                  //                       ? 'No items available'
+                  //                       : 'No items found',
+                  //                   style: theme.textTheme.bodyMedium?.copyWith(
+                  //                     color: theme.colorScheme.onSurface
+                  //                         .withOpacity(0.6),
+                  //                   ),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           )
+                  //         : _buildProductsGrid(
+                  //             context,
+                  //             _displayedItems,
+                  //             restaurantProvider,
+                  //             theme,
+                  //             isDark,
+                  //             isRestaurantActive,
+                  //           ),
 
-                      // Loading More Indicator
-                      if (_isLoadingMore)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ),
+                  //     // Loading More Indicator
+                  //     if (_isLoadingMore)
+                  //       Padding(
+                  //         padding: const EdgeInsets.all(16.0),
+                  //         child: Center(
+                  //           child: CircularProgressIndicator(
+                  //             valueColor: AlwaysStoppedAnimation<Color>(
+                  //               theme.colorScheme.primary,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
 
-                      // No More Items Indicator
-                      // if (!_hasMoreItems && _displayedItems.isNotEmpty)
-                      //   Padding(
-                      //     padding: const EdgeInsets.all(16.0),
-                      //     child: Text(
-                      //       '',
-                      //       style: TextStyle(
-                      //         color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      //         fontSize: 14,
-                      //       ),
-                      //     ),
-                      //   ),
+                  //     // No More Items Indicator
+                  //     // if (!_hasMoreItems && _displayedItems.isNotEmpty)
+                  //     //   Padding(
+                  //     //     padding: const EdgeInsets.all(16.0),
+                  //     //     child: Text(
+                  //     //       '',
+                  //     //       style: TextStyle(
+                  //     //         color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  //     //         fontSize: 14,
+                  //     //       ),
+                  //     //     ),
+                  //     //   ),
 
-                        // After hero section and before search bar
-if (restaurantProvider.fssaiNo != null || 
-    restaurantProvider.fullAddress != null ||
-    (restaurantProvider.disclaimers != null && restaurantProvider.disclaimers!.isNotEmpty))
+                  //     // After hero section and before search bar
+                  //     if (restaurantProvider.fssaiNo != null ||
+                  //         restaurantProvider.fullAddress != null ||
+                  //         (restaurantProvider.disclaimers != null &&
+                  //             restaurantProvider.disclaimers!.isNotEmpty))
+                  //       Padding(
+                  //         padding: EdgeInsets.symmetric(
+                  //           horizontal: isDesktop ? 32 : 16,
+                  //           vertical: 16,
+                  //         ),
+                  //         child: Container(
+                  //           width: double.infinity,
+                  //           padding: EdgeInsets.all(isDesktop ? 20 : 16),
+                  //           decoration: BoxDecoration(
+                  //             color: isDark ? theme.cardColor : Colors.white,
+                  //             borderRadius: BorderRadius.circular(16),
+                  //             border: Border.all(
+                  //               color:
+                  //                   theme.colorScheme.primary.withOpacity(0.2),
+                  //             ),
+                  //             boxShadow: [
+                  //               BoxShadow(
+                  //                 color: Colors.black.withOpacity(0.05),
+                  //                 blurRadius: 10,
+                  //                 offset: const Offset(0, 2),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //           child: Column(
+                  //             crossAxisAlignment: CrossAxisAlignment.start,
+                  //             children: [
+                  //               // Header
+                  //               Row(
+                  //                 children: [
+                  //                   Icon(
+                  //                     Icons.restaurant_menu,
+                  //                     color: theme.colorScheme.primary,
+                  //                     size: isDesktop ? 24 : 20,
+                  //                   ),
+                  //                   const SizedBox(width: 8),
+                  //                   Text(
+                  //                     'Restaurant Information',
+                  //                     style:
+                  //                         theme.textTheme.titleMedium?.copyWith(
+                  //                       fontWeight: FontWeight.bold,
+                  //                       color: theme.colorScheme.primary,
+                  //                     ),
+                  //                   ),
+                  //                 ],
+                  //               ),
+                  //               const SizedBox(height: 16),
+
+                  //               // Full Address
+                  //               // if (restaurantProvider.fullAddress != null &&
+                  //               //     restaurantProvider.fullAddress!.isNotEmpty)
+                  //               Padding(
+                  //                 padding: const EdgeInsets.only(bottom: 12),
+                  //                 child: Row(
+                  //                   crossAxisAlignment:
+                  //                       CrossAxisAlignment.start,
+                  //                   children: [
+                  //                     Icon(
+                  //                       Icons.location_on_outlined,
+                  //                       color: theme.colorScheme.onSurface
+                  //                           .withOpacity(0.6),
+                  //                       size: isDesktop ? 20 : 18,
+                  //                     ),
+                  //                     const SizedBox(width: 12),
+                  //                     Expanded(
+                  //                       child: Column(
+                  //                         crossAxisAlignment:
+                  //                             CrossAxisAlignment.start,
+                  //                         children: [
+                  //                           Text(
+                  //                             'Address',
+                  //                             style: theme.textTheme.labelMedium
+                  //                                 ?.copyWith(
+                  //                               color: theme
+                  //                                   .colorScheme.onSurface
+                  //                                   .withOpacity(0.6),
+                  //                             ),
+                  //                           ),
+                  //                           const SizedBox(height: 2),
+                  //                           Text(
+                  //                             restaurantProvider.fullAddress!,
+                  //                             style: theme.textTheme.bodyMedium
+                  //                                 ?.copyWith(
+                  //                               fontWeight: FontWeight.w500,
+                  //                             ),
+                  //                           ),
+                  //                         ],
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ),
+
+                  //               // FSSAI Number
+                  //               // if (restaurantProvider.fssaiNo != null &&
+                  //               //     restaurantProvider.fssaiNo!.isNotEmpty)
+                  //               Padding(
+                  //                 padding: const EdgeInsets.only(bottom: 12),
+                  //                 child: Row(
+                  //                   children: [
+                  //                     Icon(
+                  //                       Icons.verified,
+                  //                       color: theme.colorScheme.primary,
+                  //                       size: isDesktop ? 20 : 18,
+                  //                     ),
+                  //                     const SizedBox(width: 12),
+                  //                     Expanded(
+                  //                       child: Column(
+                  //                         crossAxisAlignment:
+                  //                             CrossAxisAlignment.start,
+                  //                         children: [
+                  //                           Text(
+                  //                             'FSSAI License',
+                  //                             style: theme.textTheme.labelMedium
+                  //                                 ?.copyWith(
+                  //                               color: theme
+                  //                                   .colorScheme.onSurface
+                  //                                   .withOpacity(0.6),
+                  //                             ),
+                  //                           ),
+                  //                           const SizedBox(height: 2),
+                  //                           Text(
+                  //                             restaurantProvider.fssaiNo!,
+                  //                             style: theme.textTheme.bodyMedium
+                  //                                 ?.copyWith(
+                  //                               fontWeight: FontWeight.w500,
+                  //                               color:
+                  //                                   theme.colorScheme.primary,
+                  //                             ),
+                  //                           ),
+                  //                         ],
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ),
+
+                  //               // Disclaimers
+                  //               // if (restaurantProvider.disclaimers != null &&
+                  //               //     restaurantProvider.disclaimers!.isNotEmpty)
+                  //               Padding(
+                  //                 padding: const EdgeInsets.only(bottom: 8),
+                  //                 child: Row(
+                  //                   crossAxisAlignment:
+                  //                       CrossAxisAlignment.start,
+                  //                   children: [
+                  //                     Icon(
+                  //                       Icons.info_outline,
+                  //                       color: theme.colorScheme.onSurface
+                  //                           .withOpacity(0.6),
+                  //                       size: isDesktop ? 20 : 18,
+                  //                     ),
+                  //                     const SizedBox(width: 12),
+                  //                     Expanded(
+                  //                       child: Column(
+                  //                         crossAxisAlignment:
+                  //                             CrossAxisAlignment.start,
+                  //                         children: [
+                  //                           Text(
+                  //                             'Disclaimers',
+                  //                             style: theme.textTheme.labelMedium
+                  //                                 ?.copyWith(
+                  //                               color: theme
+                  //                                   .colorScheme.onSurface
+                  //                                   .withOpacity(0.6),
+                  //                             ),
+                  //                           ),
+                  //                           const SizedBox(height: 8),
+                  //                           ...restaurantProvider.disclaimers
+                  //                               .map((disclaimer) {
+                  //                             return Padding(
+                  //                               padding: const EdgeInsets.only(
+                  //                                   bottom: 6),
+                  //                               child: Row(
+                  //                                 crossAxisAlignment:
+                  //                                     CrossAxisAlignment.start,
+                  //                                 children: [
+                  //                                   Text(
+                  //                                     '•',
+                  //                                     style: TextStyle(
+                  //                                       color: theme.colorScheme
+                  //                                           .primary,
+                  //                                       fontSize: 16,
+                  //                                       fontWeight:
+                  //                                           FontWeight.bold,
+                  //                                     ),
+                  //                                   ),
+                  //                                   const SizedBox(width: 8),
+                  //                                   Expanded(
+                  //                                     child: Text(
+                  //                                       disclaimer,
+                  //                                       style: theme
+                  //                                           .textTheme.bodySmall
+                  //                                           ?.copyWith(
+                  //                                         color: theme
+                  //                                             .colorScheme
+                  //                                             .onSurface
+                  //                                             .withOpacity(0.8),
+                  //                                       ),
+                  //                                     ),
+                  //                                   ),
+                  //                                 ],
+                  //                               ),
+                  //                             );
+                  //                           }).toList(),
+                  //                         ],
+                  //                       ),
+                  //                     ),
+                  //                   ],
+                  //                 ),
+                  //               ),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+
+                  //     SizedBox(height: isDesktop ? 150 : 100),
+                  //   ],
+                  // ),
+
+                  // Replace the Column children section in the main build method with this:
+
+child: Column(
+  children: [
+    // Hero Section
+    _buildHeroSection(
+      context,
+      restaurantProvider,
+      theme,
+      isDark,
+      isRestaurantActive,
+      rating,
+      totalReviews,
+      isMobile,
+      isDesktop,
+    ),
+
+    SizedBox(height: isDesktop ? 40 : 20),
+
+    // Search Bar
+    Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 16,
+        vertical: 8,
+      ),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 800),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 32, 203, 20),
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 50,
+                child: TextFormField(
+                  controller: _searchController,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search your food',
+                    hintStyle: TextStyle(
+                      color: theme.colorScheme.onSurface
+                          .withOpacity(0.6),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: theme.colorScheme.onSurface
+                          .withOpacity(0.6),
+                    ),
+                    filled: true,
+                    fillColor: isDark
+                        ? theme.cardColor
+                        : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(
+                      vertical: 0,
+                    ),
+                  ),
+                  onChanged: _handleSearch,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
+      ),
+    ),
+
+    Divider(
+      height: 30,
+      color: isDark ? Colors.grey[700] : Colors.grey[300],
+      indent: isDesktop ? 32 : 16,
+      endIndent: isDesktop ? 32 : 16,
+    ),
+
+    // Recommended Header
+    Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 32 : 16,
+        vertical: 8,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Recommended',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          Text(
+            '${_allFilteredItems.length} items',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface
+                  .withOpacity(0.6),
+              fontSize: isDesktop ? 16 : 14,
+            ),
+          ),
+        ],
+      ),
+    ),
+
+    // Products Grid/List
+    _displayedItems.isEmpty
+        ? Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: theme.colorScheme.onSurface
+                      .withOpacity(0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _searchQuery.isEmpty 
+                      ? 'No items available'
+                      : 'No items found',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface
+                        .withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          )
+        : _buildProductsGrid(
+            context,
+            _displayedItems,
+            restaurantProvider,
+            theme,
+            isDark,
+            isRestaurantActive,
+          ),
+
+    // Loading More Indicator
+    if (_isLoadingMore)
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              theme.colorScheme.primary,
+            ),
+          ),
+        ),
+      ),
+
+    // Restaurant Information Section - Only show when:
+    // 1. No more items are loading AND
+    // 2. Either all items are loaded OR there are no items
+// Restaurant Information Section - Only show when:
+// 1. No more items are loading AND
+// 2. Either all items are loaded OR there are no items
+if (!_isLoadingMore && 
+    (!_hasMoreItems || _allFilteredItems.isEmpty))
   Padding(
     padding: EdgeInsets.symmetric(
       horizontal: isDesktop ? 32 : 16,
@@ -493,9 +1009,9 @@ if (restaurantProvider.fssaiNo != null ||
           ),
           const SizedBox(height: 16),
           
-          // Full Address
-          // if (restaurantProvider.fullAddress != null && 
-          //     restaurantProvider.fullAddress!.isNotEmpty)
+          // Full Address (if available from restaurant)
+          if (restaurantProvider.fullAddress != null && 
+              restaurantProvider.fullAddress!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -531,9 +1047,9 @@ if (restaurantProvider.fssaiNo != null ||
               ),
             ),
           
-          // FSSAI Number
-          // if (restaurantProvider.fssaiNo != null && 
-          //     restaurantProvider.fssaiNo!.isNotEmpty)
+          // FSSAI Number (if available from restaurant)
+          if (restaurantProvider.fssaiNo != null && 
+              restaurantProvider.fssaiNo!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -569,32 +1085,34 @@ if (restaurantProvider.fssaiNo != null ||
               ),
             ),
           
-          // Disclaimers
-          // if (restaurantProvider.disclaimers != null && 
-          //     restaurantProvider.disclaimers!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    size: isDesktop ? 20 : 18,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Disclaimers',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
+          // Disclaimers Section - Show either restaurant disclaimers or default Vegiffy disclaimer
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  size: isDesktop ? 20 : 18,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Disclaimers',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
-                        const SizedBox(height: 8),
-                        ...restaurantProvider.disclaimers.map((disclaimer) {
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      // Show restaurant disclaimers if available, otherwise show default Vegiffy disclaimer
+                      ..._getDisclaimers(restaurantProvider).map((disclaimer) {
+                        // Check if this is the WhatsApp line to make it clickable
+                        if (disclaimer.contains('WhatsApp') && disclaimer.contains('+91 6309100101')) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 6),
                             child: Row(
@@ -610,31 +1128,77 @@ if (restaurantProvider.fssaiNo != null ||
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    disclaimer,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurface.withOpacity(0.8),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _openWhatsApp();
+                                    },
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text: disclaimer.replaceAll('+91 6309100101', ''),
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurface.withOpacity(0.8),
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: '+91 6309100101',
+                                            style: TextStyle(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           );
-                        }).toList(),
-                      ],
-                    ),
+                        }
+                        
+                        // Regular disclaimer item (non-clickable)
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '•',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  disclaimer,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface.withOpacity(0.8),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     ),
   ),
 
-                      SizedBox(height: isDesktop ? 150 : 100),
-                    ],
-                  ),
+    // Bottom padding
+    SizedBox(height: isDesktop ? 150 : 100),
+  ],
+),
                 ),
               ),
             );
@@ -647,7 +1211,7 @@ if (restaurantProvider.fssaiNo != null ||
         builder: (context, cartProvider, restaurantProvider, child) {
           final bool isRestaurantActive =
               (restaurantProvider.restaurantStatus ?? '').toLowerCase() ==
-              'active';
+                  'active';
 
           if (!cartProvider.hasItems || !isRestaurantActive) {
             return const SizedBox.shrink();
@@ -1036,7 +1600,6 @@ if (restaurantProvider.fssaiNo != null ||
                 MaterialPageRoute(
                   builder: (context) => DetailScreen(
                     productId: itemId,
-                    currentUserId: userId.toString(),
                     restaurantId: widget.restaurantId,
                   ),
                 ),
@@ -1116,7 +1679,6 @@ if (restaurantProvider.fssaiNo != null ||
                 MaterialPageRoute(
                   builder: (context) => DetailScreen(
                     productId: itemId,
-                    currentUserId: userId.toString(),
                     restaurantId: widget.restaurantId,
                   ),
                 ),
@@ -1160,7 +1722,8 @@ if (restaurantProvider.fssaiNo != null ||
                             color: isDark ? Colors.grey[700] : Colors.grey[200],
                             child: Icon(
                               Icons.image_not_supported,
-                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
                               size: 40,
                             ),
                           );
@@ -1169,7 +1732,8 @@ if (restaurantProvider.fssaiNo != null ||
                     ),
                     Consumer<WishlistProvider>(
                       builder: (context, wishlistProvider, child) {
-                        final isInWishlist = wishlistProvider.isInWishlist(itemId);
+                        final isInWishlist =
+                            wishlistProvider.isInWishlist(itemId);
                         return Positioned(
                           top: 8,
                           right: 8,
@@ -1244,7 +1808,8 @@ if (restaurantProvider.fssaiNo != null ||
                               style: TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 fontSize: 12,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
                               ),
                             ),
                           ],
@@ -1577,7 +2142,8 @@ if (restaurantProvider.fssaiNo != null ||
                   context: context,
                   isScrollControlled: true,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(25)),
                   ),
                   builder: (context) => VegPannerBottomSheet(
                     item: item,
@@ -1640,10 +2206,12 @@ if (restaurantProvider.fssaiNo != null ||
           ElevatedButton(
             onPressed: () {
               EasyLoading.show(status: 'Retrying...');
-              provider.fetchRestaurantProducts(
+              provider
+                  .fetchRestaurantProducts(
                 widget.restaurantId,
                 widget.categoryName,
-              ).then((_) {
+              )
+                  .then((_) {
                 EasyLoading.dismiss();
               }).catchError((error) {
                 EasyLoading.showError('Failed to load');
@@ -1739,9 +2307,13 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
   num _unitBasePrice() {
     switch (selectedVariation) {
       case 'Half':
-        return widget.item.halfPlatePrice > 0 ? widget.item.halfPlatePrice : widget.item.price;
+        return widget.item.halfPlatePrice > 0
+            ? widget.item.halfPlatePrice
+            : widget.item.price;
       case 'Full':
-        return widget.item.fullPlatePrice > 0 ? widget.item.fullPlatePrice : widget.item.price;
+        return widget.item.fullPlatePrice > 0
+            ? widget.item.fullPlatePrice
+            : widget.item.price;
       default:
         return widget.item.price;
     }
@@ -1838,21 +2410,28 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                         children: availableVariations.map((variation) {
                           num basePrice;
                           if (variation == 'Half') {
-                            basePrice = widget.item.halfPlatePrice > 0 ? widget.item.halfPlatePrice : widget.item.price;
+                            basePrice = widget.item.halfPlatePrice > 0
+                                ? widget.item.halfPlatePrice
+                                : widget.item.price;
                           } else if (variation == 'Full') {
-                            basePrice = widget.item.fullPlatePrice > 0 ? widget.item.fullPlatePrice : widget.item.price;
+                            basePrice = widget.item.fullPlatePrice > 0
+                                ? widget.item.fullPlatePrice
+                                : widget.item.price;
                           } else {
                             basePrice = widget.item.price;
                           }
 
                           final discounted = widget.item.discount > 0
-                              ? (basePrice - (basePrice * widget.item.discount / 100)).round()
+                              ? (basePrice -
+                                      (basePrice * widget.item.discount / 100))
+                                  .round()
                               : basePrice;
 
                           return ListTile(
                             title: Text(
                               variation,
-                              style: TextStyle(color: theme.colorScheme.onSurface),
+                              style:
+                                  TextStyle(color: theme.colorScheme.onSurface),
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1871,20 +2450,23 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                                     style: TextStyle(
                                       decoration: TextDecoration.lineThrough,
                                       fontSize: 12,
-                                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
                                     ),
                                   ),
                                 ] else
                                   Text(
                                     '₹$basePrice',
-                                    style: TextStyle(color: theme.colorScheme.onSurface),
+                                    style: TextStyle(
+                                        color: theme.colorScheme.onSurface),
                                   ),
                               ],
                             ),
                             leading: Radio<String>(
                               value: variation,
                               groupValue: selectedVariation,
-                              onChanged: (val) => setState(() => selectedVariation = val!),
+                              onChanged: (val) =>
+                                  setState(() => selectedVariation = val!),
                             ),
                           );
                         }).toList(),
@@ -1908,13 +2490,19 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                       child: Row(
                         children: [
                           IconButton(
-                            onPressed: quantity > 1 ? () => setState(() => quantity--) : null,
-                            icon: Icon(Icons.remove, color: theme.colorScheme.onSurface),
+                            onPressed: quantity > 1
+                                ? () => setState(() => quantity--)
+                                : null,
+                            icon: Icon(Icons.remove,
+                                color: theme.colorScheme.onSurface),
                           ),
-                          Text('$quantity', style: TextStyle(color: theme.colorScheme.onSurface)),
+                          Text('$quantity',
+                              style: TextStyle(
+                                  color: theme.colorScheme.onSurface)),
                           IconButton(
                             onPressed: () => setState(() => quantity++),
-                            icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
+                            icon: Icon(Icons.add,
+                                color: theme.colorScheme.onSurface),
                           ),
                         ],
                       ),
@@ -1924,13 +2512,14 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: theme.colorScheme.onPrimary,
                         shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                       onPressed: cartProvider.isLoading
                           ? null
                           : () async {
                               EasyLoading.show(status: 'Adding to cart...');
-                              
+
                               final success = await addToCartWithVendorGuard(
                                 context: context,
                                 cartProvider: cartProvider,
@@ -1948,7 +2537,7 @@ class _VegPannerBottomSheetState extends State<VegPannerBottomSheet> {
                               if (success && mounted) {
                                 Navigator.pop(context);
                                 // EasyLoading.showSuccess('Added to cart!');
-                                
+
                                 // Optional: Navigate to cart
                                 // Navigator.push(
                                 //   context,
@@ -2019,20 +2608,23 @@ class RestaurantReviewsScreen extends StatelessWidget {
               children: [
                 Text(
                   restaurantName,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.star, size: 16, color: theme.colorScheme.onPrimary),
+                          Icon(Icons.star,
+                              size: 16, color: theme.colorScheme.onPrimary),
                           const SizedBox(width: 4),
                           Text(
                             avg.toStringAsFixed(1),
@@ -2047,7 +2639,8 @@ class RestaurantReviewsScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       '$totalReviews review${totalReviews == 1 ? '' : 's'}',
-                      style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                      style: TextStyle(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7)),
                     ),
                   ],
                 ),
@@ -2069,7 +2662,9 @@ class RestaurantReviewsScreen extends StatelessWidget {
                     itemCount: reviews.length,
                     itemBuilder: (context, index) {
                       final review = reviews[index];
-                      final userName = review.username.isNotEmpty ? review.username : "User ${index + 1}";
+                      final userName = review.username.isNotEmpty
+                          ? review.username
+                          : "User ${index + 1}";
                       final userImage = review.userimage.isNotEmpty
                           ? review.userimage
                           : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
@@ -2096,7 +2691,9 @@ class RestaurantReviewsScreen extends StatelessWidget {
                               children: List.generate(
                                 5,
                                 (i) => Icon(
-                                  i < review.stars ? Icons.star : Icons.star_border,
+                                  i < review.stars
+                                      ? Icons.star
+                                      : Icons.star_border,
                                   size: 16,
                                   color: theme.colorScheme.primary,
                                 ),
@@ -2109,15 +2706,20 @@ class RestaurantReviewsScreen extends StatelessWidget {
                           children: [
                             const SizedBox(height: 4),
                             Text(
-                              review.comment.isNotEmpty ? review.comment : 'No comment',
-                              style: TextStyle(color: theme.colorScheme.onSurface),
+                              review.comment.isNotEmpty
+                                  ? review.comment
+                                  : 'No comment',
+                              style:
+                                  TextStyle(color: theme.colorScheme.onSurface),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              DateFormat('dd MMM yyyy, hh:mm a').format(review.createdAt.toLocal()),
+                              DateFormat('dd MMM yyyy, hh:mm a')
+                                  .format(review.createdAt.toLocal()),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
                               ),
                             ),
                           ],
@@ -2164,7 +2766,8 @@ class _WishlistHeartState extends State<_WishlistHeart> {
   @override
   void didUpdateWidget(covariant _WishlistHeart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_isProcessing && oldWidget.initialIsInWishlist != widget.initialIsInWishlist) {
+    if (!_isProcessing &&
+        oldWidget.initialIsInWishlist != widget.initialIsInWishlist) {
       _isInWishlist = widget.initialIsInWishlist;
     }
   }
@@ -2180,7 +2783,8 @@ class _WishlistHeartState extends State<_WishlistHeart> {
     try {
       await widget.onToggle();
       if (mounted) {
-        EasyLoading.showSuccess(_isInWishlist ? 'Added to wishlist' : 'Removed from wishlist');
+        EasyLoading.showSuccess(
+            _isInWishlist ? 'Added to wishlist' : 'Removed from wishlist');
       }
     } catch (_) {
       if (mounted) {
@@ -2215,7 +2819,9 @@ class _WishlistHeartState extends State<_WishlistHeart> {
               )
             : Icon(
                 _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                color: _isInWishlist ? Colors.red : widget.theme.colorScheme.onSurface,
+                color: _isInWishlist
+                    ? Colors.red
+                    : widget.theme.colorScheme.onSurface,
                 size: 18,
               ),
       ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
+import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/views/home/detail_screen.dart';
 
 class SearchBarWithVoice extends StatefulWidget {
@@ -38,11 +39,17 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
   Timer? _debounceTimer;
   bool _isSearching = false;
   List<dynamic> _searchResults = [];
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-
+  _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    setState(() {
+      _currentHintIndex =
+          (_currentHintIndex + 1) % _categoryHints.length;
+    });
+  });
     // Initialize speech to text
     _speech = stt.SpeechToText();
     _initializeSpeech();
@@ -61,6 +68,15 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
       curve: Curves.easeInOut,
     ));
   }
+
+
+int _currentHintIndex = 0;
+    List<String> _categoryHints = [
+    "Search by Pure Veg",
+    "Search by Healthy Food",
+        "Search by Tasty food",
+
+  ];
 
   Future<void> _initializeSpeech() async {
     try {
@@ -101,6 +117,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
     _silenceTimer?.cancel();
     _autoCloseTimer?.cancel();
     _debounceTimer?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -622,8 +639,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                                                     builder: (context) =>
                                                         DetailScreen(
                                                       productId: item['_id'],
-                                                      currentUserId:
-                                                          '68ef35a7447e0771c2b4aac4', // Replace with actual current user ID
+                                                    
                                                       restaurantId:
                                                           restaurant['_id'],
                                                     ),
@@ -849,7 +865,7 @@ class _SearchBarWithVoiceState extends State<SearchBarWithVoice>
                     //   color: Colors.black, // 👈 border color
                     // ),
                   ),
-                  hintText: "Search...",
+                  hintText: _categoryHints[_currentHintIndex],
                   hintStyle: TextStyle(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
