@@ -61,6 +61,7 @@ dependencies:
   new_version_plus: ^1.0.1
   chewie: ^1.13.0
   universal_html: ^2.3.0
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   test: ^1.29.0

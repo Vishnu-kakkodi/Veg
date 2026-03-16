@@ -15,6 +15,7 @@ import 'package:veegify/provider/VersionProvider/version_provider.dart';
 
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/NotificationScreen/notification_screen.dart';
+import 'package:veegify/views/Reels/reels.dart';
 
 import 'package:veegify/views/home/home_screen.dart';
 import 'package:veegify/views/Wishlist/wishlist_screen.dart';
@@ -99,7 +100,8 @@ void initState() {
       HomeScreen(),
       WishlistScreen(),
       CartScreen(),
-      HystoryScreen(),
+      // HystoryScreen(),
+      ReelsScreen(),
       ProfileScreen(),
       NotificationScreen()
     ];
@@ -333,7 +335,7 @@ class CustomMobileNavbar extends StatelessWidget {
           Expanded(
             child: _navItem(
               Icons.receipt_long_outlined, 
-              "Orders", 
+              "Reels", 
               3, 
               orangePrimary,
               showBadge: false,
