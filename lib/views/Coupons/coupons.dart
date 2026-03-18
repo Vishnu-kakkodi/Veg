@@ -37,14 +37,11 @@
 //     if (user != null && mounted) {
 //       setState(() => userId = user.userId);
 //     }
-//     // ✅ FIX: use addPostFrameCallback so context is ready,
-//     // and pass the resolved userId (fallback to '' if null)
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       context.read<CouponProvider>().fetchCoupons(userId ?? '');
 //     });
 //   }
 
-//   // ✅ FIX: extracted as a plain method so it matches VoidCallback
 //   void _retry() {
 //     context.read<CouponProvider>().fetchCoupons(userId ?? '');
 //   }
@@ -56,7 +53,6 @@
 //       appBar: _buildAppBar(),
 //       body: Consumer<CouponProvider>(
 //         builder: (context, provider, _) {
-//           // ✅ FIX: onRetry now receives _retry which is a VoidCallback
 //           return switch (provider.status) {
 //             CouponStatus.idle || CouponStatus.loading => const _LoadingView(),
 //             CouponStatus.error => _ErrorView(
@@ -73,20 +69,22 @@
 //   }
 
 //   AppBar _buildAppBar() {
+//     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
+
 //     return AppBar(
 //       backgroundColor: const Color(0xFFF5F3EE),
 //       elevation: 0,
 //       centerTitle: true,
-//       title: const Text(
-//         'Your Coupons',
+//       title: Text(
+//         isWebOrTablet ? 'My Coupons' : 'Your Coupons',
 //         style: TextStyle(
-//           fontSize: 22,
+//           fontSize: isWebOrTablet ? 28 : 22,
 //           fontWeight: FontWeight.w800,
-//           color: Color(0xFF1A1A1A),
+//           color: const Color(0xFF1A1A1A),
 //           letterSpacing: -0.5,
 //         ),
 //       ),
-//       toolbarHeight: 70,
+//       toolbarHeight: isWebOrTablet ? 80 : 70,
 //     );
 //   }
 // }
@@ -100,12 +98,31 @@
 
 //   @override
 //   Widget build(BuildContext context) {
-//     return ListView.separated(
-//       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-//       itemCount: coupons.length,
-//       separatorBuilder: (_, __) => const SizedBox(height: 16),
-//       itemBuilder: (context, index) => CouponTicket(coupon: coupons[index]),
-//     );
+//     final screenWidth = MediaQuery.of(context).size.width;
+//     final isWebOrTablet = screenWidth > 600;
+
+//     if (isWebOrTablet) {
+//       // Grid layout for web/tablet
+//       return GridView.builder(
+//         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+//         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+//           maxCrossAxisExtent: 500,
+//           crossAxisSpacing: 20,
+//           mainAxisSpacing: 20,
+//           childAspectRatio: 1.2,
+//         ),
+//         itemCount: coupons.length,
+//         itemBuilder: (context, index) => CouponTicket(coupon: coupons[index]),
+//       );
+//     } else {
+//       // List layout for mobile
+//       return ListView.separated(
+//         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+//         itemCount: coupons.length,
+//         separatorBuilder: (_, __) => const SizedBox(height: 16),
+//         itemBuilder: (context, index) => CouponTicket(coupon: coupons[index]),
+//       );
+//     }
 //   }
 // }
 
@@ -133,6 +150,7 @@
 //     final accent = _accentColor();
 //     final dateFormat = DateFormat('dd MMM yyyy');
 //     final expired = coupon.isExpired;
+//     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
 
 //     return Opacity(
 //       opacity: expired ? 0.55 : 1.0,
@@ -142,15 +160,21 @@
 //           children: [
 //             // ── Top section ─────────────────────
 //             Padding(
-//               padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+//               padding: EdgeInsets.fromLTRB(
+//                 isWebOrTablet ? 24 : 20,
+//                 isWebOrTablet ? 24 : 20,
+//                 isWebOrTablet ? 24 : 20,
+//                 16,
+//               ),
 //               child: Row(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
 //                 children: [
 //                   Container(
-//                     width: 72,
-//                     height: 72,
+//                     width: isWebOrTablet ? 84 : 72,
+//                     height: isWebOrTablet ? 84 : 72,
 //                     decoration: BoxDecoration(
 //                       color: accent.withOpacity(0.12),
-//                       borderRadius: BorderRadius.circular(16),
+//                       borderRadius: BorderRadius.circular(isWebOrTablet ? 18 : 16),
 //                     ),
 //                     child: Center(
 //                       child: Text(
@@ -158,7 +182,7 @@
 //                             ? '${coupon.discountValue.toStringAsFixed(0)}%'
 //                             : '₹${coupon.discountValue.toStringAsFixed(0)}',
 //                         style: TextStyle(
-//                           fontSize: 20,
+//                           fontSize: isWebOrTablet ? 24 : 20,
 //                           fontWeight: FontWeight.w900,
 //                           color: accent,
 //                           letterSpacing: -0.5,
@@ -173,32 +197,37 @@
 //                       children: [
 //                         Text(
 //                           coupon.title,
-//                           style: const TextStyle(
-//                             fontSize: 18,
+//                           style: TextStyle(
+//                             fontSize: isWebOrTablet ? 20 : 18,
 //                             fontWeight: FontWeight.w800,
-//                             color: Color(0xFF1A1A1A),
+//                             color: const Color(0xFF1A1A1A),
 //                             letterSpacing: -0.3,
 //                           ),
 //                         ),
 //                         const SizedBox(height: 4),
 //                         Text(
 //                           coupon.description,
-//                           style: const TextStyle(
-//                               fontSize: 13, color: Color(0xFF666666)),
+//                           style: TextStyle(
+//                             fontSize: isWebOrTablet ? 14 : 13,
+//                             color: const Color(0xFF666666),
+//                           ),
+//                           maxLines: isWebOrTablet ? 2 : 1,
+//                           overflow: TextOverflow.ellipsis,
 //                         ),
 //                         const SizedBox(height: 6),
 //                         Wrap(
 //                           spacing: 6,
+//                           runSpacing: 4,
 //                           children: [
 //                             _Pill(
-//                               label:
-//                                   'Max ₹${coupon.maxDiscountAmount.toInt()}',
+//                               label: 'Max ₹${coupon.maxDiscountAmount.toInt()}',
 //                               color: accent,
+//                               isWebOrTablet: isWebOrTablet,
 //                             ),
 //                             _Pill(
-//                               label:
-//                                   'Min ₹${coupon.minOrderAmount.toInt()}',
+//                               label: 'Min ₹${coupon.minOrderAmount.toInt()}',
 //                               color: const Color(0xFF999999),
+//                               isWebOrTablet: isWebOrTablet,
 //                             ),
 //                           ],
 //                         ),
@@ -216,7 +245,7 @@
 //                       child: Text(
 //                         'EXPIRED',
 //                         style: TextStyle(
-//                           fontSize: 10,
+//                           fontSize: isWebOrTablet ? 11 : 10,
 //                           fontWeight: FontWeight.w700,
 //                           color: Colors.red.shade400,
 //                           letterSpacing: 0.5,
@@ -232,19 +261,24 @@
 
 //             // ── Bottom: scratch card section ─────
 //             Padding(
-//               padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+//               padding: EdgeInsets.fromLTRB(
+//                 isWebOrTablet ? 24 : 20,
+//                 14,
+//                 isWebOrTablet ? 24 : 20,
+//                 isWebOrTablet ? 24 : 18,
+//               ),
 //               child: Row(
 //                 children: [
 //                   Expanded(
 //                     child: Column(
 //                       crossAxisAlignment: CrossAxisAlignment.start,
 //                       children: [
-//                         const Text(
+//                         Text(
 //                           'USE CODE',
 //                           style: TextStyle(
-//                             fontSize: 10,
+//                             fontSize: isWebOrTablet ? 11 : 10,
 //                             fontWeight: FontWeight.w600,
-//                             color: Color(0xFFAAAAAA),
+//                             color: const Color(0xFFAAAAAA),
 //                             letterSpacing: 1.2,
 //                           ),
 //                         ),
@@ -252,29 +286,31 @@
 //                         ScratchCard(
 //                           couponCode: coupon.couponCode,
 //                           accentColor: accent,
+//                           isWebOrTablet: isWebOrTablet,
 //                         ),
 //                       ],
 //                     ),
 //                   ),
+//                   const SizedBox(width: 16),
 //                   Column(
 //                     crossAxisAlignment: CrossAxisAlignment.end,
 //                     children: [
-//                       const Text(
+//                       Text(
 //                         'VALID TILL',
 //                         style: TextStyle(
-//                           fontSize: 10,
+//                           fontSize: isWebOrTablet ? 11 : 10,
 //                           fontWeight: FontWeight.w600,
-//                           color: Color(0xFFAAAAAA),
+//                           color: const Color(0xFFAAAAAA),
 //                           letterSpacing: 1.2,
 //                         ),
 //                       ),
 //                       const SizedBox(height: 4),
 //                       Text(
 //                         dateFormat.format(coupon.endDate),
-//                         style: const TextStyle(
-//                           fontSize: 13,
+//                         style: TextStyle(
+//                           fontSize: isWebOrTablet ? 14 : 13,
 //                           fontWeight: FontWeight.w600,
-//                           color: Color(0xFF444444),
+//                           color: const Color(0xFF444444),
 //                         ),
 //                       ),
 //                     ],
@@ -295,11 +331,13 @@
 // class ScratchCard extends StatefulWidget {
 //   final String couponCode;
 //   final Color accentColor;
+//   final bool isWebOrTablet;
 
 //   const ScratchCard({
 //     super.key,
 //     required this.couponCode,
 //     required this.accentColor,
+//     this.isWebOrTablet = false,
 //   });
 
 //   @override
@@ -320,13 +358,18 @@
 //   final math.Random _rng = math.Random();
 
 //   static const double _revealThreshold = 0.55;
-//   static const double _cardW = 160.0;
-//   static const double _cardH = 44.0;
-//   static const double _brushR = 18.0;
+//   late double _cardW;
+//   late double _cardH;
+//   late double _brushR;
 
 //   @override
 //   void initState() {
 //     super.initState();
+
+//     // Set dimensions based on platform
+//     _cardW = widget.isWebOrTablet ? 220.0 : 160.0;
+//     _cardH = widget.isWebOrTablet ? 52.0 : 44.0;
+//     _brushR = widget.isWebOrTablet ? 24.0 : 18.0;
 
 //     _confettiCtrl = AnimationController(
 //       vsync: this,
@@ -382,11 +425,9 @@
 //     final total = cols * rows;
 //     final covered = <String>{};
 //     for (final p in _scratchPoints) {
-//       final minC =
-//           ((p.dx - _brushR) / gridSize).floor().clamp(0, cols - 1);
+//       final minC = ((p.dx - _brushR) / gridSize).floor().clamp(0, cols - 1);
 //       final maxC = ((p.dx + _brushR) / gridSize).ceil().clamp(0, cols);
-//       final minR =
-//           ((p.dy - _brushR) / gridSize).floor().clamp(0, rows - 1);
+//       final minR = ((p.dy - _brushR) / gridSize).floor().clamp(0, rows - 1);
 //       final maxR = ((p.dy + _brushR) / gridSize).ceil().clamp(0, rows);
 //       for (var c = minC; c < maxC; c++) {
 //         for (var r = minR; r < maxR; r++) {
@@ -400,12 +441,12 @@
 //   void _revealCode() {
 //     _revealed = true;
 //     _particles.clear();
-//     for (var i = 0; i < 28; i++) {
+//     for (var i = 0; i < (widget.isWebOrTablet ? 40 : 28); i++) {
 //       _particles.add(_Particle(
 //         color: _particleColors[_rng.nextInt(_particleColors.length)],
 //         angle: _rng.nextDouble() * 2 * math.pi,
 //         speed: 60 + _rng.nextDouble() * 100,
-//         size: 4 + _rng.nextDouble() * 5,
+//         size: widget.isWebOrTablet ? 5 + _rng.nextDouble() * 6 : 4 + _rng.nextDouble() * 5,
 //         startX: _cardW / 2 + (_rng.nextDouble() - 0.5) * _cardW * 0.8,
 //         startY: _cardH / 2,
 //         rotationSpeed: (_rng.nextDouble() - 0.5) * 8,
@@ -452,6 +493,7 @@
 //                 child: _CodeChip(
 //                   code: widget.couponCode,
 //                   accentColor: widget.accentColor,
+//                   isWebOrTablet: widget.isWebOrTablet,
 //                 ),
 //               ),
 //             ),
@@ -468,8 +510,10 @@
 //                     points: _scratchPoints,
 //                     brushRadius: _brushR,
 //                     accentColor: widget.accentColor,
+//                     cardWidth: _cardW,
+//                     cardHeight: _cardH,
 //                   ),
-//                   size: const Size(_cardW, _cardH),
+//                   // size: const Size(_cardW, _cardH),
 //                 ),
 //               ),
 
@@ -486,13 +530,13 @@
 //                       mainAxisSize: MainAxisSize.min,
 //                       children: [
 //                         Icon(Icons.back_hand_outlined,
-//                             size: 13,
+//                             size: widget.isWebOrTablet ? 16 : 13,
 //                             color: Colors.white.withOpacity(0.85)),
 //                         const SizedBox(width: 5),
 //                         Text(
-//                           'Scratch me!',
+//                           widget.isWebOrTablet ? 'Scratch to reveal' : 'Scratch me!',
 //                           style: TextStyle(
-//                             fontSize: 11,
+//                             fontSize: widget.isWebOrTablet ? 13 : 11,
 //                             fontWeight: FontWeight.w700,
 //                             color: Colors.white.withOpacity(0.9),
 //                             letterSpacing: 0.4,
@@ -566,18 +610,21 @@
 //   final List<Offset> points;
 //   final double brushRadius;
 //   final Color accentColor;
+//   final double cardWidth;
+//   final double cardHeight;
 
 //   const _ScratchPainter({
 //     required this.points,
 //     required this.brushRadius,
 //     required this.accentColor,
+//     required this.cardWidth,
+//     required this.cardHeight,
 //   });
 
 //   @override
 //   void paint(Canvas canvas, Size size) {
 //     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-//     final rrect =
-//         RRect.fromRectAndRadius(rect, const Radius.circular(10));
+//     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
 
 //     final foilPaint = Paint()
 //       ..shader = ui.Gradient.linear(
@@ -648,8 +695,13 @@
 // class _CodeChip extends StatelessWidget {
 //   final String code;
 //   final Color accentColor;
+//   final bool isWebOrTablet;
 
-//   const _CodeChip({required this.code, required this.accentColor});
+//   const _CodeChip({
+//     required this.code,
+//     required this.accentColor,
+//     this.isWebOrTablet = false,
+//   });
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -669,7 +721,7 @@
 //           );
 //       },
 //       child: Container(
-//         height: 44,
+//         height: isWebOrTablet ? 52 : 44,
 //         decoration: BoxDecoration(
 //           color: accentColor.withOpacity(0.08),
 //           borderRadius: BorderRadius.circular(10),
@@ -684,14 +736,18 @@
 //             Text(
 //               code,
 //               style: TextStyle(
-//                 fontSize: 15,
+//                 fontSize: isWebOrTablet ? 18 : 15,
 //                 fontWeight: FontWeight.w900,
 //                 color: accentColor,
 //                 letterSpacing: 2,
 //               ),
 //             ),
 //             const SizedBox(width: 8),
-//             Icon(Icons.copy_rounded, size: 14, color: accentColor),
+//             Icon(
+//               Icons.copy_rounded,
+//               size: isWebOrTablet ? 18 : 14,
+//               color: accentColor,
+//             ),
 //           ],
 //         ),
 //       ),
@@ -814,12 +870,20 @@
 // class _Pill extends StatelessWidget {
 //   final String label;
 //   final Color color;
-//   const _Pill({required this.label, required this.color});
+//   final bool isWebOrTablet;
+
+//   const _Pill({
+//     required this.label,
+//     required this.color,
+//     this.isWebOrTablet = false,
+//   });
 
 //   @override
 //   Widget build(BuildContext context) => Container(
-//         padding:
-//             const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+//         padding: EdgeInsets.symmetric(
+//           horizontal: isWebOrTablet ? 10 : 8,
+//           vertical: isWebOrTablet ? 4 : 3,
+//         ),
 //         decoration: BoxDecoration(
 //           color: color.withOpacity(0.1),
 //           borderRadius: BorderRadius.circular(20),
@@ -827,9 +891,10 @@
 //         child: Text(
 //           label,
 //           style: TextStyle(
-//               fontSize: 10,
-//               fontWeight: FontWeight.w600,
-//               color: color),
+//             fontSize: isWebOrTablet ? 12 : 10,
+//             fontWeight: FontWeight.w600,
+//             color: color,
+//           ),
 //         ),
 //       );
 // }
@@ -841,92 +906,110 @@
 //   const _LoadingView();
 
 //   @override
-//   Widget build(BuildContext context) => const Center(
-//         child: Column(mainAxisSize: MainAxisSize.min, children: [
-//           CircularProgressIndicator(strokeWidth: 2.5),
-//           SizedBox(height: 16),
-//           Text('Fetching coupons…',
-//               style:
-//                   TextStyle(color: Color(0xFF888888), fontSize: 14)),
-//         ]),
-//       );
+//   Widget build(BuildContext context) {
+//     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
+
+//     return Center(
+//       child: Column(mainAxisSize: MainAxisSize.min, children: [
+//         const CircularProgressIndicator(strokeWidth: 2.5),
+//         const SizedBox(height: 16),
+//         Text(
+//           isWebOrTablet ? 'Fetching your coupons...' : 'Fetching coupons…',
+//           style: TextStyle(
+//             color: const Color(0xFF888888),
+//             fontSize: isWebOrTablet ? 16 : 14,
+//           ),
+//         ),
+//       ]),
+//     );
+//   }
 // }
 
 // class _ErrorView extends StatelessWidget {
 //   final String message;
-//   final VoidCallback onRetry; // ✅ correct type
+//   final VoidCallback onRetry;
 //   const _ErrorView({required this.message, required this.onRetry});
 
 //   @override
-//   Widget build(BuildContext context) => Center(
-//         child: Padding(
-//           padding: const EdgeInsets.all(32),
-//           child:
-//               Column(mainAxisSize: MainAxisSize.min, children: [
-//             const Icon(Icons.wifi_off_rounded,
-//                 size: 52, color: Colors.grey),
+//   Widget build(BuildContext context) {
+//     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
+
+//     return Center(
+//       child: Padding(
+//         padding: EdgeInsets.all(isWebOrTablet ? 48 : 32),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(
+//               Icons.wifi_off_rounded,
+//               size: isWebOrTablet ? 72 : 52,
+//               color: Colors.grey,
+//             ),
 //             const SizedBox(height: 16),
-//             Text(message,
-//                 textAlign: TextAlign.center,
-//                 style: const TextStyle(
-//                     color: Color(0xFF666666), fontSize: 14)),
+//             Text(
+//               message,
+//               textAlign: TextAlign.center,
+//               style: TextStyle(
+//                 color: const Color(0xFF666666),
+//                 fontSize: isWebOrTablet ? 16 : 14,
+//               ),
+//             ),
 //             const SizedBox(height: 24),
 //             ElevatedButton.icon(
-//               onPressed: onRetry, // ✅ just pass it directly
+//               onPressed: onRetry,
 //               icon: const Icon(Icons.refresh_rounded),
-//               label: const Text('Try Again'),
+//               label: Text(isWebOrTablet ? 'Try Again' : 'Try Again'),
 //               style: ElevatedButton.styleFrom(
 //                 backgroundColor: const Color(0xFF1A1A1A),
 //                 foregroundColor: Colors.white,
-//                 padding: const EdgeInsets.symmetric(
-//                     horizontal: 28, vertical: 14),
+//                 padding: EdgeInsets.symmetric(
+//                   horizontal: isWebOrTablet ? 36 : 28,
+//                   vertical: isWebOrTablet ? 18 : 14,
+//                 ),
 //                 shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(12)),
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
 //               ),
 //             ),
-//           ]),
+//           ],
 //         ),
-//       );
+//       ),
+//     );
+//   }
 // }
 
 // class _EmptyView extends StatelessWidget {
 //   const _EmptyView();
 
 //   @override
-//   Widget build(BuildContext context) => const Center(
-//         child: Column(mainAxisSize: MainAxisSize.min, children: [
-//           Icon(Icons.local_offer_outlined,
-//               size: 52, color: Colors.grey),
-//           SizedBox(height: 12),
-//           Text('No active coupons right now.',
-//               style: TextStyle(
-//                   color: Color(0xFF888888), fontSize: 15)),
-//         ]),
-//       );
+//   Widget build(BuildContext context) {
+//     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
+
+//     return Center(
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           Icon(
+//             Icons.local_offer_outlined,
+//             size: isWebOrTablet ? 72 : 52,
+//             color: Colors.grey,
+//           ),
+//           const SizedBox(height: 12),
+//           Text(
+//             isWebOrTablet ? 'No active coupons available right now.' : 'No active coupons right now.',
+//             style: TextStyle(
+//               color: const Color(0xFF888888),
+//               fontSize: isWebOrTablet ? 18 : 15,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ─────────────────────────────────────────
-//  coupons_screen.dart  (scratch-card edition)
+//  coupons_screen.dart  (scratch-card edition with dark mode support)
 // ─────────────────────────────────────────
 
 import 'dart:math' as math;
@@ -973,11 +1056,31 @@ class _CouponsScreenState extends State<CouponsScreen> {
     context.read<CouponProvider>().fetchCoupons(userId ?? '');
   }
 
+  Color _getBackgroundColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF121212)
+        : const Color(0xFFF5F3EE);
+  }
+
+  Color _getTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF1A1A1A);
+  }
+
+  Color _getSecondaryTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade400
+        : const Color(0xFF666666);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3EE),
-      appBar: _buildAppBar(),
+      backgroundColor: _getBackgroundColor(context),
+      appBar: _buildAppBar(context),
       body: Consumer<CouponProvider>(
         builder: (context, provider, _) {
           return switch (provider.status) {
@@ -995,11 +1098,12 @@ class _CouponsScreenState extends State<CouponsScreen> {
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AppBar(
-      backgroundColor: const Color(0xFFF5F3EE),
+      backgroundColor: _getBackgroundColor(context),
       elevation: 0,
       centerTitle: true,
       title: Text(
@@ -1007,11 +1111,14 @@ class _CouponsScreenState extends State<CouponsScreen> {
         style: TextStyle(
           fontSize: isWebOrTablet ? 28 : 22,
           fontWeight: FontWeight.w800,
-          color: const Color(0xFF1A1A1A),
+          color: _getTextColor(context),
           letterSpacing: -0.5,
         ),
       ),
       toolbarHeight: isWebOrTablet ? 80 : 70,
+      iconTheme: IconThemeData(
+        color: _getTextColor(context),
+      ),
     );
   }
 }
@@ -1027,7 +1134,7 @@ class _CouponList extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isWebOrTablet = screenWidth > 600;
-    
+
     if (isWebOrTablet) {
       // Grid layout for web/tablet
       return GridView.builder(
@@ -1072,17 +1179,37 @@ class CouponTicket extends StatelessWidget {
   Color _accentColor() => _palette[
       coupon.couponCode.codeUnits.fold(0, (a, b) => a + b) % _palette.length];
 
+  Color _getCardBackgroundColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF2C2C2C)
+        : Colors.white;
+  }
+
+  Color _getTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : const Color(0xFF1A1A1A);
+  }
+
+  Color _getDescriptionColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade400
+        : const Color(0xFF666666);
+  }
+
   @override
   Widget build(BuildContext context) {
     final accent = _accentColor();
     final dateFormat = DateFormat('dd MMM yyyy');
     final expired = coupon.isExpired;
     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Opacity(
       opacity: expired ? 0.55 : 1.0,
       child: _TicketShape(
         accentColor: accent,
+        backgroundColor: _getCardBackgroundColor(context),
         child: Column(
           children: [
             // ── Top section ─────────────────────
@@ -1100,8 +1227,9 @@ class CouponTicket extends StatelessWidget {
                     width: isWebOrTablet ? 84 : 72,
                     height: isWebOrTablet ? 84 : 72,
                     decoration: BoxDecoration(
-                      color: accent.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(isWebOrTablet ? 18 : 16),
+                      color: accent.withOpacity(isDark ? 0.25 : 0.12),
+                      borderRadius:
+                          BorderRadius.circular(isWebOrTablet ? 18 : 16),
                     ),
                     child: Center(
                       child: Text(
@@ -1127,7 +1255,7 @@ class CouponTicket extends StatelessWidget {
                           style: TextStyle(
                             fontSize: isWebOrTablet ? 20 : 18,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1A1A1A),
+                            color: _getTextColor(context),
                             letterSpacing: -0.3,
                           ),
                         ),
@@ -1136,7 +1264,7 @@ class CouponTicket extends StatelessWidget {
                           coupon.description,
                           style: TextStyle(
                             fontSize: isWebOrTablet ? 14 : 13,
-                            color: const Color(0xFF666666),
+                            color: _getDescriptionColor(context),
                           ),
                           maxLines: isWebOrTablet ? 2 : 1,
                           overflow: TextOverflow.ellipsis,
@@ -1153,7 +1281,9 @@ class CouponTicket extends StatelessWidget {
                             ),
                             _Pill(
                               label: 'Min ₹${coupon.minOrderAmount.toInt()}',
-                              color: const Color(0xFF999999),
+                              color: isDark
+                                  ? Colors.grey.shade500
+                                  : const Color(0xFF999999),
                               isWebOrTablet: isWebOrTablet,
                             ),
                           ],
@@ -1166,7 +1296,9 @@ class CouponTicket extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
+                        color: isDark
+                            ? Colors.red.withOpacity(0.2)
+                            : Colors.red.shade50,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -1174,7 +1306,9 @@ class CouponTicket extends StatelessWidget {
                         style: TextStyle(
                           fontSize: isWebOrTablet ? 11 : 10,
                           fontWeight: FontWeight.w700,
-                          color: Colors.red.shade400,
+                          color: isDark
+                              ? Colors.red.shade300
+                              : Colors.red.shade400,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -1184,7 +1318,7 @@ class CouponTicket extends StatelessWidget {
             ),
 
             // ── Dotted divider ───────────────────
-            _DottedDivider(color: accent),
+            _DottedDivider(color: accent, isDark: isDark),
 
             // ── Bottom: scratch card section ─────
             Padding(
@@ -1205,7 +1339,9 @@ class CouponTicket extends StatelessWidget {
                           style: TextStyle(
                             fontSize: isWebOrTablet ? 11 : 10,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFFAAAAAA),
+                            color: isDark
+                                ? Colors.grey.shade500
+                                : const Color(0xFFAAAAAA),
                             letterSpacing: 1.2,
                           ),
                         ),
@@ -1227,7 +1363,9 @@ class CouponTicket extends StatelessWidget {
                         style: TextStyle(
                           fontSize: isWebOrTablet ? 11 : 10,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFFAAAAAA),
+                          color: isDark
+                              ? Colors.grey.shade500
+                              : const Color(0xFFAAAAAA),
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -1237,7 +1375,7 @@ class CouponTicket extends StatelessWidget {
                         style: TextStyle(
                           fontSize: isWebOrTablet ? 14 : 13,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF444444),
+                          color: _getTextColor(context),
                         ),
                       ),
                     ],
@@ -1292,7 +1430,7 @@ class _ScratchCardState extends State<ScratchCard>
   @override
   void initState() {
     super.initState();
-    
+
     // Set dimensions based on platform
     _cardW = widget.isWebOrTablet ? 220.0 : 160.0;
     _cardH = widget.isWebOrTablet ? 52.0 : 44.0;
@@ -1373,7 +1511,9 @@ class _ScratchCardState extends State<ScratchCard>
         color: _particleColors[_rng.nextInt(_particleColors.length)],
         angle: _rng.nextDouble() * 2 * math.pi,
         speed: 60 + _rng.nextDouble() * 100,
-        size: widget.isWebOrTablet ? 5 + _rng.nextDouble() * 6 : 4 + _rng.nextDouble() * 5,
+        size: widget.isWebOrTablet
+            ? 5 + _rng.nextDouble() * 6
+            : 4 + _rng.nextDouble() * 5,
         startX: _cardW / 2 + (_rng.nextDouble() - 0.5) * _cardW * 0.8,
         startY: _cardH / 2,
         rotationSpeed: (_rng.nextDouble() - 0.5) * 8,
@@ -1399,6 +1539,8 @@ class _ScratchCardState extends State<ScratchCard>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onPanUpdate: _onPanUpdate,
       child: SizedBox(
@@ -1414,9 +1556,7 @@ class _ScratchCardState extends State<ScratchCard>
               width: _cardW,
               height: _cardH,
               child: ScaleTransition(
-                scale: _revealed
-                    ? _scaleAnim
-                    : const AlwaysStoppedAnimation(1),
+                scale: _revealed ? _scaleAnim : const AlwaysStoppedAnimation(1),
                 child: _CodeChip(
                   code: widget.couponCode,
                   accentColor: widget.accentColor,
@@ -1439,8 +1579,8 @@ class _ScratchCardState extends State<ScratchCard>
                     accentColor: widget.accentColor,
                     cardWidth: _cardW,
                     cardHeight: _cardH,
+                    isDark: isDark,
                   ),
-                  // size: const Size(_cardW, _cardH),
                 ),
               ),
 
@@ -1461,7 +1601,9 @@ class _ScratchCardState extends State<ScratchCard>
                             color: Colors.white.withOpacity(0.85)),
                         const SizedBox(width: 5),
                         Text(
-                          widget.isWebOrTablet ? 'Scratch to reveal' : 'Scratch me!',
+                          widget.isWebOrTablet
+                              ? 'Scratch to reveal'
+                              : 'Scratch me!',
                           style: TextStyle(
                             fontSize: widget.isWebOrTablet ? 13 : 11,
                             fontWeight: FontWeight.w700,
@@ -1539,6 +1681,7 @@ class _ScratchPainter extends CustomPainter {
   final Color accentColor;
   final double cardWidth;
   final double cardHeight;
+  final bool isDark;
 
   const _ScratchPainter({
     required this.points,
@@ -1546,6 +1689,7 @@ class _ScratchPainter extends CustomPainter {
     required this.accentColor,
     required this.cardWidth,
     required this.cardHeight,
+    required this.isDark,
   });
 
   @override
@@ -1553,18 +1697,29 @@ class _ScratchPainter extends CustomPainter {
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
 
+    // Adjust foil colors for dark mode
     final foilPaint = Paint()
       ..shader = ui.Gradient.linear(
         Offset.zero,
         Offset(size.width, size.height),
         [
-          accentColor.withOpacity(0.90),
-          accentColor
-              .withRed((accentColor.red + 40).clamp(0, 255))
-              .withOpacity(0.95),
-          accentColor
-              .withBlue((accentColor.blue + 30).clamp(0, 255))
-              .withOpacity(0.85),
+          isDark
+              ? accentColor.withOpacity(0.85)
+              : accentColor.withOpacity(0.90),
+          isDark
+              ? accentColor
+                  .withRed((accentColor.red - 20).clamp(0, 255))
+                  .withOpacity(0.90)
+              : accentColor
+                  .withRed((accentColor.red + 40).clamp(0, 255))
+                  .withOpacity(0.95),
+          isDark
+              ? accentColor
+                  .withBlue((accentColor.blue - 20).clamp(0, 255))
+                  .withOpacity(0.80)
+              : accentColor
+                  .withBlue((accentColor.blue + 30).clamp(0, 255))
+                  .withOpacity(0.85),
         ],
         [0.0, 0.5, 1.0],
       );
@@ -1588,8 +1743,7 @@ class _ScratchPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
 
-      final path = Path()
-        ..moveTo(points.first.dx, points.first.dy);
+      final path = Path()..moveTo(points.first.dx, points.first.dy);
       for (var i = 1; i < points.length; i++) {
         final prev = points[i - 1];
         final curr = points[i];
@@ -1607,7 +1761,9 @@ class _ScratchPainter extends CustomPainter {
     canvas.drawRRect(
       rrect,
       Paint()
-        ..color = Colors.white.withOpacity(0.25)
+        ..color = isDark
+            ? Colors.white.withOpacity(0.15)
+            : Colors.white.withOpacity(0.25)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
@@ -1615,7 +1771,7 @@ class _ScratchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ScratchPainter old) =>
-      old.points.length != points.length;
+      old.points.length != points.length || old.isDark != isDark;
 }
 
 // ── Revealed code chip ───────────────────
@@ -1629,6 +1785,18 @@ class _CodeChip extends StatelessWidget {
     required this.accentColor,
     this.isWebOrTablet = false,
   });
+
+  Color _getBackgroundColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? accentColor.withOpacity(0.15)
+        : accentColor.withOpacity(0.08);
+  }
+
+  Color _getBorderColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? accentColor.withOpacity(0.5)
+        : accentColor.withOpacity(0.35);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1644,16 +1812,19 @@ class _CodeChip extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               duration: const Duration(seconds: 2),
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2C)
+                  : null,
             ),
           );
       },
       child: Container(
         height: isWebOrTablet ? 52 : 44,
         decoration: BoxDecoration(
-          color: accentColor.withOpacity(0.08),
+          color: _getBackgroundColor(context),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: accentColor.withOpacity(0.35),
+            color: _getBorderColor(context),
             width: 1.5,
           ),
         ),
@@ -1688,8 +1859,13 @@ class _CodeChip extends StatelessWidget {
 class _TicketShape extends StatelessWidget {
   final Widget child;
   final Color accentColor;
+  final Color backgroundColor;
 
-  const _TicketShape({required this.child, required this.accentColor});
+  const _TicketShape({
+    required this.child,
+    required this.accentColor,
+    required this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1698,7 +1874,7 @@ class _TicketShape extends StatelessWidget {
       child: ClipPath(
         clipper: _TicketClipper(),
         child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
+          decoration: BoxDecoration(color: backgroundColor),
           child: child,
         ),
       ),
@@ -1761,23 +1937,27 @@ class _TicketClipper extends CustomClipper<Path> {
 // ══════════════════════════════════════════
 class _DottedDivider extends StatelessWidget {
   final Color color;
-  const _DottedDivider({required this.color});
+  final bool isDark;
+
+  const _DottedDivider({required this.color, required this.isDark});
 
   @override
   Widget build(BuildContext context) => CustomPaint(
         size: const Size(double.infinity, 1),
-        painter: _DottedLinePainter(color: color),
+        painter: _DottedLinePainter(color: color, isDark: isDark),
       );
 }
 
 class _DottedLinePainter extends CustomPainter {
   final Color color;
-  _DottedLinePainter({required this.color});
+  final bool isDark;
+
+  _DottedLinePainter({required this.color, required this.isDark});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.35)
+      ..color = isDark ? color.withOpacity(0.5) : color.withOpacity(0.35)
       ..strokeWidth = 1.5;
     const dashW = 6.0, gap = 4.0;
     double x = 20;
@@ -1788,7 +1968,8 @@ class _DottedLinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DottedLinePainter old) => old.color != color;
+  bool shouldRepaint(_DottedLinePainter old) =>
+      old.color != color || old.isDark != isDark;
 }
 
 // ══════════════════════════════════════════
@@ -1806,24 +1987,28 @@ class _Pill extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isWebOrTablet ? 10 : 8,
-          vertical: isWebOrTablet ? 4 : 3,
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isWebOrTablet ? 10 : 8,
+        vertical: isWebOrTablet ? 4 : 3,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? color.withOpacity(0.25) : color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: isWebOrTablet ? 12 : 10,
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: isWebOrTablet ? 12 : 10,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-      );
+      ),
+    );
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1832,18 +2017,31 @@ class _Pill extends StatelessWidget {
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
 
+  Color _getTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade400
+        : const Color(0xFF888888);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
-    
+
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const CircularProgressIndicator(strokeWidth: 2.5),
+        CircularProgressIndicator(
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).brightness == Brightness.dark
+                ? Colors.white70
+                : Colors.blue,
+          ),
+        ),
         const SizedBox(height: 16),
         Text(
           isWebOrTablet ? 'Fetching your coupons...' : 'Fetching coupons…',
           style: TextStyle(
-            color: const Color(0xFF888888),
+            color: _getTextColor(context),
             fontSize: isWebOrTablet ? 16 : 14,
           ),
         ),
@@ -1857,10 +2055,17 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
   const _ErrorView({required this.message, required this.onRetry});
 
+  Color _getTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade400
+        : const Color(0xFF666666);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.all(isWebOrTablet ? 48 : 32),
@@ -1870,14 +2075,14 @@ class _ErrorView extends StatelessWidget {
             Icon(
               Icons.wifi_off_rounded,
               size: isWebOrTablet ? 72 : 52,
-              color: Colors.grey,
+              color: isDark ? Colors.grey.shade600 : Colors.grey,
             ),
             const SizedBox(height: 16),
             Text(
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: const Color(0xFF666666),
+                color: _getTextColor(context),
                 fontSize: isWebOrTablet ? 16 : 14,
               ),
             ),
@@ -1887,8 +2092,9 @@ class _ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded),
               label: Text(isWebOrTablet ? 'Try Again' : 'Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A1A1A),
-                foregroundColor: Colors.white,
+                backgroundColor:
+                    isDark ? Colors.white : const Color(0xFF1A1A1A),
+                foregroundColor: isDark ? Colors.black : Colors.white,
                 padding: EdgeInsets.symmetric(
                   horizontal: isWebOrTablet ? 36 : 28,
                   vertical: isWebOrTablet ? 18 : 14,
@@ -1908,10 +2114,17 @@ class _ErrorView extends StatelessWidget {
 class _EmptyView extends StatelessWidget {
   const _EmptyView();
 
+  Color _getTextColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade400
+        : const Color(0xFF888888);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWebOrTablet = MediaQuery.of(context).size.width > 600;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1919,13 +2132,15 @@ class _EmptyView extends StatelessWidget {
           Icon(
             Icons.local_offer_outlined,
             size: isWebOrTablet ? 72 : 52,
-            color: Colors.grey,
+            color: isDark ? Colors.grey.shade600 : Colors.grey,
           ),
           const SizedBox(height: 12),
           Text(
-            isWebOrTablet ? 'No active coupons available right now.' : 'No active coupons right now.',
+            isWebOrTablet
+                ? 'No active coupons available right now.'
+                : 'No active coupons right now.',
             style: TextStyle(
-              color: const Color(0xFF888888),
+              color: _getTextColor(context),
               fontSize: isWebOrTablet ? 18 : 15,
             ),
           ),

@@ -42,32 +42,30 @@ class _NavbarScreenState extends State<NavbarScreen> {
   static const Color orangeLight = Color(0xFFFF8A5C);
   static const Color orangeVeryLight = Color(0xFFFFE9E0);
 
-    String? userId;
+  String? userId;
 
+  @override
+  void initState() {
+    super.initState();
 
-@override
-void initState() {
-  super.initState();
-
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await _loadUserId();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadUserId();
 
       debugPrint("User not available yet");
 
-    if (userId != null ) {
-     print("User Id printing in navbar Screen: $userId");
+      if (userId != null) {
+        print("User Id printing in navbar Screen: $userId");
 
-      context.read<CartProvider>().setUserId(userId.toString());
-      context.read<CartProvider>().loadCart(userId.toString());
-      
-      // Load orders for history screen
-      context.read<OrderProvider>().loadAllOrders(userId.toString());
-    } else {
-      debugPrint("User not available yet");
-    }
-  });
-}
+        context.read<CartProvider>().setUserId(userId.toString());
+        context.read<CartProvider>().loadCart(userId.toString());
 
+        // Load orders for history screen
+        context.read<OrderProvider>().loadAllOrders(userId.toString());
+      } else {
+        debugPrint("User not available yet");
+      }
+    });
+  }
 
   Future<void> _loadUserId() async {
     final user = UserPreferences.getUser();
@@ -77,6 +75,7 @@ void initState() {
       });
     }
   }
+
   void _onTabChange(int index) {
     context.read<BottomNavbarProvider>().setIndex(index);
 
@@ -96,14 +95,14 @@ void initState() {
     final versionProvider = context.watch<VersionProvider>();
     final cartProvider = context.watch<CartProvider>();
 
-    final pages = const [
-      HomeScreen(),
-      WishlistScreen(),
-      CartScreen(),
-      // HystoryScreen(),
-      ReelsScreen(),
-      ProfileScreen(),
-      NotificationScreen()
+    final pages = [
+      const HomeScreen(),
+      const WishlistScreen(),
+      const CartScreen(),
+      // Pass isScreenVisible: true ONLY when index 3 (Reels tab) is active
+      ReelsScreen(isScreenVisible: navProvider.currentIndex == 3),
+      const ProfileScreen(),
+      const NotificationScreen(),
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,7 +134,7 @@ void initState() {
             ),
           ],
         ),
-      
+
         /// ✅ MOBILE CUSTOM NAVBAR WITH FLOATING CART
         bottomNavigationBar: isDesktop
             ? null
@@ -147,7 +146,7 @@ void initState() {
                     currentIndex: navProvider.currentIndex,
                     onTap: _onTabChange,
                   ),
-                  
+
                   // Floating cart button
                   Positioned(
                     top: -20, // Adjust this value to control how high it floats
@@ -185,7 +184,7 @@ void initState() {
                                   size: 28,
                                 ),
                               ),
-                              
+
                               // Cart badge - using cartProvider.totalItems
                               if (cartProvider.totalItems > 0)
                                 Positioned(
@@ -207,9 +206,10 @@ void initState() {
                                     ),
                                   ),
                                 ),
-                                
+
                               // Show "!" if vendor is inactive
-                              if (cartProvider.hasItems && !cartProvider.isVendorActive)
+                              if (cartProvider.hasItems &&
+                                  !cartProvider.isVendorActive)
                                 Positioned(
                                   bottom: 8,
                                   left: 8,
@@ -257,8 +257,7 @@ void initState() {
             onPressed: () async {
               final uri = Uri.parse(playStoreUrl);
               if (await canLaunchUrl(uri)) {
-                await launchUrl(uri,
-                    mode: LaunchMode.externalApplication);
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -291,7 +290,7 @@ class CustomMobileNavbar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Watch cart provider for badge updates
     final cartProvider = context.watch<CartProvider>();
-    
+
     return Container(
       height: 70,
       decoration: BoxDecoration(
@@ -309,20 +308,20 @@ class CustomMobileNavbar extends StatelessWidget {
           // Home - left side
           Expanded(
             child: _navItem(
-              Icons.home_outlined, 
-              "Home", 
-              0, 
+              Icons.home_outlined,
+              "Home",
+              0,
               orangePrimary,
               showBadge: false,
             ),
           ),
-          
+
           // Saved - left side
           Expanded(
             child: _navItem(
-              Icons.favorite_border, 
-              "Saved", 
-              1, 
+              Icons.favorite_border,
+              "Saved",
+              1,
               orangePrimary,
               showBadge: false,
             ),
@@ -334,20 +333,20 @@ class CustomMobileNavbar extends StatelessWidget {
           // Orders - right side
           Expanded(
             child: _navItem(
-              Icons.receipt_long_outlined, 
-              "Reels", 
-              3, 
+              Icons.receipt_long_outlined,
+              "Reels",
+              3,
               orangePrimary,
               showBadge: false,
             ),
           ),
-          
+
           // Profile - right side
           Expanded(
             child: _navItem(
-              Icons.person_outline, 
-              "Profile", 
-              4, 
+              Icons.person_outline,
+              "Profile",
+              4,
               orangePrimary,
               showBadge: false,
             ),
@@ -358,9 +357,9 @@ class CustomMobileNavbar extends StatelessWidget {
   }
 
   Widget _navItem(
-    IconData icon, 
-    String label, 
-    int index, 
+    IconData icon,
+    String label,
+    int index,
     Color activeColor, {
     required bool showBadge,
     int badgeCount = 0,
@@ -380,7 +379,7 @@ class CustomMobileNavbar extends StatelessWidget {
                 size: 22,
                 color: isActive ? activeColor : Colors.grey,
               ),
-              
+
               // Optional badge (currently not used for any nav items)
               if (showBadge && badgeCount > 0)
                 Positioned(
@@ -444,7 +443,7 @@ class DesktopTopNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 70,
       width: double.infinity,
@@ -456,50 +455,50 @@ class DesktopTopNavbar extends StatelessWidget {
             // ---------------- LEFT: LOGO ----------------
             Row(
               children: [
- ClipOval(
-  child: Image.asset(
-    'assets/appstore.png',
-    height: 58,
-    width: 58, // Add width to match height for perfect circle
-    fit: BoxFit.cover, // Cover ensures image fills the circle
-    errorBuilder: (_, __, ___) => Container(
-      height: 38,
-      width: 38,
-      decoration: BoxDecoration(
-        color: orangePrimary.withOpacity(0.1),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Icons.shopping_basket,
-        size: 20,
-        color: orangePrimary,
-      ),
-    ),
-  ),
-),
+                ClipOval(
+                  child: Image.asset(
+                    'assets/appstore.png',
+                    height: 58,
+                    width: 58, // Add width to match height for perfect circle
+                    fit: BoxFit.cover, // Cover ensures image fills the circle
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 38,
+                      width: 38,
+                      decoration: BoxDecoration(
+                        color: orangePrimary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.shopping_basket,
+                        size: 20,
+                        color: orangePrimary,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 10),
-RichText(
-  text: TextSpan(
-    children: [
-      TextSpan(
-        text: "Veg",
-        style: GoogleFonts.outfit(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          color: const Color.fromARGB(255, 255, 255, 255),
-        ),
-      ),
-      TextSpan(
-        text: "iffy",
-        style: GoogleFonts.outfit(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          color: orangePrimary,
-        ),
-      ),
-    ],
-  ),
-)
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Veg",
+                        style: GoogleFonts.outfit(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                        ),
+                      ),
+                      TextSpan(
+                        text: "iffy",
+                        style: GoogleFonts.outfit(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: orangePrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
 
@@ -520,7 +519,7 @@ RichText(
               currentIndex: currentIndex,
               onTap: onTap,
             ),
-            
+
             // Cart item with badge
             Stack(
               clipBehavior: Clip.none,
@@ -532,7 +531,7 @@ RichText(
                   currentIndex: currentIndex,
                   onTap: onTap,
                 ),
-                
+
                 // Cart badge
                 if (cartItemCount > 0)
                   Positioned(
@@ -561,7 +560,7 @@ RichText(
                   ),
               ],
             ),
-            
+
             _NavItem(
               label: 'History',
               icon: Icons.receipt_long_rounded,
@@ -576,7 +575,7 @@ RichText(
               currentIndex: currentIndex,
               onTap: onTap,
             ),
-                        _NavItem(
+            _NavItem(
               label: 'Notification',
               icon: Icons.notifications,
               index: 5,
@@ -635,7 +634,8 @@ class _NavItemState extends State<_NavItem> {
                 ? const Color.fromARGB(255, 255, 255, 255).withOpacity(0.08)
                 : hovered
                     ? const Color.fromARGB(255, 241, 236, 189).withOpacity(0.08)
-                    : const Color.fromARGB(255, 255, 255, 255).withOpacity(0.08),
+                    : const Color.fromARGB(255, 255, 255, 255)
+                        .withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -643,19 +643,14 @@ class _NavItemState extends State<_NavItem> {
               Icon(
                 widget.icon,
                 size: 18,
-                color: isActive
-                    ? Colors.black
-                    :Colors.white,
+                color: isActive ? Colors.black : Colors.white,
               ),
               const SizedBox(width: 6),
               Text(
                 widget.label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight:
-                      isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: isActive
-                      ? Colors.black
-                      : Colors.white,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive ? Colors.black : Colors.white,
                 ),
               ),
             ],

@@ -47,7 +47,7 @@ dependencies:
   open_filex: ^4.4.0
 
   # ❗ Legacy plugin (must keep)
-  flutter_html_to_pdf: 0.7.0
+  # flutter_html_to_pdf: 0.7.0
 
   # PDF stack (compatible)
   # printing: 5.14.2

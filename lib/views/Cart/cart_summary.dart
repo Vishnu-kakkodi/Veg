@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:veegify/provider/CartProvider/cart_provider.dart';
 // import 'package:veegify/utils/responsive.dart'; // ✅ add this
@@ -507,29 +506,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
 import 'package:veegify/utils/responsive.dart';
@@ -645,8 +621,7 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                             Text(
                               'To Pay',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color:
-                                    colorScheme.onSurface.withOpacity(0.6),
+                                color: colorScheme.onSurface.withOpacity(0.6),
                               ),
                             ),
                             Text(
@@ -692,8 +667,8 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
                           _buildDetailRow(
                             icon: Icons.receipt,
                             label: 'Sub Total',
-                            value: widget.cartProvider.subtotal
-                                .toStringAsFixed(2),
+                            value:
+                                widget.cartProvider.subtotal.toStringAsFixed(2),
                           ),
                           if (widget.cartProvider.couponDiscount > 0) ...[
                             const SizedBox(height: 12),
@@ -823,8 +798,7 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
       ),
       builder: (_) {
         final totalGst =
-            widget.cartProvider.gstAmount +
-                widget.cartProvider.gstOnDelivery;
+            widget.cartProvider.gstAmount + widget.cartProvider.gstOnDelivery;
 
         return Padding(
           padding: const EdgeInsets.all(20),
@@ -832,8 +806,7 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('GST Breakup',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               _gstRow('Items GST', widget.cartProvider.gstAmount),
               _gstRow('Delivery GST', widget.cartProvider.gstOnDelivery),
@@ -854,12 +827,10 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
         children: [
           Text(label,
               style: TextStyle(
-                  fontWeight:
-                      isBold ? FontWeight.bold : FontWeight.normal)),
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
           Text('₹${value.toStringAsFixed(2)}',
               style: TextStyle(
-                  fontWeight:
-                      isBold ? FontWeight.bold : FontWeight.w600)),
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.w600)),
         ],
       ),
     );
@@ -873,8 +844,8 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
         const Spacer(),
         Text(
           '₹${widget.cartProvider.amountSavedOnOrder.toStringAsFixed(2)}',
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.green),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
         ),
       ],
     );
@@ -896,8 +867,8 @@ class _TicketPricingSummaryState extends State<TicketPricingSummary>
         Text(
           '${isNegative ? '-' : ''}${showCurrency ? '₹' : ''}$value',
           style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: valueColor ?? Colors.black),
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

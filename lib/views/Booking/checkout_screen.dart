@@ -1,4 +1,4 @@
-// checkout_screen.dart 
+// checkout_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:veegify/helper/storage_helper.dart';
@@ -152,7 +152,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
 
     var options = {
-      'key': 'rzp_test_RgqXPvDLbgEIVv', // Replace with your Razorpay key
+      'key': 'rzp_live_SSf33nIx6Os3GH', // Replace with your Razorpay key
       'amount': (cartProvider.totalPayable * 100).toInt(), // Amount in paise
       'name': 'Vegiffy',
       'description': 'Order Payment',
@@ -376,8 +376,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     final bool isTablet = width >= 800 && width < 1200;
                     final bool isDesktop = width >= 1200;
 
-                    final double maxWidth = isDesktop ? 1400 : (isTablet ? 1000 : double.infinity);
-                    final double horizontalPadding = isDesktop ? 40 : (isTablet ? 24 : 16);
+                    final double maxWidth =
+                        isDesktop ? 1400 : (isTablet ? 1000 : double.infinity);
+                    final double horizontalPadding =
+                        isDesktop ? 40 : (isTablet ? 24 : 16);
                     final double verticalPadding = isDesktop ? 24 : 16;
 
                     return SingleChildScrollView(
@@ -531,7 +533,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
               // Delivery Address Section
               _buildAddressSection(addressProvider, theme, colorScheme),
-
             ],
           ),
         ),
@@ -543,9 +544,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           flex: 1,
           child: Column(
             children: [
-
-
-                            // Payment Method Section
+              // Payment Method Section
               _buildPaymentMethodSection(theme, colorScheme),
               const SizedBox(height: 20),
 
@@ -632,8 +631,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                     ),
-
-
                   ],
                 ),
               ),
@@ -659,14 +656,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: isActive ? colorScheme.primary : colorScheme.surfaceVariant,
+              color:
+                  isActive ? colorScheme.primary : colorScheme.surfaceVariant,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 step.toString(),
                 style: TextStyle(
-                  color: isActive ? colorScheme.onPrimary : colorScheme.onSurface,
+                  color:
+                      isActive ? colorScheme.onPrimary : colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -875,13 +874,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-Widget _buildAddressSection(
+  Widget _buildAddressSection(
     AddressProvider addressProvider,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
     final isDesktop = Responsive.isDesktop(context);
-    
+
     // Sort addresses: default first, then others
     final sortedAddresses = List.from(addressProvider.addresses)
       ..sort((a, b) {
@@ -889,7 +888,7 @@ Widget _buildAddressSection(
         if (!a.isDefault && b.isDefault) return 1;
         return 0;
       });
-    
+
     // Get only first 2 addresses to display
     final displayAddresses = sortedAddresses.take(2).toList();
     final hasMoreAddresses = sortedAddresses.length > 2;
@@ -927,14 +926,16 @@ Widget _buildAddressSection(
                     TextButton.icon(
                       onPressed: () {
                         _showAllAddressesBottomSheet(
-                          context, 
-                          sortedAddresses, 
+                          context,
+                          sortedAddresses,
                           addressProvider,
                           theme,
                           colorScheme,
                         );
                       },
-                      icon: Icon(Icons.list, size: isDesktop ? 20 : 18, color: colorScheme.primary),
+                      icon: Icon(Icons.list,
+                          size: isDesktop ? 20 : 18,
+                          color: colorScheme.primary),
                       label: Text(
                         'View All (${sortedAddresses.length})',
                         style: TextStyle(
@@ -953,7 +954,8 @@ Widget _buildAddressSection(
                         addressProvider.loadAddresses();
                       });
                     },
-                    icon: Icon(Icons.add, size: isDesktop ? 20 : 18, color: colorScheme.primary),
+                    icon: Icon(Icons.add,
+                        size: isDesktop ? 20 : 18, color: colorScheme.primary),
                     label: Text(
                       'Add New',
                       style: TextStyle(
@@ -1047,7 +1049,8 @@ Widget _buildAddressSection(
                                         ),
                                         decoration: BoxDecoration(
                                           color: colorScheme.primary,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -1087,7 +1090,8 @@ Widget _buildAddressSection(
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    address.fullAddress ?? address.formattedAddress,
+                                    address.fullAddress ??
+                                        address.formattedAddress,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontSize: isDesktop ? 14 : 12,
                                     ),
@@ -1110,8 +1114,8 @@ Widget _buildAddressSection(
                       child: TextButton(
                         onPressed: () {
                           _showAllAddressesBottomSheet(
-                            context, 
-                            sortedAddresses, 
+                            context,
+                            sortedAddresses,
                             addressProvider,
                             theme,
                             colorScheme,
@@ -1142,7 +1146,7 @@ Widget _buildAddressSection(
     ColorScheme colorScheme,
   ) {
     final isDesktop = Responsive.isDesktop(context);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1267,7 +1271,8 @@ Widget _buildAddressSection(
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  address.fullAddress ?? address.formattedAddress,
+                                  address.fullAddress ??
+                                      address.formattedAddress,
                                   style: theme.textTheme.bodyMedium,
                                 ),
                               ],
@@ -1305,7 +1310,7 @@ Widget _buildAddressSection(
 
   Widget _buildPaymentMethodSection(ThemeData theme, ColorScheme colorScheme) {
     final isDesktop = Responsive.isDesktop(context);
-    
+
     final paymentMethods = [
       {
         'title': 'Cash on Delivery',
@@ -1482,7 +1487,9 @@ Widget _buildAddressSection(
             colorScheme,
             valueColor: Colors.green,
           ),
-          Divider(height: isDesktop ? 24 : 20, color: colorScheme.outline.withOpacity(0.3)),
+          Divider(
+              height: isDesktop ? 24 : 20,
+              color: colorScheme.outline.withOpacity(0.3)),
           _buildPriceRow(
             'Total Payable',
             '₹${cartProvider.totalPayable.toStringAsFixed(2)}',
@@ -1589,7 +1596,8 @@ Widget _buildAddressSection(
               const SizedBox(height: 20),
               _gstRow('Items GST', cartProvider.gstAmount, theme, isDesktop),
               const SizedBox(height: 12),
-              _gstRow('Delivery GST', cartProvider.gstOnDelivery, theme, isDesktop),
+              _gstRow(
+                  'Delivery GST', cartProvider.gstOnDelivery, theme, isDesktop),
               const Divider(height: 32),
               _gstRow('Total GST', totalGst, theme, isDesktop, isBold: true),
             ],
@@ -1735,6 +1743,3 @@ class _StickyCheckoutSummary extends StatelessWidget {
     );
   }
 }
-
-
-
