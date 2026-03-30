@@ -48,6 +48,7 @@
 //   final double minOrder;
 //   final double maxDiscount;
 //   final DateTime endDate;
+//   final bool isApplied; // Added isApplied field
 
 //   const _Coupon({
 //     required this.id,
@@ -59,6 +60,7 @@
 //     required this.minOrder,
 //     required this.maxDiscount,
 //     required this.endDate,
+//     required this.isApplied, // Added isApplied field
 //   });
 
 //   factory _Coupon.fromJson(Map<String, dynamic> j) => _Coupon(
@@ -71,6 +73,7 @@
 //         minOrder: (j['minOrderAmount'] as num).toDouble(),
 //         maxDiscount: (j['maxDiscountAmount'] as num).toDouble(),
 //         endDate: DateTime.parse(j['endDate'] as String),
+//         isApplied: j['isApplied'] as bool? ?? false, // Parse isApplied field
 //       );
 // }
 
@@ -146,10 +149,18 @@
 //           .get(Uri.parse("$_kGetCouponsUrl/${widget.userId}"))
 //           .timeout(const Duration(seconds: 12));
 //       if (res.statusCode == 200) {
-//         final data = (json.decode(res.body)['data'] as List)
+//         final List<dynamic> dataList = json.decode(res.body)['data'] as List;
+//         final allCoupons = dataList
 //             .map((e) => _Coupon.fromJson(e as Map<String, dynamic>))
 //             .toList();
-//         setState(() { _coupons = data; _loading = false; });
+
+//         // Filter out coupons where isApplied is true
+//         final availableCoupons = allCoupons.where((coupon) => !coupon.isApplied).toList();
+
+//         setState(() {
+//           _coupons = availableCoupons;
+//           _loading = false;
+//         });
 //       } else {
 //         setState(() { _error = 'HTTP ${res.statusCode}'; _loading = false; });
 //       }
@@ -699,28 +710,6 @@
 //   });
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // coupon_picker_modal.dart
 // Self-contained — no provider, no external state.
 // Call showCouponPickerModal(...) from anywhere.
@@ -771,7 +760,7 @@ class _Coupon {
   final double minOrder;
   final double maxDiscount;
   final DateTime endDate;
-  final bool isApplied; // Added isApplied field
+  final bool isApplied;
 
   const _Coupon({
     required this.id,
@@ -783,21 +772,91 @@ class _Coupon {
     required this.minOrder,
     required this.maxDiscount,
     required this.endDate,
-    required this.isApplied, // Added isApplied field
+    required this.isApplied,
   });
 
-  factory _Coupon.fromJson(Map<String, dynamic> j) => _Coupon(
-        id: j['_id'] as String,
-        code: j['couponCode'] as String,
-        title: j['title'] as String,
-        description: j['description'] as String? ?? '',
-        discountType: j['discountType'] as String,
-        discountValue: (j['discountValue'] as num).toDouble(),
-        minOrder: (j['minOrderAmount'] as num).toDouble(),
-        maxDiscount: (j['maxDiscountAmount'] as num).toDouble(),
-        endDate: DateTime.parse(j['endDate'] as String),
-        isApplied: j['isApplied'] as bool? ?? false, // Parse isApplied field
-      );
+  factory _Coupon.fromJson(Map<String, dynamic> j) {
+    // Safely parse id
+    final id = _safeString(j['_id']);
+    if (id == null) {
+      throw Exception('Missing coupon ID');
+    }
+
+    // Safely parse couponCode
+    final code = _safeString(j['couponCode']);
+    if (code == null) {
+      throw Exception('Missing coupon code');
+    }
+
+    // Safely parse other fields with defaults
+    final title = _safeString(j['title']) ?? '';
+    final description = _safeString(j['description']) ?? '';
+    final discountType = _safeString(j['discountType']) ?? 'percentage';
+
+    // Safely parse numeric values
+    final discountValue = _safeDouble(j['discountValue']) ?? 0.0;
+    final minOrder = _safeDouble(j['minOrderAmount']) ?? 0.0;
+    final maxDiscount = _safeDouble(j['maxDiscountAmount']) ?? 0.0;
+
+    // Safely parse date
+    DateTime? endDate;
+    if (j['endDate'] != null) {
+      try {
+        endDate = DateTime.parse(j['endDate'].toString());
+      } catch (e) {
+        endDate = DateTime.now().add(const Duration(days: 30));
+      }
+    } else {
+      endDate = DateTime.now().add(const Duration(days: 30));
+    }
+
+    // Safely parse isApplied
+    bool isApplied = false;
+    if (j['isApplied'] != null) {
+      if (j['isApplied'] is bool) {
+        isApplied = j['isApplied'] as bool;
+      } else if (j['isApplied'] is String) {
+        isApplied = (j['isApplied'] as String).toLowerCase() == 'true';
+      } else if (j['isApplied'] is num) {
+        isApplied = (j['isApplied'] as num) == 1;
+      }
+    }
+
+    return _Coupon(
+      id: id,
+      code: code,
+      title: title,
+      description: description,
+      discountType: discountType,
+      discountValue: discountValue,
+      minOrder: minOrder,
+      maxDiscount: maxDiscount,
+      endDate: endDate,
+      isApplied: isApplied,
+    );
+  }
+
+  // Helper methods for safe parsing
+  static String? _safeString(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  static double? _safeDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    if (value is num) return value.toDouble();
+    return null;
+  }
 }
 
 // ─── Modal ─────────────────────────────────────────────────────────────────
@@ -831,13 +890,20 @@ class _CouponPickerModalState extends State<CouponPickerModal>
   final math.Random _rng = math.Random();
 
   static const _confettiColors = [
-    Color(0xFFFF6B6B), Color(0xFFFFD93D), Color(0xFF6BCB77),
-    Color(0xFF4D96FF), Color(0xFFFF922B), Color(0xFFCC5DE8),
+    Color(0xFFFF6B6B),
+    Color(0xFFFFD93D),
+    Color(0xFF6BCB77),
+    Color(0xFF4D96FF),
+    Color(0xFFFF922B),
+    Color(0xFFCC5DE8),
   ];
 
   static const _palette = [
-    Color(0xFF4CAF82), Color(0xFFE8705A), Color(0xFF5B8FD4),
-    Color(0xFFF0A500), Color(0xFF9B5DE5),
+    Color(0xFF4CAF82),
+    Color(0xFFE8705A),
+    Color(0xFF5B8FD4),
+    Color(0xFFF0A500),
+    Color(0xFF9B5DE5),
   ];
 
   Color _accentFor(String code) =>
@@ -850,8 +916,7 @@ class _CouponPickerModalState extends State<CouponPickerModal>
         vsync: this, duration: const Duration(milliseconds: 600));
     _successScale =
         CurvedAnimation(parent: _successCtrl, curve: Curves.elasticOut);
-    _successFade =
-        CurvedAnimation(parent: _successCtrl, curve: Curves.easeIn);
+    _successFade = CurvedAnimation(parent: _successCtrl, curve: Curves.easeIn);
     _confettiCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1400))
       ..addListener(() => setState(() {}));
@@ -866,40 +931,106 @@ class _CouponPickerModalState extends State<CouponPickerModal>
   }
 
   Future<void> _fetchCoupons() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
     try {
-      final res = await http
-          .get(Uri.parse("$_kGetCouponsUrl/${widget.userId}"))
-          .timeout(const Duration(seconds: 12));
+      final url = Uri.parse("$_kGetCouponsUrl/${widget.userId}");
+      final res = await http.get(url).timeout(const Duration(seconds: 12));
+
+      if (!mounted) return;
+
       if (res.statusCode == 200) {
-        final List<dynamic> dataList = json.decode(res.body)['data'] as List;
-        final allCoupons = dataList
-            .map((e) => _Coupon.fromJson(e as Map<String, dynamic>))
-            .toList();
-        
-        // Filter out coupons where isApplied is true
-        final availableCoupons = allCoupons.where((coupon) => !coupon.isApplied).toList();
-        
-        setState(() { 
-          _coupons = availableCoupons; 
-          _loading = false; 
-        });
+        try {
+          final Map<String, dynamic> responseBody = json.decode(res.body);
+
+          // Safely access data array
+          dynamic dataList = responseBody['data'];
+
+          if (dataList == null) {
+            setState(() {
+              _coupons = [];
+              _loading = false;
+            });
+            return;
+          }
+
+          // Handle both List and Map responses
+          List<dynamic> couponsList;
+          if (dataList is List) {
+            couponsList = dataList;
+          } else if (dataList is Map) {
+            // If data is a single object, wrap it in a list
+            couponsList = [dataList];
+          } else {
+            setState(() {
+              _coupons = [];
+              _loading = false;
+            });
+            return;
+          }
+
+          // Parse coupons with error handling per coupon
+          final List<_Coupon> allCoupons = [];
+          for (var item in couponsList) {
+            try {
+              if (item is Map<String, dynamic>) {
+                final coupon = _Coupon.fromJson(item);
+                allCoupons.add(coupon);
+              }
+            } catch (e) {
+              // Skip invalid coupon, log if needed
+              debugPrint('Error parsing coupon: $e');
+            }
+          }
+
+          // Filter out coupons where isApplied is true or expired
+          final now = DateTime.now();
+          final availableCoupons = allCoupons
+              .where(
+                  (coupon) => !coupon.isApplied && coupon.endDate.isAfter(now))
+              .toList();
+
+          setState(() {
+            _coupons = availableCoupons;
+            _loading = false;
+          });
+        } catch (e) {
+          setState(() {
+            _error = 'Failed to parse coupons: ${e.toString()}';
+            _loading = false;
+          });
+        }
       } else {
-        setState(() { _error = 'HTTP ${res.statusCode}'; _loading = false; });
+        setState(() {
+          _error = 'HTTP ${res.statusCode}';
+          _loading = false;
+        });
       }
     } catch (e) {
-      setState(() { _error = e.toString(); _loading = false; });
+      setState(() {
+        _error = e.toString();
+        _loading = false;
+      });
     }
   }
 
   Future<void> _applyCoupon(_Coupon coupon) async {
     setState(() => _applyingId = coupon.id);
+
     try {
+      final requestBody = {
+        'userId': widget.userId,
+        'couponId': coupon.id,
+      };
+
       final res = await http
           .post(
             Uri.parse(_kApplyCouponUrl),
             headers: {'Content-Type': 'application/json'},
-            body: json.encode({'userId': widget.userId, 'couponId': coupon.id}),
+            body: json.encode(requestBody),
           )
           .timeout(const Duration(seconds: 12));
 
@@ -910,18 +1041,23 @@ class _CouponPickerModalState extends State<CouponPickerModal>
         await _playSuccess();
         if (mounted) {
           Navigator.of(context).pop();
-          // Pass id + code back — cart screen stores them locally
           widget.onCouponApplied(
             couponId: coupon.id,
             couponCode: coupon.code,
           );
         }
       } else {
-        final msg = (json.decode(res.body) as Map<String, dynamic>)['message']
-                as String? ??
-            'Failed to apply coupon';
+        String errorMessage = 'Failed to apply coupon';
+        try {
+          final responseBody = json.decode(res.body);
+          if (responseBody is Map<String, dynamic>) {
+            errorMessage = responseBody['message']?.toString() ?? errorMessage;
+          }
+        } catch (e) {
+          // Use default message
+        }
         setState(() => _applyingId = null);
-        _snack(msg, Colors.red.shade400);
+        _snack(errorMessage, Colors.red.shade400);
       }
     } catch (e) {
       if (!mounted) return;
@@ -951,6 +1087,7 @@ class _CouponPickerModalState extends State<CouponPickerModal>
   }
 
   void _snack(String msg, Color color) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(
@@ -958,6 +1095,7 @@ class _CouponPickerModalState extends State<CouponPickerModal>
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 3),
       ));
   }
 
@@ -978,7 +1116,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
               children: [
                 const SizedBox(height: 12),
                 Container(
-                  width: 42, height: 4,
+                  width: 42,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: const Color(0xFFCCCCCC),
                     borderRadius: BorderRadius.circular(2),
@@ -992,8 +1131,10 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                       const Text(
                         'Available Coupons',
                         style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w800,
-                          color: Color(0xFF1A1A1A), letterSpacing: -0.4,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
+                          letterSpacing: -0.4,
                         ),
                       ),
                       const Spacer(),
@@ -1019,7 +1160,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Tap Apply on any coupon to use it',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade500),
                     ),
                   ),
                 ),
@@ -1041,13 +1183,15 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                     math.sin(p.angle).abs() * p.speed * t +
                     0.5 * 350 * t * t;
                 return Positioned(
-                  left: x, top: y,
+                  left: x,
+                  top: y,
                   child: Opacity(
                     opacity: (1.0 - t).clamp(0.0, 1.0),
                     child: Transform.rotate(
                       angle: p.rot * t * math.pi,
                       child: Container(
-                        width: p.size, height: p.size * 0.55,
+                        width: p.size,
+                        height: p.size * 0.55,
                         decoration: BoxDecoration(
                           color: p.color,
                           borderRadius: BorderRadius.circular(1),
@@ -1078,7 +1222,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.12),
-                            blurRadius: 24, offset: const Offset(0, 8),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
                           ),
                         ],
                       ),
@@ -1086,7 +1231,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 64, height: 64,
+                            width: 64,
+                            height: 64,
                             decoration: const BoxDecoration(
                               color: Color(0xFFE8F5EE),
                               shape: BoxShape.circle,
@@ -1097,7 +1243,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
                           const SizedBox(height: 14),
                           const Text('Coupon Applied! 🎉',
                               style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
                                 color: Color(0xFF1A1A1A),
                               )),
                           const SizedBox(height: 6),
@@ -1133,7 +1280,8 @@ class _CouponPickerModalState extends State<CouponPickerModal>
           const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
           const SizedBox(height: 12),
           Text(_error!,
-              style: const TextStyle(color: Color(0xFF666666), fontSize: 13)),
+              style: const TextStyle(color: Color(0xFF666666), fontSize: 13),
+              textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: _fetchCoupons,
@@ -1215,7 +1363,8 @@ class _CouponTile extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(children: [
               Container(
-                width: 60, height: 60,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: accent.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -1226,8 +1375,10 @@ class _CouponTile extends StatelessWidget {
                         ? '${coupon.discountValue.toStringAsFixed(0)}%'
                         : '₹${coupon.discountValue.toStringAsFixed(0)}',
                     style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w900,
-                      color: accent, letterSpacing: -0.3,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: accent,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ),
@@ -1237,19 +1388,25 @@ class _CouponTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(coupon.title,
+                    Text(coupon.title.isNotEmpty ? coupon.title : coupon.code,
                         style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
                             color: Color(0xFF1A1A1A))),
                     const SizedBox(height: 3),
-                    Text(coupon.description,
+                    Text(
+                        coupon.description.isNotEmpty
+                            ? coupon.description
+                            : 'Get ${coupon.discountValue}% off on your order',
                         style: const TextStyle(
                             fontSize: 12, color: Color(0xFF888888))),
                     const SizedBox(height: 6),
                     Wrap(spacing: 6, children: [
-                      _Pill('Max ₹${coupon.maxDiscount.toInt()}', accent),
-                      _Pill('Min ₹${coupon.minOrder.toInt()}',
-                          const Color(0xFF999999)),
+                      if (coupon.maxDiscount > 0)
+                        _Pill('Max ₹${coupon.maxDiscount.toInt()}', accent),
+                      if (coupon.minOrder > 0)
+                        _Pill('Min ₹${coupon.minOrder.toInt()}',
+                            const Color(0xFF999999)),
                     ]),
                   ],
                 ),
@@ -1268,16 +1425,20 @@ class _CouponTile extends StatelessWidget {
                   children: [
                     const Text('CODE',
                         style: TextStyle(
-                            fontSize: 9, fontWeight: FontWeight.w600,
-                            color: Color(0xFFAAAAAA), letterSpacing: 1.4)),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFAAAAAA),
+                            letterSpacing: 1.4)),
                     const SizedBox(height: 4),
                     GestureDetector(
                       onTap: () => _copy(context),
                       child: Row(children: [
                         Text(coupon.code,
                             style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w900,
-                              color: accent, letterSpacing: 2,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: accent,
+                              letterSpacing: 2,
                             )),
                         const SizedBox(width: 5),
                         Icon(Icons.copy_rounded, size: 13, color: accent),
@@ -1301,7 +1462,8 @@ class _CouponTile extends StatelessWidget {
                   ),
                   child: isApplying
                       ? const SizedBox(
-                          width: 16, height: 16,
+                          width: 16,
+                          height: 16,
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
                       : const Text('Apply',
@@ -1374,6 +1536,7 @@ class _TicketClipper extends CustomClipper<Path> {
           radius: const Radius.circular(r), clockwise: true)
       ..close();
   }
+
   @override
   bool shouldReclip(_TicketClipper o) => false;
 }
@@ -1384,8 +1547,7 @@ class _DottedLine extends StatelessWidget {
   const _DottedLine({required this.color});
   @override
   Widget build(BuildContext context) => CustomPaint(
-      size: const Size(double.infinity, 1),
-      painter: _DotPainter(color));
+      size: const Size(double.infinity, 1), painter: _DotPainter(color));
 }
 
 class _DotPainter extends CustomPainter {
@@ -1393,13 +1555,16 @@ class _DotPainter extends CustomPainter {
   _DotPainter(this.color);
   @override
   void paint(Canvas canvas, Size size) {
-    final p = Paint()..color = color.withOpacity(0.3)..strokeWidth = 1.5;
+    final p = Paint()
+      ..color = color.withOpacity(0.3)
+      ..strokeWidth = 1.5;
     double x = 16;
     while (x < size.width - 16) {
       canvas.drawLine(Offset(x, 0), Offset(x + 6, 0), p);
       x += 10;
     }
   }
+
   @override
   bool shouldRepaint(_DotPainter o) => o.color != color;
 }
@@ -1427,8 +1592,12 @@ class _Particle {
   final Color color;
   final double angle, speed, size, startX, startY, rot;
   const _Particle({
-    required this.color, required this.angle, required this.speed,
-    required this.size, required this.startX, required this.startY,
+    required this.color,
+    required this.angle,
+    required this.speed,
+    required this.size,
+    required this.startX,
+    required this.startY,
     required this.rot,
   });
 }

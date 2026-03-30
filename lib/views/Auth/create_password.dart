@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:provider/provider.dart';
@@ -376,18 +375,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -613,7 +600,7 @@ class _CreatePasswordState extends State<CreatePassword> {
           SizedBox(height: verticalSpacingSmall),
 
           Image.asset(
-            "assets/images/password.png",
+            "assets/images/img.png",
             height: isMobile ? 200 : 180,
             color: isDark ? Colors.white : null,
           ),
@@ -659,9 +646,7 @@ class _CreatePasswordState extends State<CreatePassword> {
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _isPasswordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off,
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
                 onPressed: () {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:veegify/helper/cart_vendor_guard.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/CartProvider/cart_provider.dart';
@@ -26,7 +27,8 @@ class RestaurantDetailScreen extends StatefulWidget {
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
 }
 
-class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with WidgetsBindingObserver {
+class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? userId;
@@ -65,9 +67,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
     super.dispose();
   }
 
-   void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // App came to foreground - refresh data
@@ -93,7 +95,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
     }
   }
 
-    Future<void> _refreshDataOnResume() async {
+  Future<void> _refreshDataOnResume() async {
     if (!mounted) return;
 
     try {
@@ -101,11 +103,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
       final restaurantProvider = context.read<RestaurantProductsProvider>();
       final cartProvider = context.read<CartProvider>();
       final wishlistProvider = context.read<WishlistProvider>();
-      
+
       // Check if data is empty (memory might have been cleared)
       if (restaurantProvider.allRecommendedItems.isEmpty) {
         EasyLoading.show(status: 'Refreshing...');
-        
+
         // Reload all data
         await _loadUserId();
         if (userId != null) {
@@ -115,7 +117,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
           );
           await cartProvider.loadCart(userId!);
           await wishlistProvider.fetchWishlist(userId.toString());
-          
+
           // Reset pagination
           if (mounted) {
             setState(() {
@@ -123,13 +125,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
             });
           }
         }
-        
+
         EasyLoading.dismiss();
       }
-      
+
       // Restart polling
       _startAvailabilityPolling();
-      
     } catch (e) {
       debugPrint("Error refreshing on resume: $e");
       EasyLoading.dismiss();
@@ -290,60 +291,69 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> with Wi
   }
 
   List<String> _getDisclaimers(RestaurantProductsProvider provider) {
-  // Default Vegiffy disclaimers
-  const defaultDisclaimers = [
-    "Prices of menu items listed on Vegiffy are determined and updated directly by the respective restaurant partners. Vegiffy does not control or modify restaurant pricing.",
-    "Nutritional information displayed on the app is provided by restaurant partners and is indicative only. Actual values may vary depending on ingredients, preparation methods, and portion sizes.",
-    "Daily calorie needs vary by individual. The general guideline of 2,000 kcal per day is used for reference for an average active adult.",
-    "Dish descriptions, images, and food details may be generated or enhanced using AI or other digital tools to improve the user experience. Actual dishes may vary.",
-    "Vegiffy acts as a technology platform connecting customers with vegetarian restaurants and does not prepare food directly.",
-    "Customer Support (WhatsApp): +91 6309100101"
-  ];
+    // Default Vegiffy disclaimers
+    const defaultDisclaimers = [
+      "Prices of menu items listed on Vegiffy are determined and updated directly by the respective restaurant partners. Vegiffy does not control or modify restaurant pricing.",
+      "Nutritional information displayed on the app is provided by restaurant partners and is indicative only. Actual values may vary depending on ingredients, preparation methods, and portion sizes.",
+      "Daily calorie needs vary by individual. The general guideline of 2,000 kcal per day is used for reference for an average active adult.",
+      "Dish descriptions, images, and food details may be generated or enhanced using AI or other digital tools to improve the user experience. Actual dishes may vary.",
+      "Vegiffy acts as a technology platform connecting customers with vegetarian restaurants and does not prepare food directly.",
+      "Customer Support (WhatsApp): +91 6309100101"
+    ];
 
-  // If restaurant has disclaimers, use them, otherwise use default
-  if (provider.disclaimers != null && provider.disclaimers!.isNotEmpty) {
-    // return provider.disclaimers!;
+    // If restaurant has disclaimers, use them, otherwise use default
+    if (provider.disclaimers != null && provider.disclaimers!.isNotEmpty) {
+      // return provider.disclaimers!;
       return defaultDisclaimers;
+    }
 
+    return defaultDisclaimers;
   }
-  
-  return defaultDisclaimers;
-}
 
-void _openWhatsApp() {
-  const phoneNumber = "+916309100101"; // Remove spaces for URL
-  const message = "Hello, I need help with Vegiffy";
-  
-  final whatsappUrl = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
-  
-  // Use url_launcher to open WhatsApp
-  // Make sure to add url_launcher dependency in pubspec.yaml
-  // import 'package:url_launcher/url_launcher.dart';
-  
-  // _launchURL(whatsappUrl);
-  
-  // For now, show a snackbar or dialog
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Opening WhatsApp...'),
-      duration: Duration(seconds: 2),
-    ),
-  );
-  
-  // Uncomment when you add url_launcher
-  /*
-  if (await canLaunch(whatsappUrl)) {
-    await launch(whatsappUrl);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Could not open WhatsApp. Please make sure WhatsApp is installed.'),
-        backgroundColor: Colors.red,
-      ),
-    );
+// Add this method to open WhatsApp
+  Future<void> _openWhatsApp() async {
+    const phoneNumber = "+916309100101";
+    const message = "Hello, I need help with Vegiffy";
+
+    // Remove any spaces and special characters
+    final cleanedNumber = phoneNumber.replaceAll(RegExp(r'\s+'), '');
+
+    // Create WhatsApp URL
+    final whatsappUrl =
+        "https://wa.me/$cleanedNumber?text=${Uri.encodeComponent(message)}";
+
+    try {
+      final Uri url = Uri.parse(whatsappUrl);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        // Show error if WhatsApp is not installed
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'WhatsApp is not installed. Please install WhatsApp to contact support.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error opening WhatsApp: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open WhatsApp. Please try again later.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
-  */
-}
 
   @override
   Widget build(BuildContext context) {
@@ -403,802 +413,470 @@ void _openWhatsApp() {
                   constraints: BoxConstraints(
                     maxWidth: _getMaxWidth(context),
                   ),
-                  // child: Column(
-                  //   children: [
-                  //     // Hero Section
-                  //     _buildHeroSection(
-                  //       context,
-                  //       restaurantProvider,
-                  //       theme,
-                  //       isDark,
-                  //       isRestaurantActive,
-                  //       rating,
-                  //       totalReviews,
-                  //       isMobile,
-                  //       isDesktop,
-                  //     ),
+                  child: Column(
+                    children: [
+                      // Hero Section
+                      _buildHeroSection(
+                        context,
+                        restaurantProvider,
+                        theme,
+                        isDark,
+                        isRestaurantActive,
+                        rating,
+                        totalReviews,
+                        isMobile,
+                        isDesktop,
+                      ),
 
-                  //     SizedBox(height: isDesktop ? 40 : 20),
+                      SizedBox(height: isDesktop ? 40 : 20),
 
-                  //     // Search Bar
-                  //     Padding(
-                  //       padding: EdgeInsets.symmetric(
-                  //         horizontal: isDesktop ? 32 : 16,
-                  //         vertical: 8,
-                  //       ),
-                  //       child: Container(
-                  //         constraints: const BoxConstraints(maxWidth: 800),
-                  //         decoration: BoxDecoration(
-                  //           border: Border.all(
-                  //             color: const Color.fromARGB(255, 32, 203, 20),
-                  //           ),
-                  //           borderRadius: BorderRadius.circular(12),
-                  //         ),
-                  //         child: Row(
-                  //           children: [
-                  //             Expanded(
-                  //               child: SizedBox(
-                  //                 height: 50,
-                  //                 child: TextFormField(
-                  //                   controller: _searchController,
-                  //                   style: TextStyle(
-                  //                     color: theme.colorScheme.onSurface,
-                  //                   ),
-                  //                   decoration: InputDecoration(
-                  //                     hintText: 'Search your food',
-                  //                     hintStyle: TextStyle(
-                  //                       color: theme.colorScheme.onSurface
-                  //                           .withOpacity(0.6),
-                  //                     ),
-                  //                     prefixIcon: Icon(
-                  //                       Icons.search,
-                  //                       color: theme.colorScheme.onSurface
-                  //                           .withOpacity(0.6),
-                  //                     ),
-                  //                     filled: true,
-                  //                     fillColor: isDark
-                  //                         ? theme.cardColor
-                  //                         : Colors.white,
-                  //                     border: OutlineInputBorder(
-                  //                       borderRadius: BorderRadius.circular(30),
-                  //                       borderSide: BorderSide.none,
-                  //                     ),
-                  //                     contentPadding:
-                  //                         const EdgeInsets.symmetric(
-                  //                       vertical: 0,
-                  //                     ),
-                  //                   ),
-                  //                   onChanged: _handleSearch,
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //             const SizedBox(width: 10),
-                  //           ],
-                  //         ),
-                  //       ),
-                  //     ),
+                      // Search Bar
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 32 : 16,
+                          vertical: 8,
+                        ),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 800),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 32, 203, 20),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 50,
+                                  child: TextFormField(
+                                    controller: _searchController,
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Search your food',
+                                      hintStyle: TextStyle(
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
+                                      ),
+                                      filled: true,
+                                      fillColor: isDark
+                                          ? theme.cardColor
+                                          : Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        vertical: 0,
+                                      ),
+                                    ),
+                                    onChanged: _handleSearch,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                  //     Divider(
-                  //       height: 30,
-                  //       color: isDark ? Colors.grey[700] : Colors.grey[300],
-                  //       indent: isDesktop ? 32 : 16,
-                  //       endIndent: isDesktop ? 32 : 16,
-                  //     ),
+                      Divider(
+                        height: 30,
+                        color: isDark ? Colors.grey[700] : Colors.grey[300],
+                        indent: isDesktop ? 32 : 16,
+                        endIndent: isDesktop ? 32 : 16,
+                      ),
 
-                  //     // Recommended Header
-                  //     Padding(
-                  //       padding: EdgeInsets.symmetric(
-                  //         horizontal: isDesktop ? 32 : 16,
-                  //         vertical: 8,
-                  //       ),
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //         children: [
-                  //           Text(
-                  //             'Recommended',
-                  //             style: theme.textTheme.titleLarge?.copyWith(
-                  //               fontWeight: FontWeight.bold,
-                  //               color: theme.colorScheme.onSurface,
-                  //             ),
-                  //           ),
-                  //           Text(
-                  //             '${_allFilteredItems.length} items',
-                  //             style: TextStyle(
-                  //               color: theme.colorScheme.onSurface
-                  //                   .withOpacity(0.6),
-                  //               fontSize: isDesktop ? 16 : 14,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
+                      // Recommended Header
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isDesktop ? 32 : 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recommended',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            Text(
+                              '${_allFilteredItems.length} items',
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
+                                fontSize: isDesktop ? 16 : 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
-                  //     // Products Grid/List
-                  //     _displayedItems.isEmpty
-                  //         ? Padding(
-                  //             padding: const EdgeInsets.all(32.0),
-                  //             child: Column(
-                  //               children: [
-                  //                 Icon(
-                  //                   Icons.search_off,
-                  //                   size: 64,
-                  //                   color: theme.colorScheme.onSurface
-                  //                       .withOpacity(0.5),
-                  //                 ),
-                  //                 const SizedBox(height: 16),
-                  //                 Text(
-                  //                   _searchQuery.isEmpty
-                  //                       ? 'No items available'
-                  //                       : 'No items found',
-                  //                   style: theme.textTheme.bodyMedium?.copyWith(
-                  //                     color: theme.colorScheme.onSurface
-                  //                         .withOpacity(0.6),
-                  //                   ),
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           )
-                  //         : _buildProductsGrid(
-                  //             context,
-                  //             _displayedItems,
-                  //             restaurantProvider,
-                  //             theme,
-                  //             isDark,
-                  //             isRestaurantActive,
-                  //           ),
+                      // Products Grid/List
+                      _displayedItems.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.search_off,
+                                    size: 64,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _searchQuery.isEmpty
+                                        ? 'No items available'
+                                        : 'No items found',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : _buildProductsGrid(
+                              context,
+                              _displayedItems,
+                              restaurantProvider,
+                              theme,
+                              isDark,
+                              isRestaurantActive,
+                            ),
 
-                  //     // Loading More Indicator
-                  //     if (_isLoadingMore)
-                  //       Padding(
-                  //         padding: const EdgeInsets.all(16.0),
-                  //         child: Center(
-                  //           child: CircularProgressIndicator(
-                  //             valueColor: AlwaysStoppedAnimation<Color>(
-                  //               theme.colorScheme.primary,
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
+                      // Loading More Indicator
+                      if (_isLoadingMore)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
 
-                  //     // No More Items Indicator
-                  //     // if (!_hasMoreItems && _displayedItems.isNotEmpty)
-                  //     //   Padding(
-                  //     //     padding: const EdgeInsets.all(16.0),
-                  //     //     child: Text(
-                  //     //       '',
-                  //     //       style: TextStyle(
-                  //     //         color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  //     //         fontSize: 14,
-                  //     //       ),
-                  //     //     ),
-                  //     //   ),
-
-                  //     // After hero section and before search bar
-                  //     if (restaurantProvider.fssaiNo != null ||
-                  //         restaurantProvider.fullAddress != null ||
-                  //         (restaurantProvider.disclaimers != null &&
-                  //             restaurantProvider.disclaimers!.isNotEmpty))
-                  //       Padding(
-                  //         padding: EdgeInsets.symmetric(
-                  //           horizontal: isDesktop ? 32 : 16,
-                  //           vertical: 16,
-                  //         ),
-                  //         child: Container(
-                  //           width: double.infinity,
-                  //           padding: EdgeInsets.all(isDesktop ? 20 : 16),
-                  //           decoration: BoxDecoration(
-                  //             color: isDark ? theme.cardColor : Colors.white,
-                  //             borderRadius: BorderRadius.circular(16),
-                  //             border: Border.all(
-                  //               color:
-                  //                   theme.colorScheme.primary.withOpacity(0.2),
-                  //             ),
-                  //             boxShadow: [
-                  //               BoxShadow(
-                  //                 color: Colors.black.withOpacity(0.05),
-                  //                 blurRadius: 10,
-                  //                 offset: const Offset(0, 2),
-                  //               ),
-                  //             ],
-                  //           ),
-                  //           child: Column(
-                  //             crossAxisAlignment: CrossAxisAlignment.start,
-                  //             children: [
-                  //               // Header
-                  //               Row(
-                  //                 children: [
-                  //                   Icon(
-                  //                     Icons.restaurant_menu,
-                  //                     color: theme.colorScheme.primary,
-                  //                     size: isDesktop ? 24 : 20,
-                  //                   ),
-                  //                   const SizedBox(width: 8),
-                  //                   Text(
-                  //                     'Restaurant Information',
-                  //                     style:
-                  //                         theme.textTheme.titleMedium?.copyWith(
-                  //                       fontWeight: FontWeight.bold,
-                  //                       color: theme.colorScheme.primary,
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               ),
-                  //               const SizedBox(height: 16),
-
-                  //               // Full Address
-                  //               // if (restaurantProvider.fullAddress != null &&
-                  //               //     restaurantProvider.fullAddress!.isNotEmpty)
-                  //               Padding(
-                  //                 padding: const EdgeInsets.only(bottom: 12),
-                  //                 child: Row(
-                  //                   crossAxisAlignment:
-                  //                       CrossAxisAlignment.start,
-                  //                   children: [
-                  //                     Icon(
-                  //                       Icons.location_on_outlined,
-                  //                       color: theme.colorScheme.onSurface
-                  //                           .withOpacity(0.6),
-                  //                       size: isDesktop ? 20 : 18,
-                  //                     ),
-                  //                     const SizedBox(width: 12),
-                  //                     Expanded(
-                  //                       child: Column(
-                  //                         crossAxisAlignment:
-                  //                             CrossAxisAlignment.start,
-                  //                         children: [
-                  //                           Text(
-                  //                             'Address',
-                  //                             style: theme.textTheme.labelMedium
-                  //                                 ?.copyWith(
-                  //                               color: theme
-                  //                                   .colorScheme.onSurface
-                  //                                   .withOpacity(0.6),
-                  //                             ),
-                  //                           ),
-                  //                           const SizedBox(height: 2),
-                  //                           Text(
-                  //                             restaurantProvider.fullAddress!,
-                  //                             style: theme.textTheme.bodyMedium
-                  //                                 ?.copyWith(
-                  //                               fontWeight: FontWeight.w500,
-                  //                             ),
-                  //                           ),
-                  //                         ],
-                  //                       ),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ),
-
-                  //               // FSSAI Number
-                  //               // if (restaurantProvider.fssaiNo != null &&
-                  //               //     restaurantProvider.fssaiNo!.isNotEmpty)
-                  //               Padding(
-                  //                 padding: const EdgeInsets.only(bottom: 12),
-                  //                 child: Row(
-                  //                   children: [
-                  //                     Icon(
-                  //                       Icons.verified,
-                  //                       color: theme.colorScheme.primary,
-                  //                       size: isDesktop ? 20 : 18,
-                  //                     ),
-                  //                     const SizedBox(width: 12),
-                  //                     Expanded(
-                  //                       child: Column(
-                  //                         crossAxisAlignment:
-                  //                             CrossAxisAlignment.start,
-                  //                         children: [
-                  //                           Text(
-                  //                             'FSSAI License',
-                  //                             style: theme.textTheme.labelMedium
-                  //                                 ?.copyWith(
-                  //                               color: theme
-                  //                                   .colorScheme.onSurface
-                  //                                   .withOpacity(0.6),
-                  //                             ),
-                  //                           ),
-                  //                           const SizedBox(height: 2),
-                  //                           Text(
-                  //                             restaurantProvider.fssaiNo!,
-                  //                             style: theme.textTheme.bodyMedium
-                  //                                 ?.copyWith(
-                  //                               fontWeight: FontWeight.w500,
-                  //                               color:
-                  //                                   theme.colorScheme.primary,
-                  //                             ),
-                  //                           ),
-                  //                         ],
-                  //                       ),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ),
-
-                  //               // Disclaimers
-                  //               // if (restaurantProvider.disclaimers != null &&
-                  //               //     restaurantProvider.disclaimers!.isNotEmpty)
-                  //               Padding(
-                  //                 padding: const EdgeInsets.only(bottom: 8),
-                  //                 child: Row(
-                  //                   crossAxisAlignment:
-                  //                       CrossAxisAlignment.start,
-                  //                   children: [
-                  //                     Icon(
-                  //                       Icons.info_outline,
-                  //                       color: theme.colorScheme.onSurface
-                  //                           .withOpacity(0.6),
-                  //                       size: isDesktop ? 20 : 18,
-                  //                     ),
-                  //                     const SizedBox(width: 12),
-                  //                     Expanded(
-                  //                       child: Column(
-                  //                         crossAxisAlignment:
-                  //                             CrossAxisAlignment.start,
-                  //                         children: [
-                  //                           Text(
-                  //                             'Disclaimers',
-                  //                             style: theme.textTheme.labelMedium
-                  //                                 ?.copyWith(
-                  //                               color: theme
-                  //                                   .colorScheme.onSurface
-                  //                                   .withOpacity(0.6),
-                  //                             ),
-                  //                           ),
-                  //                           const SizedBox(height: 8),
-                  //                           ...restaurantProvider.disclaimers
-                  //                               .map((disclaimer) {
-                  //                             return Padding(
-                  //                               padding: const EdgeInsets.only(
-                  //                                   bottom: 6),
-                  //                               child: Row(
-                  //                                 crossAxisAlignment:
-                  //                                     CrossAxisAlignment.start,
-                  //                                 children: [
-                  //                                   Text(
-                  //                                     '•',
-                  //                                     style: TextStyle(
-                  //                                       color: theme.colorScheme
-                  //                                           .primary,
-                  //                                       fontSize: 16,
-                  //                                       fontWeight:
-                  //                                           FontWeight.bold,
-                  //                                     ),
-                  //                                   ),
-                  //                                   const SizedBox(width: 8),
-                  //                                   Expanded(
-                  //                                     child: Text(
-                  //                                       disclaimer,
-                  //                                       style: theme
-                  //                                           .textTheme.bodySmall
-                  //                                           ?.copyWith(
-                  //                                         color: theme
-                  //                                             .colorScheme
-                  //                                             .onSurface
-                  //                                             .withOpacity(0.8),
-                  //                                       ),
-                  //                                     ),
-                  //                                   ),
-                  //                                 ],
-                  //                               ),
-                  //                             );
-                  //                           }).toList(),
-                  //                         ],
-                  //                       ),
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //               ),
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       ),
-
-                  //     SizedBox(height: isDesktop ? 150 : 100),
-                  //   ],
-                  // ),
-
-                  // Replace the Column children section in the main build method with this:
-
-child: Column(
-  children: [
-    // Hero Section
-    _buildHeroSection(
-      context,
-      restaurantProvider,
-      theme,
-      isDark,
-      isRestaurantActive,
-      rating,
-      totalReviews,
-      isMobile,
-      isDesktop,
-    ),
-
-    SizedBox(height: isDesktop ? 40 : 20),
-
-    // Search Bar
-    Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 32 : 16,
-        vertical: 8,
-      ),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 800),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(255, 32, 203, 20),
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 50,
-                child: TextFormField(
-                  controller: _searchController,
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Search your food',
-                    hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurface
-                          .withOpacity(0.6),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: theme.colorScheme.onSurface
-                          .withOpacity(0.6),
-                    ),
-                    filled: true,
-                    fillColor: isDark
-                        ? theme.cardColor
-                        : Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(
-                      vertical: 0,
-                    ),
-                  ),
-                  onChanged: _handleSearch,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-          ],
-        ),
-      ),
-    ),
-
-    Divider(
-      height: 30,
-      color: isDark ? Colors.grey[700] : Colors.grey[300],
-      indent: isDesktop ? 32 : 16,
-      endIndent: isDesktop ? 32 : 16,
-    ),
-
-    // Recommended Header
-    Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 32 : 16,
-        vertical: 8,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Recommended',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          Text(
-            '${_allFilteredItems.length} items',
-            style: TextStyle(
-              color: theme.colorScheme.onSurface
-                  .withOpacity(0.6),
-              fontSize: isDesktop ? 16 : 14,
-            ),
-          ),
-        ],
-      ),
-    ),
-
-    // Products Grid/List
-    _displayedItems.isEmpty
-        ? Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.search_off,
-                  size: 64,
-                  color: theme.colorScheme.onSurface
-                      .withOpacity(0.5),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _searchQuery.isEmpty 
-                      ? 'No items available'
-                      : 'No items found',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface
-                        .withOpacity(0.6),
-                  ),
-                ),
-              ],
-            ),
-          )
-        : _buildProductsGrid(
-            context,
-            _displayedItems,
-            restaurantProvider,
-            theme,
-            isDark,
-            isRestaurantActive,
-          ),
-
-    // Loading More Indicator
-    if (_isLoadingMore)
-      Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              theme.colorScheme.primary,
-            ),
-          ),
-        ),
-      ),
-
-    // Restaurant Information Section - Only show when:
-    // 1. No more items are loading AND
-    // 2. Either all items are loaded OR there are no items
+                      // Restaurant Information Section - Only show when:
+                      // 1. No more items are loading AND
+                      // 2. Either all items are loaded OR there are no items
 // Restaurant Information Section - Only show when:
 // 1. No more items are loading AND
 // 2. Either all items are loaded OR there are no items
-if (!_isLoadingMore && 
-    (!_hasMoreItems || _allFilteredItems.isEmpty))
-  Padding(
-    padding: EdgeInsets.symmetric(
-      horizontal: isDesktop ? 32 : 16,
-      vertical: 16,
-    ),
-    child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 20 : 16),
-      decoration: BoxDecoration(
-        color: isDark ? theme.cardColor : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Icon(
-                Icons.restaurant_menu,
-                color: theme.colorScheme.primary,
-                size: isDesktop ? 24 : 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Restaurant Information',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          
-          // Full Address (if available from restaurant)
-          if (restaurantProvider.fullAddress != null && 
-              restaurantProvider.fullAddress!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    size: isDesktop ? 20 : 18,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Address',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      if (!_isLoadingMore &&
+                          (!_hasMoreItems || _allFilteredItems.isEmpty))
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop ? 32 : 16,
+                            vertical: 16,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          restaurantProvider.fullAddress!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          
-          // FSSAI Number (if available from restaurant)
-          if (restaurantProvider.fssaiNo != null && 
-              restaurantProvider.fssaiNo!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.verified,
-                    color: theme.colorScheme.primary,
-                    size: isDesktop ? 20 : 18,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FSSAI License',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          restaurantProvider.fssaiNo!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          
-          // Disclaimers Section - Show either restaurant disclaimers or default Vegiffy disclaimer
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  size: isDesktop ? 20 : 18,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Disclaimers',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      
-                      // Show restaurant disclaimers if available, otherwise show default Vegiffy disclaimer
-                      ..._getDisclaimers(restaurantProvider).map((disclaimer) {
-                        // Check if this is the WhatsApp line to make it clickable
-                        if (disclaimer.contains('WhatsApp') && disclaimer.contains('+91 6309100101')) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Row(
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(isDesktop ? 20 : 16),
+                            decoration: BoxDecoration(
+                              color: isDark ? theme.cardColor : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color:
+                                    theme.colorScheme.primary.withOpacity(0.2),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  '•',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      _openWhatsApp();
-                                    },
-                                    child: Text.rich(
-                                      TextSpan(
-                                        text: disclaimer.replaceAll('+91 6309100101', ''),
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurface.withOpacity(0.8),
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text: '+91 6309100101',
-                                            style: TextStyle(
-                                              color: theme.colorScheme.primary,
-                                              fontWeight: FontWeight.bold,
-                                              decoration: TextDecoration.underline,
-                                            ),
-                                          ),
-                                        ],
+                                // Header
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.restaurant_menu,
+                                      color: theme.colorScheme.primary,
+                                      size: isDesktop ? 24 : 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Restaurant Information',
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
                                       ),
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Full Address (if available from restaurant)
+                                if (restaurantProvider.fullAddress != null &&
+                                    restaurantProvider.fullAddress!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.6),
+                                          size: isDesktop ? 20 : 18,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Address',
+                                                style: theme
+                                                    .textTheme.labelMedium
+                                                    ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme.onSurface
+                                                      .withOpacity(0.6),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                restaurantProvider.fullAddress!,
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                // FSSAI Number (if available from restaurant)
+                                if (restaurantProvider.fssaiNo != null &&
+                                    restaurantProvider.fssaiNo!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.verified,
+                                          color: theme.colorScheme.primary,
+                                          size: isDesktop ? 20 : 18,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'FSSAI License',
+                                                style: theme
+                                                    .textTheme.labelMedium
+                                                    ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme.onSurface
+                                                      .withOpacity(0.6),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                restaurantProvider.fssaiNo!,
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                // Disclaimers Section - Show either restaurant disclaimers or default Vegiffy disclaimer
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
+                                        size: isDesktop ? 20 : 18,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Disclaimers',
+                                              style: theme.textTheme.labelMedium
+                                                  ?.copyWith(
+                                                color: theme
+                                                    .colorScheme.onSurface
+                                                    .withOpacity(0.6),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+
+                                            // Show restaurant disclaimers if available, otherwise show default Vegiffy disclaimer
+                                            ..._getDisclaimers(
+                                                    restaurantProvider)
+                                                .map((disclaimer) {
+                                              // Check if this is the WhatsApp line to make it clickable
+                                              if (disclaimer
+                                                      .contains('WhatsApp') &&
+                                                  disclaimer.contains(
+                                                      '+91 6309100101')) {
+                                                return Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          bottom: 6),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '•',
+                                                        style: TextStyle(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .primary,
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            _openWhatsApp();
+                                                          },
+                                                          child: Text.rich(
+                                                            TextSpan(
+                                                              text: disclaimer
+                                                                  .replaceAll(
+                                                                      '+91 6309100101',
+                                                                      ''),
+                                                              style: theme
+                                                                  .textTheme
+                                                                  .bodySmall
+                                                                  ?.copyWith(
+                                                                color: theme
+                                                                    .colorScheme
+                                                                    .onSurface
+                                                                    .withOpacity(
+                                                                        0.8),
+                                                              ),
+                                                              children: [
+                                                                TextSpan(
+                                                                  text:
+                                                                      '+91 6309100101',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color: theme
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    decoration:
+                                                                        TextDecoration
+                                                                            .underline,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              }
+
+                                              // Regular disclaimer item (non-clickable)
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 6),
+                                                child: Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      '•',
+                                                      style: TextStyle(
+                                                        color: theme.colorScheme
+                                                            .primary,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Text(
+                                                        disclaimer,
+                                                        style: theme
+                                                            .textTheme.bodySmall
+                                                            ?.copyWith(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .onSurface
+                                                              .withOpacity(0.8),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          );
-                        }
-                        
-                        // Regular disclaimer item (non-clickable)
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '•',
-                                style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  disclaimer,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.8),
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
-                        );
-                      }).toList(),
+                        ),
+
+                      // Bottom padding
+                      SizedBox(height: isDesktop ? 150 : 100),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-
-    // Bottom padding
-    SizedBox(height: isDesktop ? 150 : 100),
-  ],
-),
                 ),
               ),
             );

@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/provider/AuthProvider/auth_provider.dart';
+import 'package:veegify/provider/Credential/credential_provider.dart';
 import 'package:veegify/utils/responsive.dart';
 import 'package:veegify/views/Auth/signup_page.dart';
 import 'package:veegify/views/ForgotPassword/forgot_password_screen.dart';
@@ -30,11 +30,12 @@ class _LoginPageState extends State<LoginPage> {
     _loadSavedCredentials();
   }
 
-  void _loadSavedCredentials() {
+  void _loadSavedCredentials() async {
     if (UserPreferences.getRememberMe()) {
       _phoneController.text = UserPreferences.getSavedPhoneNumber();
       _passwordController.text = UserPreferences.getSavedPassword();
       _rememberMe = true;
+      await context.read<CredentialProvider>().fetchCredentials();
     }
   }
 
@@ -80,29 +81,64 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  String? get _supportPhone {
+    final provider = context.read<CredentialProvider>();
+    return provider.getMobileByType('user'); // or vendor
+  }
+
+  String? get _supportWattsapp {
+    final provider = context.read<CredentialProvider>();
+    return provider.getWhatsappByType('user'); // or vendor
+  }
+
+  String? get _supportEmail {
+    final provider = context.read<CredentialProvider>();
+    return provider.getEmailByType('user');
+  }
+
+  Future<void> openWhatsApp(String phoneNumber, {String message = ""}) async {
+    // Remove spaces and ensure only digits
+    String cleanedNumber = phoneNumber.replaceAll(RegExp(r'\D'), '');
+
+    // If number is missing country code, add +91 by default
+    if (!cleanedNumber.startsWith("91") && cleanedNumber.length == 10) {
+      cleanedNumber = "91$cleanedNumber";
+    }
+
+    final String encodedMessage = Uri.encodeComponent(message);
+    final String url = "https://wa.me/$cleanedNumber?text=$encodedMessage";
+
+    final Uri uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw "Could not launch WhatsApp";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
-return Scaffold(
-  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-  body: SafeArea(
-    child: (kIsWeb && screenWidth > 1024)
-        ? Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/login_bg.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: _buildWebLayout(), // card / content on top
-          )
-        : _buildMobileLayout(),
-  ),
-);
 
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: (kIsWeb && screenWidth > 1024)
+            ? Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/login_bg.png'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: _buildWebLayout(), // card / content on top
+              )
+            : _buildMobileLayout(),
+      ),
+    );
   }
 
   // WEB LAYOUT - Completely different design with image
@@ -149,8 +185,7 @@ return Scaffold(
                           Text(
                             'Veegiffy',
                             style: TextStyle(
-                                                      fontFamily: 'Cursive',
-
+                              fontFamily: 'Cursive',
                               fontSize: screenWidth > 1400 ? 36 : 32,
                               fontWeight: FontWeight.bold,
                               color: theme.colorScheme.primary,
@@ -171,7 +206,8 @@ return Scaffold(
                           Text(
                             'Sign in with your mobile and Password',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                               fontSize: 14,
                             ),
                           ),
@@ -209,13 +245,15 @@ return Scaffold(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.2),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.2),
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.2),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.2),
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
@@ -266,13 +304,15 @@ return Scaffold(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.2),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.2),
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.2),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.2),
                                       ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
@@ -293,12 +333,14 @@ return Scaffold(
                                         _isPasswordVisible
                                             ? Icons.visibility
                                             : Icons.visibility_off,
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.6),
                                         size: 20,
                                       ),
                                       onPressed: () {
                                         setState(() {
-                                          _isPasswordVisible = !_isPasswordVisible;
+                                          _isPasswordVisible =
+                                              !_isPasswordVisible;
                                         });
                                       },
                                     ),
@@ -312,7 +354,8 @@ return Scaffold(
 
                                 // Remember Me & Forgot Password Row
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
@@ -355,7 +398,8 @@ return Scaffold(
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
                                         minimumSize: const Size(0, 0),
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
                                       ),
                                       child: Text(
                                         'Forgot Password?',
@@ -377,22 +421,27 @@ return Scaffold(
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        onPressed:
-                                            authProvider.isLoading ? null : _handleLogin,
+                                        onPressed: authProvider.isLoading
+                                            ? null
+                                            : _handleLogin,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: theme.colorScheme.primary,
+                                          backgroundColor:
+                                              theme.colorScheme.primary,
                                           foregroundColor: Colors.white,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         child: authProvider.isLoading
                                             ? const SizedBox(
                                                 height: 24,
                                                 width: 24,
-                                                child: CircularProgressIndicator(
-                                                  valueColor: AlwaysStoppedAnimation(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
                                                     Colors.white,
                                                   ),
                                                   strokeWidth: 2.5,
@@ -417,7 +466,8 @@ return Scaffold(
                                   children: [
                                     Text(
                                       "Don't have an account? ",
-                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
                                         fontSize: 14,
                                       ),
                                     ),
@@ -426,7 +476,8 @@ return Scaffold(
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => const SignupPage(),
+                                            builder: (context) =>
+                                                const SignupPage(),
                                           ),
                                         );
                                       },
@@ -511,7 +562,7 @@ return Scaffold(
           if (showWelcomeImage && imageHeight > 0)
             Center(
               child: Image.asset(
-                "assets/images/login.png",
+                "assets/images/img.png",
                 height: imageHeight,
                 fit: BoxFit.contain,
               ),
@@ -791,6 +842,38 @@ return Scaffold(
                 ),
               ),
             ],
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          InkWell(
+            onTap: () {
+              if (_supportWattsapp != null && _supportWattsapp!.isNotEmpty) {
+                openWhatsApp(
+                  _supportWattsapp!,
+                  message: "Hello, I need help",
+                );
+              }
+            },
+            borderRadius: BorderRadius.circular(50),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/wattsapp.png',
+                  width: 47,
+                  height: 47,
+                ),
+                Text(
+                  "Quick Help?",
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

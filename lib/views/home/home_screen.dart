@@ -1023,7 +1023,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         _bannerController.reset();
                         _nearbyController.reset();
                         _topRestaurantsController.reset();
-      
+
                         await _initializeData();
                       },
                       child: RefreshIndicator(
@@ -1051,7 +1051,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
-      
+
             // Sticky Search Bar (Mobile only)
             if (!_isInitializing && _isSearchBarPinned && !useWebLayout)
               Positioned(
@@ -1368,7 +1368,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-            const SizedBox(height:5),
+            const SizedBox(height: 5),
 
             /// 🔥 Categories Section
             Padding(
@@ -1464,7 +1464,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
 
-              SizedBox(height: 30,),
+        SizedBox(
+          height: 30,
+        ),
 
         // Main content with constrained width
         Center(
@@ -1681,7 +1683,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-Widget _buildRestaurantList() {
+  Widget _buildRestaurantList() {
     final theme = Theme.of(context);
     final isDesktop = Responsive.isDesktop(context);
     final isWeb = kIsWeb;
@@ -1729,32 +1731,32 @@ Widget _buildRestaurantList() {
           );
         }
 
-return GridView.builder(
-  shrinkWrap: true,                              // ✅ wraps to content height
-  physics: const NeverScrollableScrollPhysics(), // ✅ disables inner scroll
-  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
-    childAspectRatio: 1.0,
-    crossAxisSpacing: 12,
-    mainAxisSpacing: 12,
-  ),
-  itemCount: provider.nearbyRestaurants.length,
-  itemBuilder: (context, index) {
-    final restaurant = provider.nearbyRestaurants[index];
-    return RestaurantCard(
-      id: restaurant.id,
-      imagePath: restaurant.imageUrl,
-      name: restaurant.restaurantName,
-      rating: restaurant.rating.toDouble(),
-      description: restaurant.description,
-      price: restaurant.startingPrice,
-      locationName: restaurant.locationName,
-      status: restaurant.status,
-      discount: restaurant.discount,
-      distance: restaurant.distance
-    );
-  },
-);
+        return GridView.builder(
+          shrinkWrap: true, // ✅ wraps to content height
+          physics:
+              const NeverScrollableScrollPhysics(), // ✅ disables inner scroll
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: Responsive.isMobile(context) ? 2 : 3,
+            childAspectRatio: 0.9,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: provider.nearbyRestaurants.length,
+          itemBuilder: (context, index) {
+            final restaurant = provider.nearbyRestaurants[index];
+            return RestaurantCard(
+                id: restaurant.id,
+                imagePath: restaurant.imageUrl,
+                name: restaurant.restaurantName,
+                rating: restaurant.rating.toDouble(),
+                description: restaurant.description,
+                price: restaurant.startingPrice,
+                locationName: restaurant.locationName,
+                status: restaurant.status,
+                discount: restaurant.discount,
+                distance: restaurant.distance);
+          },
+        );
       },
     );
   }

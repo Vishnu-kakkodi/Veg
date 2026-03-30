@@ -1,17 +1,13 @@
-// ─────────────────────────────────────────
-//  coupon_model.dart
-// ─────────────────────────────────────────
-
 class CouponModel {
   final String id;
   final String couponCode;
   final String title;
   final String description;
   final String note;
-  final String discountType; // "percentage" | "flat"
+  final String discountType;
   final double discountValue;
-  final double minOrderAmount;
-  final double maxDiscountAmount;
+  final double? minOrderAmount;
+  final double? maxDiscountAmount;
   final DateTime startDate;
   final DateTime endDate;
   final int? usageLimit;
@@ -27,8 +23,8 @@ class CouponModel {
     required this.note,
     required this.discountType,
     required this.discountValue,
-    required this.minOrderAmount,
-    required this.maxDiscountAmount,
+    this.minOrderAmount,
+    this.maxDiscountAmount,
     required this.startDate,
     required this.endDate,
     this.usageLimit,
@@ -38,22 +34,34 @@ class CouponModel {
   });
 
   factory CouponModel.fromJson(Map<String, dynamic> json) {
+    double? toDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString());
+    }
+
+    int? toInt(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toInt();
+      return int.tryParse(value.toString());
+    }
+
     return CouponModel(
-      id: json['_id'] as String,
-      couponCode: json['couponCode'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      note: json['note'] as String? ?? '',
-      discountType: json['discountType'] as String,
-      discountValue: (json['discountValue'] as num).toDouble(),
-      minOrderAmount: (json['minOrderAmount'] as num).toDouble(),
-      maxDiscountAmount: (json['maxDiscountAmount'] as num).toDouble(),
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
-      usageLimit: json['usageLimit'] as int?,
-      usedCount: (json['usedCount'] as num).toInt(),
-      isActive: json['isActive'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      id: json['_id']?.toString() ?? '',
+      couponCode: json['couponCode']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      note: json['note']?.toString() ?? '',
+      discountType: json['discountType']?.toString() ?? 'flat',
+      discountValue: toDouble(json['discountValue']) ?? 0.0,
+      minOrderAmount: toDouble(json['minOrderAmount']),
+      maxDiscountAmount: toDouble(json['maxDiscountAmount']),
+      startDate: DateTime.tryParse(json['startDate'] ?? '') ?? DateTime.now(),
+      endDate: DateTime.tryParse(json['endDate'] ?? '') ?? DateTime.now(),
+      usageLimit: toInt(json['usageLimit']),
+      usedCount: toInt(json['usedCount']) ?? 0,
+      isActive: json['isActive'] ?? false,
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
@@ -75,11 +83,9 @@ class CouponModel {
         'createdAt': createdAt.toIso8601String(),
       };
 
-  /// e.g. "4.98% OFF" or "₹4.98 OFF"
-  String get discountLabel =>
-      discountType == 'percentage'
-          ? '${discountValue.toStringAsFixed(2)}% OFF'
-          : '₹${discountValue.toStringAsFixed(0)} OFF';
+  String get discountLabel => discountType == 'percentage'
+      ? '${discountValue.toStringAsFixed(0)}% OFF'
+      : '₹${discountValue.toStringAsFixed(0)} OFF';
 
   bool get isExpired => DateTime.now().isAfter(endDate);
 }

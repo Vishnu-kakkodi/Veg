@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:provider/provider.dart';
@@ -334,23 +333,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -453,24 +435,24 @@ class _SignupPageState extends State<SignupPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-return Scaffold(
-  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-  body: SafeArea(
-    child: (kIsWeb && screenWidth > 1024)
-        ? Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/login_bg.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: _buildWebLayout(), // card / content on top
-          )
-        : _buildMobileLayout(),
-  ),
-);
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SafeArea(
+        child: (kIsWeb && screenWidth > 1024)
+            ? Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/login_bg.png'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: _buildWebLayout(), // card / content on top
+              )
+            : _buildMobileLayout(),
+      ),
+    );
   }
 
   // ================= WEB LAYOUT (Desktop) =================
@@ -538,7 +520,8 @@ return Scaffold(
                           Text(
                             'Sign up to start using Veegify',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                               fontSize: 14,
                             ),
                           ),
@@ -547,7 +530,8 @@ return Scaffold(
                           // Form
                           Form(
                             key: _formKey,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -556,11 +540,13 @@ return Scaffold(
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'First Name',
-                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,
                                             ),
@@ -577,7 +563,8 @@ return Scaffold(
                                             inputFormatters: [
                                               FilteringTextInputFormatter.allow(
                                                   RegExp(r'[a-zA-Z\s]')),
-                                              LengthLimitingTextInputFormatter(30),
+                                              LengthLimitingTextInputFormatter(
+                                                  30),
                                             ],
                                           ),
                                         ],
@@ -586,11 +573,13 @@ return Scaffold(
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Last Name',
-                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 14,
                                             ),
@@ -607,7 +596,8 @@ return Scaffold(
                                             inputFormatters: [
                                               FilteringTextInputFormatter.allow(
                                                   RegExp(r'[a-zA-Z\s]')),
-                                              LengthLimitingTextInputFormatter(30),
+                                              LengthLimitingTextInputFormatter(
+                                                  30),
                                             ],
                                           ),
                                         ],
@@ -686,21 +676,27 @@ return Scaffold(
                                       width: double.infinity,
                                       height: 50,
                                       child: ElevatedButton(
-                                        onPressed: auth.isLoading ? null : handleSubmit,
+                                        onPressed: auth.isLoading
+                                            ? null
+                                            : handleSubmit,
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: theme.colorScheme.primary,
+                                          backgroundColor:
+                                              theme.colorScheme.primary,
                                           foregroundColor: Colors.white,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                         child: auth.isLoading
                                             ? const SizedBox(
                                                 height: 24,
                                                 width: 24,
-                                                child: CircularProgressIndicator(
-                                                  valueColor: AlwaysStoppedAnimation(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
                                                     Colors.white,
                                                   ),
                                                   strokeWidth: 2.5,
@@ -725,7 +721,8 @@ return Scaffold(
                                   children: [
                                     Text(
                                       "Already have an account? ",
-                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
                                         fontSize: 14,
                                       ),
                                     ),
@@ -815,7 +812,7 @@ return Scaffold(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                "assets/images/signup.png",
+                "assets/images/img.png",
                 height: 320,
               ),
               const SizedBox(height: 24),
@@ -874,12 +871,11 @@ return Scaffold(
         children: [
           if (!isDesktop) ...[
             Image.asset(
-              "assets/images/signup.png",
+              "assets/images/img.png",
               height: 220,
             ),
             const SizedBox(height: 24),
           ],
-
           Text(
             'Create Account',
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -887,7 +883,6 @@ return Scaffold(
             ),
           ),
           const SizedBox(height: 24),
-
           Row(
             children: [
               Expanded(
@@ -912,7 +907,6 @@ return Scaffold(
             ],
           ),
           const SizedBox(height: 16),
-
           TextFormField(
             controller: phoneController,
             keyboardType: TextInputType.phone,
@@ -924,7 +918,6 @@ return Scaffold(
             ],
           ),
           const SizedBox(height: 16),
-
           TextFormField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
@@ -932,13 +925,11 @@ return Scaffold(
             validator: _validateEmail,
           ),
           const SizedBox(height: 16),
-
           TextFormField(
             controller: referalController,
             decoration: _inputDecoration('Referral Code (optional)', theme),
           ),
           const SizedBox(height: 28),
-
           Consumer<AuthProvider>(
             builder: (context, auth, _) {
               return SizedBox(
@@ -971,7 +962,6 @@ return Scaffold(
             },
           ),
           const SizedBox(height: 20),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

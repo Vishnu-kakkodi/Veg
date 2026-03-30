@@ -13,6 +13,8 @@ ndkVersion = "27.0.12077973"
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+                isCoreLibraryDesugaringEnabled = true 
+
     }
 
     kotlinOptions {
@@ -46,6 +48,9 @@ ndkVersion = "27.0.12077973"
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+            implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-datasource:1.3.1")
 }
 
 flutter {

@@ -1,4 +1,3 @@
-
 // import 'package:flutter/material.dart';
 // import 'package:pin_code_fields/pin_code_fields.dart';
 // import 'package:provider/provider.dart';
@@ -17,7 +16,7 @@
 //   final TextEditingController _phoneController = TextEditingController();
 //   final TextEditingController _otpController = TextEditingController();
 //   final _formKey = GlobalKey<FormState>();
-  
+
 //   String _currentOtp = '';
 //   bool _isOtpSent = false;
 //   String? _userId;
@@ -45,18 +44,18 @@
 //   void _sendOtp() async {
 //     if (_formKey.currentState!.validate()) {
 //       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
 //       try {
 //         print("jjjjjjjjjjjjjjjjjjok");
 //         await authProvider.sendForgotPasswordOtp(
 //           phoneNumber: _phoneController.text,
 //           context: context,
 //         );
-        
+
 //         setState(() {
 //           _isOtpSent = true;
 //         });
-        
+
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: const Text("OTP sent successfully"),
@@ -84,16 +83,16 @@
 //     print("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu$_currentOtp");
 //     if (_currentOtp.length == 4) {
 //       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
 //       try {
 //         final response = await authProvider.verifyForgotPasswordOtp(
 //           otp: _currentOtp,
 //           context: context,
 //         );
-        
+
 //         if (response != null && response['userId'] != null) {
 //           _userId = response['userId'];
-          
+
 //           Navigator.pushReplacement(
 //             context,
 //             MaterialPageRoute(
@@ -127,13 +126,13 @@
 
 //   void _resendOtp() async {
 //     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
 //     try {
 //       await authProvider.sendForgotPasswordOtp(
 //         phoneNumber: _phoneController.text,
 //         context: context,
 //       );
-      
+
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(
 //           content: const Text("OTP resent successfully"),
@@ -160,7 +159,7 @@
 //   Widget build(BuildContext context) {
 //     final theme = Theme.of(context);
 //     final isDark = theme.brightness == Brightness.dark;
-    
+
 //     return Scaffold(
 //       backgroundColor: theme.scaffoldBackgroundColor,
 //       body: SafeArea(
@@ -225,7 +224,7 @@
 
 //                   // Subtitle
 //                   Text(
-//                     _isOtpSent 
+//                     _isOtpSent
 //                         ? 'Enter the 4-digit code sent to ${_phoneController.text}'
 //                         : 'Enter your phone number to receive OTP',
 //                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -386,25 +385,6 @@
 //     );
 //   }
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -673,22 +653,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           // Profile image
           Center(
             child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 4,
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
               child: CircleAvatar(
                 radius: isMobile ? 70 : 80,
                 backgroundColor: theme.cardColor,
-                backgroundImage: const NetworkImage(
-                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPHslEuUEmK912EWkZFplnGzD1FgrhXjI1cw&s',
+                backgroundImage: const AssetImage(
+                  'assets/images/img.png',
                 ),
               ),
             ),
@@ -749,7 +718,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
               ),
             ),
-
             SizedBox(height: verticalSpacingMedium),
           ],
 
@@ -772,15 +740,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   shape: PinCodeFieldShape.underline,
                   activeColor: theme.colorScheme.primary,
                   selectedColor: theme.colorScheme.primary,
-                  inactiveColor:
-                      theme.colorScheme.onSurface.withOpacity(0.5),
+                  inactiveColor: theme.colorScheme.onSurface.withOpacity(0.5),
                   activeFillColor: Colors.transparent,
                   selectedFillColor: Colors.transparent,
                   inactiveFillColor: Colors.transparent,
                 ),
               ),
             ),
-
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -793,7 +759,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
               ),
             ),
-
             SizedBox(height: verticalSpacingSmall),
           ],
 

@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LocationService {
-
   // =========================
   // ADDRESS
   // =========================
@@ -64,12 +63,10 @@ class LocationService {
 
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
-        return [
-          p.street,
-          p.locality,
-          p.administrativeArea,
-          p.country
-        ].whereType<String>().where((e) => e.isNotEmpty).join(', ');
+        return [p.street, p.locality, p.administrativeArea, p.country]
+            .whereType<String>()
+            .where((e) => e.isNotEmpty)
+            .join(', ');
       }
 
       return 'Address not found';
@@ -81,45 +78,44 @@ class LocationService {
   // =========================
   // COORDINATES (WORKS ON WEB)
   // =========================
-static Future<List<double>?> getCurrentCoordinates() async {
-  try {
-    // 🌐 WEB: browser handles permission automatically
-    if (kIsWeb) {
+  static Future<List<double>?> getCurrentCoordinates() async {
+    try {
+      // 🌐 WEB: browser handles permission automatically
+      if (kIsWeb) {
+        final position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        return [position.latitude, position.longitude];
+      }
+
+      // 📱 MOBILE: manual permission handling
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission(); // 🔥 popup
+      }
+
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permission denied');
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permission permanently denied');
+      }
+
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+
       return [position.latitude, position.longitude];
+    } catch (e) {
+      debugPrint('Location error: $e');
+      return null;
     }
-
-    // 📱 MOBILE: manual permission handling
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception('Location services are disabled');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission(); // 🔥 popup
-    }
-
-    if (permission == LocationPermission.denied) {
-      throw Exception('Location permission denied');
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permission permanently denied');
-    }
-
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    return [position.latitude, position.longitude];
-  } catch (e) {
-    debugPrint('Location error: $e');
-    return null;
   }
-}
-
 }
