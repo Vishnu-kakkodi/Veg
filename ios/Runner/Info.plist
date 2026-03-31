@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>GMSApiKey</key>
-	<string>AIzaSyDrfuvRqBj5hfk8BW7R7h-MxFoISkqfUpE</string>
+	<string>AIzaSyDaJzdZ5-Q2Lv2KArStqAtGXf4SukdHwig</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>

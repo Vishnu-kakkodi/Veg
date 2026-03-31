@@ -1,4 +1,7 @@
+
+
 // import 'package:flutter/foundation.dart';
+// import 'package:geolocator/geolocator.dart';
 // import 'package:veegify/helper/storage_helper.dart';
 // import 'package:veegify/services/Location/api_location.dart';
 // import 'package:veegify/services/Location/location_sercice.dart';
@@ -19,76 +22,131 @@
 //   bool get hasLocation => _coordinates != null && _coordinates!.length >= 2;
 
 //   // Initialize location (get current location)
+//   // Future<void> initLocation(String userId) async {
+//   //   try {
+//   //     print("Initializing location for user: $userId");
+//   //     _isLoading = true;
+//   //     _hasError = false;
+//   //     _errorMessage = '';
+//   //     notifyListeners();
+
+//   //     // Get coordinates first
+//   //     final coords = await LocationService.getCurrentCoordinates();
+
+//   //     if (coords == null) {
+//   //       throw Exception('Failed to get coordinates');
+//   //     }
+
+//   //     _coordinates = coords;
+
+//   //     // Get address
+//   //     final fullAddress = await LocationService.getCurrentAddress();
+//   //     if (fullAddress == null) {
+//   //       throw Exception('Failed to get address');
+//   //     }
+
+//   //     // Check if address contains error messages
+//   //     if (fullAddress.contains('Location services are disabled') ||
+//   //         fullAddress.contains('Location permission denied') ||
+//   //         fullAddress.contains('permanently denied') ||
+//   //         fullAddress.contains('Address not found')) {
+//   //       throw Exception(fullAddress);
+//   //     }
+
+//   //     _address = _formatAddress(fullAddress);
+
+//   //     print("Address: $_address");
+//   //     print("latitude: ${_coordinates![0].toString()}");
+//   //     print("longitude: ${_coordinates![1].toString()}");
+
+//   //     // Call addLocation API with user's coordinates
+//   //     final isSuccess = await ApiLocationService().addLocation(
+//   //       userId: userId, 
+//   //       latitude: _coordinates![0].toString(), // latitude
+//   //       longitude: _coordinates![1].toString()  // longitude
+//   //     );
+      
+//   //     if (!isSuccess) {
+//   //       if (kDebugMode) {
+//   //         print('Warning: Failed to save location to server');
+//   //       }
+//   //     }
+
+//   //     _isLoading = false;
+//   //     _hasError = false;
+//   //     notifyListeners();
+//   //   } catch (e) {
+//   //     _isLoading = false;
+//   //     _hasError = true;
+//   //     _errorMessage = e.toString();
+//   //     _address = 'Location not available';
+//   //     _coordinates = null;
+//   //     notifyListeners();
+//   //   }
+//   // }
+
+
+
+
 //   Future<void> initLocation(String userId) async {
-//     try {
-//       print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk$userId");
-//       _isLoading = true;
-//       _hasError = false;
-//       _errorMessage = '';
-//       notifyListeners();
-//       print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk11111111111$userId");
+//   try {
+//     _isLoading = true;
+//     notifyListeners();
 
-//       // Get coordinates first
-//       final coords = await LocationService.getCurrentCoordinates();
+//     // Run both operations in parallel
+//     final results = await Future.wait([
+//       LocationService.getCurrentCoordinates(),  // Get coordinates
+//       LocationService.getCurrentAddress(),      // Get address simultaneously
+//     ]);
 
-//             print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk22222222222$userId");
+//     _coordinates = results[0] as List<double>?;
+//     final address = results[1] as String?;
 
-//       if (coords == null) {
-//         throw Exception('Failed to get coordinates');
-//       }
-
-//                   print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk222222222223333333$userId");
-
-//       _coordinates = coords;
-
-//       // Get address
-//       final fullAddress = await LocationService.getCurrentAddress();
-//       if (fullAddress == null) {
-//         throw Exception('Failed to get address');
-//       }
-
-//       // Check if address contains error messages
-//       if (fullAddress.contains('Location services are disabled') ||
-//           fullAddress.contains('Location permission denied') ||
-//           fullAddress.contains('permanently denied') ||
-//           fullAddress.contains('Address not found')) {
-//         throw Exception(fullAddress);
-//       }
-
-//       _address = _formatAddress(fullAddress);
-
-//       print("ppppppppppppppppppppppppppppppppppppp$_address");
-
-//       print("latitude: ${_coordinates![0].toString()}");
-//       print("longitude: ${_coordinates![1].toString()}");
-
+//     if (_coordinates != null && address != null) {
+//       _address = _formatAddress(address);
       
-//       // Call addLocation API with user's coordinates
-//       final isSuccess = await ApiLocationService().addLocation(
-//         userId: userId, 
-//         latitude: _coordinates![0].toString(), // latitude
-//         longitude: _coordinates![1].toString()  // longitude
-//       );
-      
-//       if (!isSuccess) {
-//         if (kDebugMode) {
-//           print('Warning: Failed to save location to server');
-//         }
-//         // Note: We don't throw an error here as the location was still fetched successfully
-//         // The API call failure shouldn't prevent the user from using the app
-//       }
+//       // Fire-and-forget API call (don't wait for it)
+//       ApiLocationService().addLocation(
+//         userId: userId,
+//         latitude: _coordinates![0].toString(),
+//         longitude: _coordinates![1].toString()
+//       ).then((success) {
+//         print("Location saved: $success");
+//       });
 
 //       _isLoading = false;
-//       _hasError = false;
-//       notifyListeners();
-//     } catch (e) {
-//       _isLoading = false;
-//       _hasError = true;
-//       _errorMessage = e.toString();
-//       _address = 'Location not available';
-//       _coordinates = null;
 //       notifyListeners();
 //     }
+//   } catch (e) {
+//     // Handle error
+//   }
+// }
+
+//   // Determine position - checks permissions and gets location
+//   Future<Position> determinePosition() async {
+//     bool serviceEnabled;
+//     LocationPermission permission;
+
+//     // Test if location services are enabled
+//     serviceEnabled = await Geolocator.isLocationServiceEnabled();
+//     if (!serviceEnabled) {
+//       throw Exception('Location services are disabled');
+//     }
+
+//     permission = await Geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) {
+//       permission = await Geolocator.requestPermission();
+//       if (permission == LocationPermission.denied) {
+//         throw Exception('Location permissions are denied');
+//       }
+//     }
+
+//     if (permission == LocationPermission.deniedForever) {
+//       throw Exception('Location permissions are permanently denied');
+//     }
+
+//     // When permissions are granted and services are enabled, get the position
+//     return await Geolocator.getCurrentPosition();
 //   }
 
 //   // Update location manually (from search)
@@ -98,13 +156,14 @@
 //     _isLoading = false;
 //     _hasError = false;
 //     _errorMessage = '';
-//     print("llllllllllllllllllllllllllllllllllll$_address");
-//           final isSuccess = await ApiLocationService().addLocation(
-//         userId: userId, 
-//         latitude: _coordinates![0].toString(), // latitude
-//         longitude: _coordinates![1].toString()  // longitude
-//       );
-//           print("llllllllllllllllllllllllllllllllllll$isSuccess");
+//     print("Updated address: $_address");
+    
+//     final isSuccess = await ApiLocationService().addLocation(
+//       userId: userId, 
+//       latitude: _coordinates![0].toString(),
+//       longitude: _coordinates![1].toString()
+//     );
+//     print("Location update success: $isSuccess");
 
 //     notifyListeners();
 //   }
@@ -120,10 +179,9 @@
 //   }
 
 //   // Refresh current location
-//   // Future<void> refreshLocation() async {
-//   //   final user = await UserPreferences.getUser();
-//   //   await initLocation("686cfbbbcd2def2c5d950f09");
-//   // }
+//   Future<void> refreshLocation(String userId) async {
+//     await initLocation(userId);
+//   }
 
 //   // Reset location state
 //   void resetLocation() {
@@ -133,6 +191,28 @@
 //     _hasError = false;
 //     _errorMessage = '';
 //     notifyListeners();
+//   }
+
+//   // Check if location permission is granted
+//   Future<bool> isLocationPermissionGranted() async {
+//     LocationPermission permission = await Geolocator.checkPermission();
+//     return permission == LocationPermission.always || 
+//            permission == LocationPermission.whileInUse;
+//   }
+
+//   // Check if location services are enabled
+//   Future<bool> areLocationServicesEnabled() async {
+//     return await Geolocator.isLocationServiceEnabled();
+//   }
+
+//   // Open app settings
+//   Future<void> openAppSettings() async {
+//     await Geolocator.openAppSettings();
+//   }
+
+//   // Open location settings
+//   Future<void> openLocationSettings() async {
+//     await Geolocator.openLocationSettings();
 //   }
 // }
 
@@ -145,23 +225,8 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/services/Location/api_location.dart';
 import 'package:veegify/services/Location/location_sercice.dart';
 
@@ -180,119 +245,76 @@ class LocationProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   bool get hasLocation => _coordinates != null && _coordinates!.length >= 2;
 
-  // Initialize location (get current location)
-  // Future<void> initLocation(String userId) async {
-  //   try {
-  //     print("Initializing location for user: $userId");
-  //     _isLoading = true;
-  //     _hasError = false;
-  //     _errorMessage = '';
-  //     notifyListeners();
-
-  //     // Get coordinates first
-  //     final coords = await LocationService.getCurrentCoordinates();
-
-  //     if (coords == null) {
-  //       throw Exception('Failed to get coordinates');
-  //     }
-
-  //     _coordinates = coords;
-
-  //     // Get address
-  //     final fullAddress = await LocationService.getCurrentAddress();
-  //     if (fullAddress == null) {
-  //       throw Exception('Failed to get address');
-  //     }
-
-  //     // Check if address contains error messages
-  //     if (fullAddress.contains('Location services are disabled') ||
-  //         fullAddress.contains('Location permission denied') ||
-  //         fullAddress.contains('permanently denied') ||
-  //         fullAddress.contains('Address not found')) {
-  //       throw Exception(fullAddress);
-  //     }
-
-  //     _address = _formatAddress(fullAddress);
-
-  //     print("Address: $_address");
-  //     print("latitude: ${_coordinates![0].toString()}");
-  //     print("longitude: ${_coordinates![1].toString()}");
-
-  //     // Call addLocation API with user's coordinates
-  //     final isSuccess = await ApiLocationService().addLocation(
-  //       userId: userId, 
-  //       latitude: _coordinates![0].toString(), // latitude
-  //       longitude: _coordinates![1].toString()  // longitude
-  //     );
-      
-  //     if (!isSuccess) {
-  //       if (kDebugMode) {
-  //         print('Warning: Failed to save location to server');
-  //       }
-  //     }
-
-  //     _isLoading = false;
-  //     _hasError = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     _isLoading = false;
-  //     _hasError = true;
-  //     _errorMessage = e.toString();
-  //     _address = 'Location not available';
-  //     _coordinates = null;
-  //     notifyListeners();
-  //   }
-  // }
-
-
-
-
+  // ✅ FIXED INIT LOCATION (NO PARALLEL CALLS)
   Future<void> initLocation(String userId) async {
-  try {
-    _isLoading = true;
-    notifyListeners();
+    try {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = '';
+      notifyListeners();
 
-    // Run both operations in parallel
-    final results = await Future.wait([
-      LocationService.getCurrentCoordinates(),  // Get coordinates
-      LocationService.getCurrentAddress(),      // Get address simultaneously
-    ]);
+      print("📍 Step 1: Getting coordinates...");
 
-    _coordinates = results[0] as List<double>?;
-    final address = results[1] as String?;
+      final coords = await LocationService.getCurrentCoordinates();
 
-    if (_coordinates != null && address != null) {
+      if (coords == null) {
+        throw Exception('Failed to get coordinates');
+      }
+
+      _coordinates = coords;
+
+      print("📍 Step 2: Getting address...");
+
+      final address = await LocationService.getCurrentAddress();
+
+      if (address == null || address.isEmpty) {
+        throw Exception('Failed to get address');
+      }
+
       _address = _formatAddress(address);
-      
-      // Fire-and-forget API call (don't wait for it)
+
+      print("✅ Location success: $_address");
+
+      // 🔥 Fire-and-forget API (non-blocking)
       ApiLocationService().addLocation(
         userId: userId,
         latitude: _coordinates![0].toString(),
-        longitude: _coordinates![1].toString()
+        longitude: _coordinates![1].toString(),
       ).then((success) {
-        print("Location saved: $success");
+        print("🌍 Location saved: $success");
       });
 
       _isLoading = false;
       notifyListeners();
-    }
-  } catch (e) {
-    // Handle error
-  }
-}
+    } catch (e) {
+      print("❌ Location Error: $e");
 
-  // Determine position - checks permissions and gets location
+      _isLoading = false;
+      _hasError = true;
+      _errorMessage = e.toString();
+      _address = 'Location not available';
+      _coordinates = null;
+
+      notifyListeners();
+    }
+  }
+
+  // ✅ FIXED DETERMINE POSITION (WITH TIMEOUT + SAFETY)
   Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled
+    print("🔍 Checking location services...");
+
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw Exception('Location services are disabled');
     }
 
+    print("🔍 Checking permission...");
+
     permission = await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -304,45 +326,74 @@ class LocationProvider extends ChangeNotifier {
       throw Exception('Location permissions are permanently denied');
     }
 
-    // When permissions are granted and services are enabled, get the position
-    return await Geolocator.getCurrentPosition();
+    print("📡 Fetching current position...");
+
+    try {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium, // 🔥 important for iOS
+      ).timeout(const Duration(seconds: 10));
+    } catch (e) {
+      print("⚠️ Primary location failed, trying fallback...");
+
+      final lastPosition = await Geolocator.getLastKnownPosition();
+
+      if (lastPosition != null) {
+        return lastPosition;
+      }
+
+      // Final fallback
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      );
+    }
   }
 
-  // Update location manually (from search)
-  Future<void> updateLocation(String newAddress, List<double> newCoordinates, String userId) async {
+  // ✅ MANUAL UPDATE LOCATION
+  Future<void> updateLocation(
+    String newAddress,
+    List<double> newCoordinates,
+    String userId,
+  ) async {
     _address = _formatAddress(newAddress);
     _coordinates = newCoordinates;
     _isLoading = false;
     _hasError = false;
     _errorMessage = '';
-    print("Updated address: $_address");
-    
+
+    print("📍 Updated address: $_address");
+
     final isSuccess = await ApiLocationService().addLocation(
-      userId: userId, 
+      userId: userId,
       latitude: _coordinates![0].toString(),
-      longitude: _coordinates![1].toString()
+      longitude: _coordinates![1].toString(),
     );
-    print("Location update success: $isSuccess");
+
+    print("🌍 Location update success: $isSuccess");
 
     notifyListeners();
   }
 
-  // Format address to show only first 2 parts
+  // ✅ FORMAT ADDRESS
   String _formatAddress(String fullAddress) {
     if (fullAddress.isEmpty) return 'Unknown location';
-    
-    final parts = fullAddress.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+
+    final parts = fullAddress
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
     if (parts.isEmpty) return 'Unknown location';
-    
-    return parts.length > 1 ? '${parts[0]}, ${parts[1]}' : parts[0];  
+
+    return parts.length > 1 ? '${parts[0]}, ${parts[1]}' : parts[0];
   }
 
-  // Refresh current location
+  // ✅ REFRESH
   Future<void> refreshLocation(String userId) async {
     await initLocation(userId);
   }
 
-  // Reset location state
+  // ✅ RESET
   void resetLocation() {
     _address = 'Fetching location...';
     _coordinates = null;
@@ -352,24 +403,23 @@ class LocationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Check if location permission is granted
+  // ✅ PERMISSION CHECK
   Future<bool> isLocationPermissionGranted() async {
     LocationPermission permission = await Geolocator.checkPermission();
-    return permission == LocationPermission.always || 
-           permission == LocationPermission.whileInUse;
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
   }
 
-  // Check if location services are enabled
+  // ✅ SERVICE CHECK
   Future<bool> areLocationServicesEnabled() async {
     return await Geolocator.isLocationServiceEnabled();
   }
 
-  // Open app settings
+  // ✅ OPEN SETTINGS
   Future<void> openAppSettings() async {
     await Geolocator.openAppSettings();
   }
 
-  // Open location settings
   Future<void> openLocationSettings() async {
     await Geolocator.openLocationSettings();
   }
