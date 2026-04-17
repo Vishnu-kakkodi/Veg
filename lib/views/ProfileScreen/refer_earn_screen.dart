@@ -491,8 +491,8 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
   Widget _shareButton(BuildContext context, ThemeData theme) {
     // App links - update these with your actual app store URLs
     final String androidLink =
-        "https://play.google.com/store/apps/details?id=com.veegify.app";
-    final String iosLink = "https://apps.apple.com/app/idYOUR_APP_ID";
+        "https://play.google.com/store/apps/details?id=com.veggify.veegify";
+    final String iosLink = "https://apps.apple.com/in/app/vegiffy/id6757138352";
 
     return Container(
       height: 56,

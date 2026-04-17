@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -473,7 +471,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget _buildMobileLayout(WishlistProvider wishlistProvider, ThemeData theme) {
+  Widget _buildMobileLayout(
+      WishlistProvider wishlistProvider, ThemeData theme) {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: wishlistProvider.wishlist.length,
@@ -824,11 +823,10 @@ class _WishlistListItemState extends State<WishlistListItem> {
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color:
-                                  (!isRestaurantActive
-                                          ? Colors.black
-                                          : Colors.grey.shade700)
-                                      .withOpacity(0.55),
+                              color: (!isRestaurantActive
+                                      ? Colors.black
+                                      : Colors.grey.shade700)
+                                  .withOpacity(0.55),
                             ),
                             child: Center(
                               child: Container(
@@ -837,11 +835,10 @@ class _WishlistListItemState extends State<WishlistListItem> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color:
-                                      (!isRestaurantActive
-                                              ? Colors.red.shade600
-                                              : Colors.black87)
-                                          .withOpacity(0.9),
+                                  color: (!isRestaurantActive
+                                          ? Colors.red.shade600
+                                          : Colors.black87)
+                                      .withOpacity(0.9),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -929,6 +926,7 @@ class _WishlistListItemState extends State<WishlistListItem> {
     );
   }
 }
+
 class WishlistWebCard extends StatefulWidget {
   final WishlistProduct product;
   final String userId;
@@ -1003,7 +1001,8 @@ class _WishlistWebCardState extends State<WishlistWebCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        transform: _isHovered ? (Matrix4.identity()..scale(1.02)) : Matrix4.identity(),
+        transform:
+            _isHovered ? (Matrix4.identity()..scale(1.02)) : Matrix4.identity(),
         child: Card(
           elevation: _isHovered ? 4 : 1,
           shape: RoundedRectangleBorder(
@@ -1041,7 +1040,8 @@ class _WishlistWebCardState extends State<WishlistWebCard> {
                               child: Icon(
                                 Icons.image_outlined,
                                 size: 40,
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.4),
                               ),
                             )
                           : null,
@@ -1179,7 +1179,8 @@ class _WishlistWebCardState extends State<WishlistWebCard> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              safeString(widget.product.name, 'Unnamed product'),
+                              safeString(
+                                  widget.product.name, 'Unnamed product'),
                               style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -1211,7 +1212,8 @@ class _WishlistWebCardState extends State<WishlistWebCard> {
                               '₹$originalPrice',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 decoration: TextDecoration.lineThrough,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.5),
                                 fontSize: 11,
                               ),
                             ),
@@ -1434,7 +1436,8 @@ class _WishlistProductBottomSheetState
                             ? Icon(
                                 Icons.image_outlined,
                                 size: isWeb ? 35 : 25,
-                                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.4),
                               )
                             : null,
                       ),
@@ -1456,7 +1459,8 @@ class _WishlistProductBottomSheetState
                             Text(
                               'Select portion and quantity',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
                               ),
                             ),
                           ],
@@ -1596,11 +1600,13 @@ class _WishlistProductBottomSheetState
                           onPressed: cartProvider.isLoading
                               ? null
                               : () async {
-                                  final success = await addToCartWithVendorGuard(
+                                  final success =
+                                      await addToCartWithVendorGuard(
                                     context: context,
                                     cartProvider: cartProvider,
                                     restaurantIdOfProduct: widget.restaurantId,
-                                    restaurantProductId: widget.product.restaurantProductId,
+                                    restaurantProductId:
+                                        widget.product.restaurantProductId,
                                     recommendedId: widget.product.id,
                                     quantity: quantity,
                                     variation: selectedVariation,
@@ -1617,7 +1623,8 @@ class _WishlistProductBottomSheetState
                                         ),
                                         behavior: SnackBarBehavior.floating,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                     );
@@ -1630,7 +1637,8 @@ class _WishlistProductBottomSheetState
                                         ),
                                         behavior: SnackBarBehavior.floating,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                       ),
                                     );

@@ -1,4 +1,3 @@
-
 // // lib/screens/accepted_order_polling_screen.dart
 // import 'dart:async';
 // import 'dart:convert';
@@ -211,7 +210,7 @@
 //     if (_isFirstLoad) {
 //       return _buildLoadingSkeleton();
 //     }
-    
+
 //     if (!_hasOrder || _order == null) {
 //       return _noOrderAnimation();
 //     } else {
@@ -261,8 +260,8 @@
 //   final screenWidth = MediaQuery.of(context).size.width;
 
 //   // Responsive sizing
-//   final double lottieHeight = isWeb 
-//       ? (screenWidth > 1200 ? 200 : 200) 
+//   final double lottieHeight = isWeb
+//       ? (screenWidth > 1200 ? 200 : 200)
 //       : 220;
 //   final double horizontalPadding = isWeb ? (screenWidth > 1200 ? 80 : 48) : 24.0;
 //   final double titleFontSize = isWeb ? (screenWidth > 1200 ? 28 : 24) : 18;
@@ -272,7 +271,7 @@
 //     width: double.infinity,
 //     // 👇 REDUCE THIS VERTICAL PADDING
 //     padding: EdgeInsets.symmetric(
-//       horizontal: horizontalPadding, 
+//       horizontal: horizontalPadding,
 //       vertical: isWeb ? 16 : 8,  // ← Changed from 32/16 to 16/8
 //     ),
 //     child: Column(
@@ -303,7 +302,7 @@
 //         ),
 //         // 👇 REDUCE THIS SPACING
 //         const SizedBox(height: 16),  // ← Changed from 32 to 16
-        
+
 //         Text(
 //           'Finding a Vegiffy Partner',
 //           style: theme.textTheme.headlineSmall?.copyWith(
@@ -315,7 +314,7 @@
 //         ),
 //         // 👇 REDUCE THIS SPACING
 //         const SizedBox(height: 8),  // ← Changed from 16 to 8
-        
+
 //         Text(
 //           'We are looking for a Vegiffy Green Partner near you\nto accept your order. This usually takes just a few minutes.',
 //           style: theme.textTheme.bodyLarge?.copyWith(
@@ -328,7 +327,7 @@
 //         if (isWeb) ...[
 //           // 👇 REDUCE THIS SPACING
 //           const SizedBox(height: 16),  // ← Changed from 24 to 16
-          
+
 //           Row(
 //             mainAxisAlignment: MainAxisAlignment.center,
 //             children: [
@@ -359,8 +358,8 @@
 //     final screenWidth = MediaQuery.of(context).size.width;
 
 //     // Responsive padding and margins
-//     final double cardMargin = isWeb 
-//         ? (screenWidth > 1200 ? 60 : 40) 
+//     final double cardMargin = isWeb
+//         ? (screenWidth > 1200 ? 60 : 40)
 //         : 16;
 //     final double cardPadding = isWeb ? (screenWidth > 1200 ? 28 : 24) : 16;
 //     final double fontSizeTitle = isWeb ? (screenWidth > 1200 ? 22 : 20) : 16;
@@ -904,8 +903,8 @@
 //     final screenWidth = MediaQuery.of(context).size.width;
 
 //     // Responsive sizing
-//     final double horizontalPadding = isWeb 
-//         ? (screenWidth > 1200 ? 60 : 40) 
+//     final double horizontalPadding = isWeb
+//         ? (screenWidth > 1200 ? 60 : 40)
 //         : 16;
 //     final double cardPadding = isWeb ? (screenWidth > 1200 ? 28 : 24) : 16;
 //     final double fontSizeTitle = isWeb ? (screenWidth > 1200 ? 20 : 18) : 15;
@@ -933,9 +932,9 @@
 //                   color: colorScheme.primary,
 //                 ),
 //               ),
-              
+
 //               const SizedBox(height: 24),
-              
+
 //               // Timeline
 //               _buildTimelineStep(
 //                 isCompleted: true,
@@ -947,12 +946,12 @@
 //                 isWeb: isWeb,
 //                 fontSizeBody: fontSizeBody,
 //               ),
-              
+
 //               _buildTimelineStep(
 //                 isCompleted: order.riderDetails != null,
 //                 title: 'Partner Assigned',
-//                 subtitle: order.riderDetails != null 
-//                     ? '${order.riderDetails?.name} is on the way' 
+//                 subtitle: order.riderDetails != null
+//                     ? '${order.riderDetails?.name} is on the way'
 //                     : 'Finding a delivery partner',
 //                 icon: Icons.delivery_dining,
 //                 theme: theme,
@@ -960,7 +959,7 @@
 //                 isWeb: isWeb,
 //                 fontSizeBody: fontSizeBody,
 //               ),
-              
+
 //               _buildTimelineStep(
 //                 isCompleted: false,
 //                 title: 'Out for Delivery',
@@ -972,13 +971,13 @@
 //                 fontSizeBody: fontSizeBody,
 //                 isLast: true,
 //               ),
-              
+
 //               const SizedBox(height: 24),
-              
+
 //               if (order.riderDetails != null) ...[
 //                 const Divider(),
 //                 const SizedBox(height: 16),
-                
+
 //                 // Rider section
 //                 Text(
 //                   'Your Delivery Partner',
@@ -987,9 +986,9 @@
 //                     fontSize: fontSizeTitle,
 //                   ),
 //                 ),
-                
+
 //                 const SizedBox(height: 16),
-                
+
 //                 Container(
 //                   padding: EdgeInsets.all(isWeb ? 20 : 16),
 //                   decoration: BoxDecoration(
@@ -1035,7 +1034,7 @@
 //                           ],
 //                         ),
 //                       ),
-                      
+
 //                       // Action buttons
 //                       if (isWeb) ...[
 //                         const SizedBox(width: 16),
@@ -1153,21 +1152,21 @@
 //               width: isWeb ? 48 : 40,
 //               height: isWeb ? 48 : 40,
 //               decoration: BoxDecoration(
-//                 color: isCompleted 
-//                     ? colorScheme.primary 
+//                 color: isCompleted
+//                     ? colorScheme.primary
 //                     : colorScheme.surfaceVariant,
 //                 shape: BoxShape.circle,
 //                 border: Border.all(
-//                   color: isCompleted 
-//                       ? Colors.transparent 
+//                   color: isCompleted
+//                       ? Colors.transparent
 //                       : colorScheme.outline.withOpacity(0.3),
 //                   width: 2,
 //                 ),
 //               ),
 //               child: Icon(
 //                 isCompleted ? Icons.check : icon,
-//                 color: isCompleted 
-//                     ? Colors.white 
+//                 color: isCompleted
+//                     ? Colors.white
 //                     : colorScheme.onSurfaceVariant,
 //                 size: isWeb ? 24 : 20,
 //               ),
@@ -1176,7 +1175,7 @@
 //               Container(
 //                 width: 2,
 //                 height: isWeb ? 50 : 40,
-//                 color: isCompleted 
+//                 color: isCompleted
 //                     ? colorScheme.primary.withOpacity(0.3)
 //                     : colorScheme.outline.withOpacity(0.2),
 //                 margin: const EdgeInsets.symmetric(vertical: 4),
@@ -1195,8 +1194,8 @@
 //                   style: theme.textTheme.titleLarge?.copyWith(
 //                     fontWeight: FontWeight.bold,
 //                     fontSize: fontSizeBody + 2,
-//                     color: isCompleted 
-//                         ? colorScheme.primary 
+//                     color: isCompleted
+//                         ? colorScheme.primary
 //                         : colorScheme.onSurface,
 //                   ),
 //                 ),
@@ -1281,7 +1280,7 @@
 //     final colorScheme = theme.colorScheme;
 //     final isWeb = kIsWeb;
 //     final screenSize = MediaQuery.of(context).size;
-    
+
 //     return Scaffold(
 //       body: Container(
 //         // decoration: isWeb
@@ -1360,14 +1359,14 @@
 //                                   ],
 //                                 ),
 //                               ),
-                              
+
 //                               // Main content
 //                               _buildCardContent(),
-                              
+
 //                               // Delivery flow if order exists
 //                               if (_hasOrder && _order != null && !_isFirstLoad)
 //                                 _deliveryFlowWidget(_order!),
-                              
+
 //                               const SizedBox(height: 40),
 //                             ],
 //                           ),
@@ -1572,25 +1571,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // lib/screens/accepted_order_polling_screen.dart
 import 'dart:async';
 import 'dart:convert';
@@ -1604,6 +1584,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:veegify/helper/storage_helper.dart';
 import 'package:veegify/views/Booking/chat_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:veegify/views/ProfileScreen/help_screen.dart';
 import 'package:veegify/views/Tracker/tracking_screen_osm.dart';
 
 class AcceptedOrderPollingScreen extends StatefulWidget {
@@ -1621,14 +1602,15 @@ class AcceptedOrderPollingScreen extends StatefulWidget {
       _AcceptedOrderPollingScreenState();
 }
 
-class _AcceptedOrderPollingScreenState
-    extends State<AcceptedOrderPollingScreen> with SingleTickerProviderStateMixin {
+class _AcceptedOrderPollingScreenState extends State<AcceptedOrderPollingScreen>
+    with SingleTickerProviderStateMixin {
   static const _pollInterval = Duration(seconds: 5);
   Timer? _pollTimer;
   bool _isFirstLoad = true;
   bool _hasOrder = false;
   bool _hasRider = false;
   AcceptedOrder? _order;
+  bool _isOrderRejected = false; // Add this new variable
 
   late final AnimationController _hourglassController;
   late final Animation<double> _hourglassAnimation;
@@ -1648,7 +1630,7 @@ class _AcceptedOrderPollingScreenState
     debugPrint("📦 Received userId: ${widget.userId}");
     debugPrint("📦 Received orderId: ${widget.orderId}");
     debugPrint("📱 Platform: ${kIsWeb ? 'Web' : 'Mobile'}");
-    
+
     _loadUserId();
 
     _hourglassController =
@@ -1703,11 +1685,12 @@ class _AcceptedOrderPollingScreenState
     debugPrint("🎯 _startPolling called");
     debugPrint("📊 Initial API call count: $_apiCallCount");
     debugPrint("=" * 50);
-    
+
     await _fetchAcceptedOrder(isInitialLoad: true);
 
     if (!_hasRider) {
-      debugPrint("⏰ Starting periodic polling every ${_pollInterval.inSeconds} seconds");
+      debugPrint(
+          "⏰ Starting periodic polling every ${_pollInterval.inSeconds} seconds");
       _pollTimer = Timer.periodic(_pollInterval, (t) async {
         debugPrint("-" * 40);
         debugPrint("⏰ Polling tick #${_apiCallCount + 1}");
@@ -1722,6 +1705,252 @@ class _AcceptedOrderPollingScreenState
     }
   }
 
+  // Future<void> _fetchAcceptedOrder({bool isInitialLoad = false}) async {
+  //   debugPrint("=" * 50);
+  //   debugPrint("🌐 _fetchAcceptedOrder EXECUTED - Call #${_apiCallCount + 1}");
+  //   debugPrint("=" * 50);
+  //   debugPrint("📋 isInitialLoad: $isInitialLoad");
+  //   debugPrint("📋 widget.userId: ${widget.userId}");
+  //   debugPrint("📋 widget.orderId: ${widget.orderId}");
+  //   debugPrint("📋 state userId: $userId");
+
+  //   if (!mounted) {
+  //     debugPrint("⚠️ Widget not mounted, returning");
+  //     return;
+  //   }
+
+  //   _apiCallCount++;
+
+  //   // Only show loading on first load, not on polling
+  //   if (isInitialLoad) {
+  //     setState(() {
+  //       _isFirstLoad = true;
+  //     });
+  //   }
+
+  //   try {
+  //     // Determine which userId to use
+  //     final effectiveUserId = userId ?? widget.userId;
+  //     debugPrint("📋 effectiveUserId: $effectiveUserId");
+
+  //     if (effectiveUserId == null) {
+  //       debugPrint("❌ No userId available, cannot make API call");
+  //       if (isInitialLoad && mounted) {
+  //         setState(() {
+  //           _isFirstLoad = false;
+  //         });
+  //       }
+  //       return;
+  //     }
+
+  //     Uri url;
+  //     String urlString;
+
+  //     if (widget.orderId != null) {
+  //       urlString =
+  //           'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId/${widget.orderId}';
+  //       print("pppppppppppppppppp$urlString");
+  //       url = Uri.parse(urlString);
+  //       debugPrint("🔗 Using URL with both IDs:");
+  //     } else {
+  //       urlString =
+  //           'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId';
+  //       url = Uri.parse(urlString);
+  //       debugPrint("🔗 Using URL with only userId:");
+  //     }
+
+  //     debugPrint("   → $urlString");
+  //     debugPrint("🌐 Making API request...");
+  //     debugPrint("⏳ Waiting for response...");
+
+  //     final stopwatch = Stopwatch()..start();
+  //     final resp = await http.get(url).timeout(const Duration(seconds: 10));
+  //     stopwatch.stop();
+
+  //     debugPrint("📥 Response received in ${stopwatch.elapsedMilliseconds}ms");
+  //     debugPrint("📊 Status code: ${resp.statusCode}");
+  //     debugPrint("📄 Response headers:");
+  //     resp.headers.forEach((key, value) {
+  //       debugPrint("   $key: $value");
+  //     });
+
+  //     // Log response body (truncate if too long)
+  //     if (resp.body.length > 500) {
+  //       debugPrint("📄 Response body (first 500 chars):");
+  //       debugPrint(resp.body.substring(0, 500) + "...");
+  //     } else {
+  //       debugPrint("📄 Response body:");
+  //       debugPrint(resp.body);
+  //     }
+
+  //     if (resp.statusCode == 200) {
+  //       _successCount++;
+  //       debugPrint("✅ API call successful (#$_successCount)");
+
+  //       try {
+  //         final jsonBody = json.decode(resp.body);
+  //         debugPrint("📊 Parsed JSON successfully");
+  //         debugPrint("📊 JSON keys: ${jsonBody.keys.join(', ')}");
+
+  //         final success = jsonBody['success'] ?? false;
+  //         final data = jsonBody['data'];
+
+  //         debugPrint("📊 success field: $success");
+  //         debugPrint("📊 data type: ${data.runtimeType}");
+
+  //         if (success != true) {
+  //           debugPrint("⚠️ success is false");
+  //           if (jsonBody['message'] != null) {
+  //             debugPrint("📝 Message: ${jsonBody['message']}");
+  //           }
+  //         }
+
+  //         if (success != true || data == null) {
+  //           debugPrint("⚠️ No valid data received");
+  //           if (!mounted) return;
+  //           setState(() {
+  //             _isFirstLoad = false;
+  //             _hasOrder = false;
+  //             _hasRider = false;
+  //             _order = null;
+  //           });
+  //           return;
+  //         }
+
+  //         Map<String, dynamic>? parsed;
+  //         if (data is List) {
+  //           debugPrint("📊 data is List with ${data.length} items");
+  //           if (data.isNotEmpty) {
+  //             parsed = data.first as Map<String, dynamic>;
+  //             debugPrint("📊 Using first item from list");
+  //           } else {
+  //             debugPrint("⚠️ data list is empty");
+  //           }
+  //         } else if (data is Map<String, dynamic>) {
+  //           debugPrint("📊 data is Map");
+  //           parsed = data;
+  //         } else {
+  //           debugPrint("❌ Unexpected data type: ${data.runtimeType}");
+  //         }
+
+  //         if (parsed == null) {
+  //           debugPrint("❌ Failed to parse data");
+  //           if (!mounted) return;
+  //           setState(() {
+  //             _isFirstLoad = false;
+  //             _hasOrder = false;
+  //             _hasRider = false;
+  //             _order = null;
+  //           });
+  //           return;
+  //         }
+
+  //         // debugPrint("📦 Creating AcceptedOrder object");
+  //         // debugPrint("📦 Parsed data keys: ${parsed.keys.join(', ')}");
+
+  //         // final order = AcceptedOrder.fromJson(parsed);
+  //         // final riderPresent = order.riderDetails != null;
+
+  //         debugPrint("📦 Creating AcceptedOrder object");
+  //         debugPrint("📦 Parsed data keys: ${parsed.keys.join(', ')}");
+
+  //         final order = AcceptedOrder.fromJson(parsed);
+  //         final riderPresent = order.riderDetails != null;
+
+  //         // *** ADD THIS CHECK FOR REJECTION ***
+  //         // Check if order is rejected (adjust the field name based on your API response)
+  //         final isRejected = parsed['orderStatus'] == 'rejected' ||
+  //             parsed['deliveryStatus'] == 'rejected' ||
+  //             parsed['status'] == 'rejected';
+
+  //         if (isRejected) {
+  //           debugPrint("❌ Order is rejected by vendor");
+  //           if (!mounted) return;
+
+  //           setState(() {
+  //             _isOrderRejected = true;
+  //             _isFirstLoad = false;
+  //             _hasOrder = false;
+  //             _hasRider = false;
+  //             _order = null;
+  //           });
+
+  //           // Cancel polling if active
+  //           _pollTimer?.cancel();
+  //           _hourglassController.stop();
+
+  //           // Show the rejection modal
+  //           WidgetsBinding.instance.addPostFrameCallback((_) {
+  //             _showRejectionModal();
+  //           });
+  //           return;
+  //         }
+
+  //         debugPrint("👤 Rider present: $riderPresent");
+  //         if (riderPresent) {
+  //           debugPrint("👤 Rider details:");
+  //           debugPrint("   - id: ${order.riderDetails?.id}");
+  //           debugPrint("   - name: ${order.riderDetails?.name}");
+  //           debugPrint("   - contact: ${order.riderDetails?.contact}");
+  //         }
+
+  //         debugPrint("🍽️ Restaurant: ${order.restaurantName}");
+  //         debugPrint("📍 Order ID: ${order.orderId}");
+
+  //         if (!mounted) return;
+  //         setState(() {
+  //           _order = order;
+  //           _hasOrder = true;
+  //           _hasRider = riderPresent;
+  //           _isFirstLoad = false;
+  //         });
+
+  //         if (riderPresent) {
+  //           debugPrint("✅ Rider found, cancelling poll timer");
+  //           _pollTimer?.cancel();
+  //           _hourglassController.stop();
+  //         }
+  //       } catch (e, stackTrace) {
+  //         debugPrint("❌ Error parsing JSON response: $e");
+  //         debugPrint("❌ Stack trace: $stackTrace");
+  //         if (!mounted) return;
+  //         setState(() {
+  //           _isFirstLoad = false;
+  //           _hasOrder = false;
+  //           _hasRider = false;
+  //           _order = null;
+  //         });
+  //       }
+  //     } else {
+  //       _errorCount++;
+  //       debugPrint("❌ API error #$_errorCount - Status: ${resp.statusCode}");
+  //       debugPrint("❌ Response body: ${resp.body}");
+
+  //       if (!mounted) return;
+  //       setState(() {
+  //         _isFirstLoad = false;
+  //         _hasOrder = false;
+  //         _hasRider = false;
+  //         _order = null;
+  //       });
+  //     }
+  //   } catch (e, stackTrace) {
+  //     _errorCount++;
+  //     debugPrint("🔥 Exception #$_errorCount: $e");
+  //     debugPrint("🔥 Exception type: ${e.runtimeType}");
+  //     debugPrint("🔥 Stack trace: $stackTrace");
+
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _isFirstLoad = false;
+  //     });
+  //   }
+
+  //   debugPrint(
+  //       "📊 Stats - API Calls: $_apiCallCount, Success: $_successCount, Errors: $_errorCount");
+  //   debugPrint("=" * 50);
+  // }
+
   Future<void> _fetchAcceptedOrder({bool isInitialLoad = false}) async {
     debugPrint("=" * 50);
     debugPrint("🌐 _fetchAcceptedOrder EXECUTED - Call #${_apiCallCount + 1}");
@@ -1730,14 +1959,14 @@ class _AcceptedOrderPollingScreenState
     debugPrint("📋 widget.userId: ${widget.userId}");
     debugPrint("📋 widget.orderId: ${widget.orderId}");
     debugPrint("📋 state userId: $userId");
-    
+
     if (!mounted) {
       debugPrint("⚠️ Widget not mounted, returning");
       return;
     }
-    
+
     _apiCallCount++;
-    
+
     // Only show loading on first load, not on polling
     if (isInitialLoad) {
       setState(() {
@@ -1762,18 +1991,20 @@ class _AcceptedOrderPollingScreenState
 
       Uri url;
       String urlString;
-      
+
       if (widget.orderId != null) {
-        urlString = 'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId/${widget.orderId}';
+        urlString =
+            'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId/${widget.orderId}';
         print("pppppppppppppppppp$urlString");
         url = Uri.parse(urlString);
         debugPrint("🔗 Using URL with both IDs:");
       } else {
-        urlString = 'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId';
+        urlString =
+            'https://api.vegiffyy.com/api/acceptedorders/$effectiveUserId';
         url = Uri.parse(urlString);
         debugPrint("🔗 Using URL with only userId:");
       }
-      
+
       debugPrint("   → $urlString");
       debugPrint("🌐 Making API request...");
       debugPrint("⏳ Waiting for response...");
@@ -1784,11 +2015,7 @@ class _AcceptedOrderPollingScreenState
 
       debugPrint("📥 Response received in ${stopwatch.elapsedMilliseconds}ms");
       debugPrint("📊 Status code: ${resp.statusCode}");
-      debugPrint("📄 Response headers:");
-      resp.headers.forEach((key, value) {
-        debugPrint("   $key: $value");
-      });
-      
+
       // Log response body (truncate if too long)
       if (resp.body.length > 500) {
         debugPrint("📄 Response body (first 500 chars):");
@@ -1798,10 +2025,25 @@ class _AcceptedOrderPollingScreenState
         debugPrint(resp.body);
       }
 
+      // *** CHECK FOR REJECTION IN RESPONSE BODY FIRST ***
+      try {
+        final responseBody = json.decode(resp.body);
+        final message = responseBody['message'] as String? ?? '';
+
+        // Check if the message contains rejection keywords
+        if (message.toLowerCase().contains('rejected')) {
+          debugPrint("❌ ORDER REJECTED DETECTED! Message: $message");
+          _handleOrderRejection(message);
+          return;
+        }
+      } catch (e) {
+        debugPrint("Could not parse response for rejection check: $e");
+      }
+
       if (resp.statusCode == 200) {
         _successCount++;
         debugPrint("✅ API call successful (#$_successCount)");
-        
+
         try {
           final jsonBody = json.decode(resp.body);
           debugPrint("📊 Parsed JSON successfully");
@@ -1809,7 +2051,7 @@ class _AcceptedOrderPollingScreenState
 
           final success = jsonBody['success'] ?? false;
           final data = jsonBody['data'];
-          
+
           debugPrint("📊 success field: $success");
           debugPrint("📊 data type: ${data.runtimeType}");
 
@@ -1862,10 +2104,21 @@ class _AcceptedOrderPollingScreenState
 
           debugPrint("📦 Creating AcceptedOrder object");
           debugPrint("📦 Parsed data keys: ${parsed.keys.join(', ')}");
-          
+
           final order = AcceptedOrder.fromJson(parsed);
           final riderPresent = order.riderDetails != null;
-          
+
+          // Also check order status fields for rejection
+          final isRejected = parsed['orderStatus'] == 'rejected' ||
+              parsed['deliveryStatus'] == 'rejected' ||
+              parsed['status'] == 'rejected';
+
+          if (isRejected) {
+            debugPrint("❌ Order is rejected by vendor (from status field)");
+            _handleOrderRejection('Order status indicates rejection');
+            return;
+          }
+
           debugPrint("👤 Rider present: $riderPresent");
           if (riderPresent) {
             debugPrint("👤 Rider details:");
@@ -1905,7 +2158,22 @@ class _AcceptedOrderPollingScreenState
         _errorCount++;
         debugPrint("❌ API error #$_errorCount - Status: ${resp.statusCode}");
         debugPrint("❌ Response body: ${resp.body}");
-        
+
+        // Check again for rejection in non-200 responses
+        try {
+          final errorBody = json.decode(resp.body);
+          final errorMessage = errorBody['message'] as String? ?? '';
+
+          if (errorMessage.toLowerCase().contains('rejected')) {
+            debugPrint(
+                "❌ Order rejected detected from error response: $errorMessage");
+            _handleOrderRejection(errorMessage);
+            return;
+          }
+        } catch (e) {
+          debugPrint("Could not parse error response: $e");
+        }
+
         if (!mounted) return;
         setState(() {
           _isFirstLoad = false;
@@ -1919,15 +2187,272 @@ class _AcceptedOrderPollingScreenState
       debugPrint("🔥 Exception #$_errorCount: $e");
       debugPrint("🔥 Exception type: ${e.runtimeType}");
       debugPrint("🔥 Stack trace: $stackTrace");
-      
+
       if (!mounted) return;
       setState(() {
         _isFirstLoad = false;
       });
     }
-    
-    debugPrint("📊 Stats - API Calls: $_apiCallCount, Success: $_successCount, Errors: $_errorCount");
+
+    debugPrint(
+        "📊 Stats - API Calls: $_apiCallCount, Success: $_successCount, Errors: $_errorCount");
     debugPrint("=" * 50);
+  }
+
+// Helper method to handle order rejection
+  void _handleOrderRejection([String? message]) {
+    debugPrint("🚫 Handling order rejection. Message: $message");
+
+    if (!mounted) return;
+
+    setState(() {
+      _isOrderRejected = true;
+      _isFirstLoad = false;
+      _hasOrder = false;
+      _hasRider = false;
+      _order = null;
+    });
+
+    // Cancel polling if active
+    _pollTimer?.cancel();
+    _hourglassController.stop();
+
+    // Show the rejection modal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showRejectionModal(message);
+    });
+  }
+
+  void _showRejectionModal([String? errorMessage]) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents closing by tapping outside
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false, // Prevents back button from closing
+          child: AlertDialog(
+            backgroundColor: colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Row(
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Order Rejected',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color:
+                        isDarkMode ? Colors.red.shade300 : Colors.red.shade700,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'We regret to inform you that your order has been rejected by the vendor.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Refund Information Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? Colors.amber.shade900.withOpacity(0.3)
+                        : Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDarkMode
+                          ? Colors.amber.shade700.withOpacity(0.5)
+                          : Colors.amber.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.currency_rupee,
+                            color: isDarkMode
+                                ? Colors.amber.shade300
+                                : Colors.amber.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Refund Information',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: isDarkMode
+                                  ? Colors.amber.shade300
+                                  : Colors.amber.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'If you have made any payment, it will be automatically refunded to your original payment method within 24 hours.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDarkMode
+                              ? Colors.amber.shade100
+                              : Colors.amber.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Options Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? colorScheme.surfaceVariant.withOpacity(0.5)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDarkMode
+                          ? colorScheme.outline.withOpacity(0.3)
+                          : Colors.grey.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'What would you like to do?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: [
+                          _buildOptionBullet(
+                            context,
+                            'No payment has been deducted (if COD)',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildOptionBullet(
+                            context,
+                            'You can place a new order with a different restaurant',
+                          ),
+                          const SizedBox(height: 6),
+                          _buildOptionBullet(
+                            context,
+                            'Contact support if you need assistance',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  // Navigate to help/support
+                  Navigator.of(context).pop(); // Close modal first
+                  _navigateToHelp();
+                },
+                icon: const Icon(Icons.help_outline, size: 18),
+                label: const Text('Contact Support'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+          ),
+        );
+      },
+    );
+  }
+
+// Helper method to build bullet points
+  Widget _buildOptionBullet(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '• ',
+          style: TextStyle(
+            fontSize: 14,
+            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _navigateToHelp() {
+    // Navigate to replacement/help screen
+    // Option 1: Navigate to a specific help/replacement screen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const HelpScreen(), // Create this screen
+      ),
+    );
+
+    // Option 2: Open a URL
+    // launchUrl(Uri.parse('https://vegiffyy.com/help'));
+
+    // Option 3: Navigate to chat support
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => SupportChatScreen(),
+    //   ),
+    // );
   }
 
   Future<void> _launchPhone(String phone) async {
@@ -1960,7 +2485,7 @@ class _AcceptedOrderPollingScreenState
     if (_isFirstLoad) {
       return _buildLoadingSkeleton();
     }
-    
+
     if (!_hasOrder || _order == null) {
       return _noOrderAnimation();
     } else {
@@ -2010,17 +2535,16 @@ class _AcceptedOrderPollingScreenState
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive sizing
-    final double lottieHeight = isWeb 
-        ? (screenWidth > 1200 ? 200 : 200) 
-        : 220;
-    final double horizontalPadding = isWeb ? (screenWidth > 1200 ? 80 : 48) : 24.0;
+    final double lottieHeight = isWeb ? (screenWidth > 1200 ? 200 : 200) : 220;
+    final double horizontalPadding =
+        isWeb ? (screenWidth > 1200 ? 80 : 48) : 24.0;
     final double titleFontSize = isWeb ? (screenWidth > 1200 ? 28 : 24) : 18;
     final double bodyFontSize = isWeb ? (screenWidth > 1200 ? 18 : 16) : 14;
 
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding, 
+        horizontal: horizontalPadding,
         vertical: isWeb ? 16 : 8,
       ),
       child: Column(
@@ -2051,7 +2575,6 @@ class _AcceptedOrderPollingScreenState
             ),
           ),
           const SizedBox(height: 16),
-          
           Text(
             'Finding a Vegiffy Partner',
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -2062,7 +2585,6 @@ class _AcceptedOrderPollingScreenState
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          
           Text(
             'We are looking for a Vegiffy Green Partner near you\nto accept your order. This usually takes just a few minutes.',
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -2104,9 +2626,7 @@ class _AcceptedOrderPollingScreenState
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive padding and margins
-    final double cardMargin = isWeb 
-        ? (screenWidth > 1200 ? 60 : 40) 
-        : 16;
+    final double cardMargin = isWeb ? (screenWidth > 1200 ? 60 : 40) : 16;
     final double cardPadding = isWeb ? (screenWidth > 1200 ? 28 : 24) : 16;
     final double fontSizeTitle = isWeb ? (screenWidth > 1200 ? 22 : 20) : 16;
     final double fontSizeBody = isWeb ? (screenWidth > 1200 ? 18 : 16) : 14;
@@ -2118,7 +2638,8 @@ class _AcceptedOrderPollingScreenState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(isWeb ? 28 : 16),
       ),
-      margin: EdgeInsets.symmetric(horizontal: cardMargin, vertical: isWeb ? 24 : 12),
+      margin: EdgeInsets.symmetric(
+          horizontal: cardMargin, vertical: isWeb ? 24 : 12),
       color: theme.cardColor,
       child: Padding(
         padding: EdgeInsets.all(cardPadding),
@@ -2257,7 +2778,8 @@ class _AcceptedOrderPollingScreenState
               ),
             ] else ...[
               // Mobile/tablet list view
-              ..._buildDetailList(order, theme, colorScheme, isWeb, fontSizeBody),
+              ..._buildDetailList(
+                  order, theme, colorScheme, isWeb, fontSizeBody),
             ],
 
             const SizedBox(height: 20),
@@ -2649,15 +3171,15 @@ class _AcceptedOrderPollingScreenState
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive sizing
-    final double horizontalPadding = isWeb 
-        ? (screenWidth > 1200 ? 60 : 40) 
-        : 16;
+    final double horizontalPadding =
+        isWeb ? (screenWidth > 1200 ? 60 : 40) : 16;
     final double cardPadding = isWeb ? (screenWidth > 1200 ? 28 : 24) : 16;
     final double fontSizeTitle = isWeb ? (screenWidth > 1200 ? 20 : 18) : 15;
     final double fontSizeBody = isWeb ? (screenWidth > 1200 ? 18 : 16) : 14;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: isWeb ? 20 : 12),
+      padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: isWeb ? 20 : 12),
       child: Card(
         elevation: isWeb ? 8 : 4,
         shadowColor: Colors.black.withOpacity(0.15),
@@ -2678,9 +3200,9 @@ class _AcceptedOrderPollingScreenState
                   color: colorScheme.primary,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Timeline
               _buildTimelineStep(
                 isCompleted: true,
@@ -2692,12 +3214,12 @@ class _AcceptedOrderPollingScreenState
                 isWeb: isWeb,
                 fontSizeBody: fontSizeBody,
               ),
-              
+
               _buildTimelineStep(
                 isCompleted: order.riderDetails != null,
                 title: 'Partner Assigned',
-                subtitle: order.riderDetails != null 
-                    ? '${order.riderDetails?.name} is on the way' 
+                subtitle: order.riderDetails != null
+                    ? '${order.riderDetails?.name} is on the way'
                     : 'Finding a delivery partner',
                 icon: Icons.delivery_dining,
                 theme: theme,
@@ -2705,7 +3227,7 @@ class _AcceptedOrderPollingScreenState
                 isWeb: isWeb,
                 fontSizeBody: fontSizeBody,
               ),
-              
+
               _buildTimelineStep(
                 isCompleted: order.deliveryStatus == 'Picked',
                 title: 'Out for Delivery',
@@ -2717,13 +3239,13 @@ class _AcceptedOrderPollingScreenState
                 fontSizeBody: fontSizeBody,
                 isLast: true,
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               if (order.riderDetails != null) ...[
                 const Divider(),
                 const SizedBox(height: 16),
-                
+
                 // Rider section
                 Text(
                   'Your Delivery Partner',
@@ -2732,165 +3254,171 @@ class _AcceptedOrderPollingScreenState
                     fontSize: fontSizeTitle,
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
-Container(
-  padding: EdgeInsets.all(isWeb ? 20 : 16),
-  decoration: BoxDecoration(
-    color: colorScheme.surfaceVariant.withOpacity(0.3),
-    borderRadius: BorderRadius.circular(isWeb ? 20 : 16),
-  ),
-  child: Column(
-    children: [
-      /// First Row (Avatar + Name + Phone + ETA)
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: isWeb ? 36 : 28,
-            backgroundColor: colorScheme.primary.withOpacity(0.1),
-            backgroundImage: order.riderDetails?.image != null
-                ? NetworkImage(order.riderDetails!.image!)
-                : null,
-            child: order.riderDetails?.image == null
-                ? Icon(
-                    Icons.person,
-                    size: isWeb ? 36 : 28,
-                    color: colorScheme.primary,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  order.riderDetails?.name ?? 'Delivery Partner',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: fontSizeTitle,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  order.riderDetails?.contact ?? 'Contact not available',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: fontSizeBody,
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-                // ETA Section - Added here
-                // if (order.deliveryFlow?.user?.time != null && 
-                //     order.deliveryFlow!.user!.time!.isNotEmpty) ...[
-                //   const SizedBox(height: 8),
-                //   Container(
-                //     padding: const EdgeInsets.symmetric(
-                //       horizontal: 10,
-                //       vertical: 5,
-                //     ),
-                //     decoration: BoxDecoration(
-                //       color: colorScheme.primary.withOpacity(0.1),
-                //       borderRadius: BorderRadius.circular(20),
-                //       border: Border.all(
-                //         color: colorScheme.primary.withOpacity(0.3),
-                //         width: 0.5,
-                //       ),
-                //     ),
-                //     child: Row(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         Icon(
-                //           Icons.access_time_filled,
-                //           size: isWeb ? 16 : 14,
-                //           color: colorScheme.primary,
-                //         ),
-                //         const SizedBox(width: 6),
-                //         Flexible(
-                //           child: Text(
-                //             'Reaches by ${order.deliveryFlow!.user!.time}',
-                //             style: theme.textTheme.labelMedium?.copyWith(
-                //               color: colorScheme.primary,
-                //               fontWeight: FontWeight.w600,
-                //               fontSize: isWeb ? 14 : 12,
-                //             ),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ],
-              ],
-            ),
-          ),
-        ],
-      ),
 
-      const SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.all(isWeb ? 20 : 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(isWeb ? 20 : 16),
+                  ),
+                  child: Column(
+                    children: [
+                      /// First Row (Avatar + Name + Phone + ETA)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: isWeb ? 36 : 28,
+                            backgroundColor:
+                                colorScheme.primary.withOpacity(0.1),
+                            backgroundImage: order.riderDetails?.image != null
+                                ? NetworkImage(order.riderDetails!.image!)
+                                : null,
+                            child: order.riderDetails?.image == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: isWeb ? 36 : 28,
+                                    color: colorScheme.primary,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  order.riderDetails?.name ??
+                                      'Delivery Partner',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSizeTitle,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  order.riderDetails?.contact ??
+                                      'Contact not available',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontSize: fontSizeBody,
+                                    color:
+                                        colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                                ),
+                                // ETA Section - Added here
+                                // if (order.deliveryFlow?.user?.time != null &&
+                                //     order.deliveryFlow!.user!.time!.isNotEmpty) ...[
+                                //   const SizedBox(height: 8),
+                                //   Container(
+                                //     padding: const EdgeInsets.symmetric(
+                                //       horizontal: 10,
+                                //       vertical: 5,
+                                //     ),
+                                //     decoration: BoxDecoration(
+                                //       color: colorScheme.primary.withOpacity(0.1),
+                                //       borderRadius: BorderRadius.circular(20),
+                                //       border: Border.all(
+                                //         color: colorScheme.primary.withOpacity(0.3),
+                                //         width: 0.5,
+                                //       ),
+                                //     ),
+                                //     child: Row(
+                                //       mainAxisSize: MainAxisSize.min,
+                                //       children: [
+                                //         Icon(
+                                //           Icons.access_time_filled,
+                                //           size: isWeb ? 16 : 14,
+                                //           color: colorScheme.primary,
+                                //         ),
+                                //         const SizedBox(width: 6),
+                                //         Flexible(
+                                //           child: Text(
+                                //             'Reaches by ${order.deliveryFlow!.user!.time}',
+                                //             style: theme.textTheme.labelMedium?.copyWith(
+                                //               color: colorScheme.primary,
+                                //               fontWeight: FontWeight.w600,
+                                //               fontSize: isWeb ? 14 : 12,
+                                //             ),
+                                //           ),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
-      /// Second Row (Track / Chat / Call)
-      if (isWeb)
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionButton(
-                icon: Icons.location_on_outlined,
-                label: 'Track',
-                onTap: _navigateToTracking(order),
-                theme: theme,
-                colorScheme: colorScheme,
-                isLarge: screenWidth > 1200,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionButton(
-                icon: Icons.chat,
-                label: 'Chat',
-                onTap: _navigateToChat(order),
-                theme: theme,
-                colorScheme: colorScheme,
-                isLarge: screenWidth > 1200,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionButton(
-                icon: Icons.call,
-                label: 'Call',
-                onTap: () => _launchPhone(order.riderDetails?.contact ?? ''),
-                theme: theme,
-                colorScheme: colorScheme,
-                isLarge: screenWidth > 1200,
-              ),
-            ),
-          ],
-        )
-      else
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionIcon(
-              Icons.location_on_outlined,
-              _navigateToTracking(order),
-              colorScheme,
-            ),
-            _buildActionIcon(
-              Icons.chat,
-              _navigateToChat(order),
-              colorScheme,
-            ),
-            _buildActionIcon(
-              Icons.call,
-              () => _launchPhone(order.riderDetails?.contact ?? ''),
-              colorScheme,
-            ),
-          ],
-        ),
-    ],
-  ),
-)
+                      const SizedBox(height: 16),
+
+                      /// Second Row (Track / Chat / Call)
+                      if (isWeb)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildActionButton(
+                                icon: Icons.location_on_outlined,
+                                label: 'Track',
+                                onTap: _navigateToTracking(order),
+                                theme: theme,
+                                colorScheme: colorScheme,
+                                isLarge: screenWidth > 1200,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildActionButton(
+                                icon: Icons.chat,
+                                label: 'Chat',
+                                onTap: _navigateToChat(order),
+                                theme: theme,
+                                colorScheme: colorScheme,
+                                isLarge: screenWidth > 1200,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildActionButton(
+                                icon: Icons.call,
+                                label: 'Call',
+                                onTap: () => _launchPhone(
+                                    order.riderDetails?.contact ?? ''),
+                                theme: theme,
+                                colorScheme: colorScheme,
+                                isLarge: screenWidth > 1200,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildActionIcon(
+                              Icons.location_on_outlined,
+                              _navigateToTracking(order),
+                              colorScheme,
+                            ),
+                            _buildActionIcon(
+                              Icons.chat,
+                              _navigateToChat(order),
+                              colorScheme,
+                            ),
+                            _buildActionIcon(
+                              Icons.call,
+                              () => _launchPhone(
+                                  order.riderDetails?.contact ?? ''),
+                              colorScheme,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                )
               ],
             ],
           ),
@@ -2904,9 +3432,11 @@ Container(
       debugPrint("🗺️ Navigating to tracking screen");
       debugPrint("   - deliveryBoyId: ${order.riderDetails?.id}");
       debugPrint("   - userId: $userId");
-      debugPrint("   - destination lat: ${order.deliveryFlow?.user?.address?.location?.coordinates?[1]}");
-      debugPrint("   - destination lng: ${order.deliveryFlow?.user?.address?.location?.coordinates?[0]}");
-      
+      debugPrint(
+          "   - destination lat: ${order.deliveryFlow?.user?.address?.location?.coordinates?[1]}");
+      debugPrint(
+          "   - destination lng: ${order.deliveryFlow?.user?.address?.location?.coordinates?[0]}");
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -2914,8 +3444,10 @@ Container(
             deliveryBoyId: '${order.riderDetails?.id ?? ""}',
             userId: '$userId',
             destination: LatLng(
-              order.deliveryFlow?.user?.address?.location?.coordinates?[1] ?? 0.0,
-              order.deliveryFlow?.user?.address?.location?.coordinates?[0] ?? 0.0,
+              order.deliveryFlow?.user?.address?.location?.coordinates?[1] ??
+                  0.0,
+              order.deliveryFlow?.user?.address?.location?.coordinates?[0] ??
+                  0.0,
             ),
           ),
         ),
@@ -2928,7 +3460,7 @@ Container(
       debugPrint("💬 Navigating to chat screen");
       debugPrint("   - deliveryBoyId: ${order.riderDetails?.id}");
       debugPrint("   - userId: $userId");
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -2962,22 +3494,21 @@ Container(
               width: isWeb ? 48 : 40,
               height: isWeb ? 48 : 40,
               decoration: BoxDecoration(
-                color: isCompleted 
-                    ? colorScheme.primary 
+                color: isCompleted
+                    ? colorScheme.primary
                     : colorScheme.surfaceVariant,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isCompleted 
-                      ? Colors.transparent 
+                  color: isCompleted
+                      ? Colors.transparent
                       : colorScheme.outline.withOpacity(0.3),
                   width: 2,
                 ),
               ),
               child: Icon(
                 isCompleted ? Icons.check : icon,
-                color: isCompleted 
-                    ? Colors.white 
-                    : colorScheme.onSurfaceVariant,
+                color:
+                    isCompleted ? Colors.white : colorScheme.onSurfaceVariant,
                 size: isWeb ? 24 : 20,
               ),
             ),
@@ -2985,7 +3516,7 @@ Container(
               Container(
                 width: 2,
                 height: isWeb ? 50 : 40,
-                color: isCompleted 
+                color: isCompleted
                     ? colorScheme.primary.withOpacity(0.3)
                     : colorScheme.outline.withOpacity(0.2),
                 margin: const EdgeInsets.symmetric(vertical: 4),
@@ -3004,8 +3535,8 @@ Container(
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: fontSizeBody + 2,
-                    color: isCompleted 
-                        ? colorScheme.primary 
+                    color: isCompleted
+                        ? colorScheme.primary
                         : colorScheme.onSurface,
                   ),
                 ),
@@ -3025,7 +3556,8 @@ Container(
     );
   }
 
-  Widget _buildActionIcon(IconData icon, VoidCallback onTap, ColorScheme colorScheme) {
+  Widget _buildActionIcon(
+      IconData icon, VoidCallback onTap, ColorScheme colorScheme) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -3090,11 +3622,12 @@ Container(
     final colorScheme = theme.colorScheme;
     final isWeb = kIsWeb;
     final screenSize = MediaQuery.of(context).size;
-    
+
     debugPrint("🎨 Building UI - isWeb: $isWeb");
     debugPrint("🎨 Screen size: ${screenSize.width} x ${screenSize.height}");
-    debugPrint("🎨 State - isLoading: $_isFirstLoad, hasOrder: $_hasOrder, hasRider: $_hasRider");
-    
+    debugPrint(
+        "🎨 State - isLoading: $_isFirstLoad, hasOrder: $_hasOrder, hasRider: $_hasRider");
+
     return Scaffold(
       body: Container(
         child: Stack(
@@ -3128,12 +3661,14 @@ Container(
                                           Icons.arrow_back_ios_new,
                                           color: colorScheme.onBackground,
                                         ),
-                                        onPressed: () => Navigator.of(context).maybePop(),
+                                        onPressed: () =>
+                                            Navigator.of(context).maybePop(),
                                       ),
                                     if (isWeb) ...[
                                       Text(
                                         'Order Status',
-                                        style: theme.textTheme.headlineMedium?.copyWith(
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: colorScheme.primary,
                                         ),
@@ -3145,12 +3680,15 @@ Container(
                                           vertical: 10,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: colorScheme.primary.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(30),
+                                          color: colorScheme.primary
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(30),
                                         ),
                                         child: Text(
                                           'Order #${widget.orderId?.substring(0, math.min(8, widget.orderId?.length ?? 0)) ?? 'N/A'}',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
                                             color: colorScheme.primary,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -3160,14 +3698,14 @@ Container(
                                   ],
                                 ),
                               ),
-                              
+
                               // Main content
                               _buildCardContent(),
-                              
+
                               // Delivery flow if order exists
                               if (_hasOrder && _order != null && !_isFirstLoad)
                                 _deliveryFlowWidget(_order!),
-                              
+
                               const SizedBox(height: 40),
                             ],
                           ),
@@ -3199,41 +3737,42 @@ class AcceptedOrder {
   final RiderDetails? riderDetails;
   final String? deliveryStatus;
 
-  AcceptedOrder({
-    this.orderId,
-    this.message,
-    this.restaurantName,
-    this.restaurantLocation,
-    this.orderDetails,
-    this.deliveryFlow,
-    this.riderDetails,
-    this.deliveryStatus
-  });
+  AcceptedOrder(
+      {this.orderId,
+      this.message,
+      this.restaurantName,
+      this.restaurantLocation,
+      this.orderDetails,
+      this.deliveryFlow,
+      this.riderDetails,
+      this.deliveryStatus});
 
   factory AcceptedOrder.fromJson(Map<String, dynamic> json) {
     debugPrint("📦 AcceptedOrder.fromJson called");
-    
+
     RiderDetails? rider;
     if (json['riderDetails'] != null &&
         json['riderDetails'] is Map<String, dynamic>) {
-      rider = RiderDetails.fromJson(json['riderDetails'] as Map<String, dynamic>);
+      rider =
+          RiderDetails.fromJson(json['riderDetails'] as Map<String, dynamic>);
     }
 
     final order = AcceptedOrder(
-      orderId: json['orderId']?.toString(),
-      message: json['message'] as String?,
-      restaurantName: json['restaurantName'] as String?,
-      restaurantLocation: json['restaurantLocation'] as String?,
-      orderDetails: json['orderDetails'] != null
-          ? OrderDetails.fromJson(json['orderDetails'] as Map<String, dynamic>)
-          : null,
-      deliveryFlow: json['deliveryFlow'] != null
-          ? DeliveryFlow.fromJson(json['deliveryFlow'] as Map<String, dynamic>)
-          : null,
-      riderDetails: rider,
-      deliveryStatus: json['deliveryStatus'] as String?
-    );
-    
+        orderId: json['orderId']?.toString(),
+        message: json['message'] as String?,
+        restaurantName: json['restaurantName'] as String?,
+        restaurantLocation: json['restaurantLocation'] as String?,
+        orderDetails: json['orderDetails'] != null
+            ? OrderDetails.fromJson(
+                json['orderDetails'] as Map<String, dynamic>)
+            : null,
+        deliveryFlow: json['deliveryFlow'] != null
+            ? DeliveryFlow.fromJson(
+                json['deliveryFlow'] as Map<String, dynamic>)
+            : null,
+        riderDetails: rider,
+        deliveryStatus: json['deliveryStatus'] as String?);
+
     debugPrint("📦 AcceptedOrder created successfully");
     return order;
   }
@@ -3332,7 +3871,8 @@ class UserAddress {
   factory UserAddress.fromJson(Map<String, dynamic>? json) {
     if (json == null) return UserAddress();
     return UserAddress(
-      location: LocationPoint.fromJson(json['location'] as Map<String, dynamic>?),
+      location:
+          LocationPoint.fromJson(json['location'] as Map<String, dynamic>?),
       street: json['street'] as String?,
       city: json['city'] as String?,
       state: json['state'] as String?,

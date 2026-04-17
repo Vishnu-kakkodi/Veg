@@ -1218,6 +1218,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         final isInCart = cartItem != null;
         final cartQuantity = cartItem?.quantity ?? 0;
 
+        print('Checking cart for productId: $productId');
+        print(
+            'Cart items: ${cartProvider.items.map((e) => e.restaurantProductId)}');
+
         if (isListView) {
           return _buildListCard(
             context,
@@ -1255,6 +1259,102 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
     );
   }
 
+  // Widget _buildListCard(
+  //   BuildContext context,
+  //   dynamic item,
+  //   String productId,
+  //   String itemId,
+  //   dynamic product,
+  //   ThemeData theme,
+  //   bool isDark,
+  //   bool canInteractProduct,
+  //   bool isProductActive,
+  //   CartProvider cartProvider,
+  //   bool isInCart,
+  //   int cartQuantity,
+  //   bool isRestaurantActive,
+  // ) {
+  //   return GestureDetector(
+  //     onTap: canInteractProduct
+  //         ? () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(
+  //                 builder: (context) => DetailScreen(
+  //                   productId: itemId,
+  //                   restaurantId: widget.restaurantId,
+  //                 ),
+  //               ),
+  //             );
+  //           }
+  //         : null,
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(8),
+  //       child: Opacity(
+  //         opacity: isProductActive ? 1.0 : 0.4,
+  //         child: Container(
+  //           padding: const EdgeInsets.all(8),
+  //           decoration: BoxDecoration(
+  //             color: isDark ? theme.cardColor : Colors.white,
+  //             borderRadius: BorderRadius.circular(16),
+  //             boxShadow: [
+  //               if (!isDark && isProductActive)
+  //                 BoxShadow(
+  //                   color: Colors.grey.withOpacity(0.1),
+  //                   spreadRadius: 1,
+  //                   blurRadius: 4,
+  //                   offset: const Offset(0, 2),
+  //                 ),
+  //             ],
+  //           ),
+  //           child: Row(
+  //             children: [
+  //               Expanded(
+  //                 child: _buildProductInfo(item, theme, isDark),
+  //               ),
+  //               const SizedBox(width: 10),
+  //               // SizedBox(
+  //               //   width: 150,
+  //               //   child: _buildProductImage(
+  //               //     context,
+  //               //     item,
+  //               //     itemId,
+  //               //     theme,
+  //               //     isDark,
+  //               //     canInteractProduct,
+  //               //     cartProvider,
+  //               //     isInCart,
+  //               //     cartQuantity,
+  //               //     productId,
+  //               //     product,
+  //               //     isRestaurantActive,
+  //               //   ),
+  //               // ),
+  //               SizedBox(
+  //                 width: 120, // Smaller width for action button
+  //                 child: _buildProductActionWidget(
+  //                   context: context,
+  //                   theme: theme,
+  //                   isDark: isDark,
+  //                   cartProvider: cartProvider,
+  //                   canInteractProduct: canInteractProduct,
+  //                   isInCart: isInCart,
+  //                   cartQuantity: cartQuantity,
+  //                   productId: productId,
+  //                   product: product,
+  //                   item: item,
+  //                   restaurantId: widget.restaurantId,
+  //                   userId: userId,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildListCard(
     BuildContext context,
     dynamic item,
@@ -1289,7 +1389,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         child: Opacity(
           opacity: isProductActive ? 1.0 : 0.4,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark ? theme.cardColor : Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -1304,26 +1404,215 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
               ],
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildProductInfo(item, theme, isDark),
+                // ========== PRODUCT IMAGE WITH WISHLIST HEART ==========
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        item.image,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 100,
+                            height: 100,
+                            color: isDark ? Colors.grey[700] : Colors.grey[200],
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.5),
+                              size: 40,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    // Wishlist Heart Button
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Consumer<WishlistProvider>(
+                        builder: (context, wishlistProvider, child) {
+                          final isInWishlist =
+                              wishlistProvider.isInWishlist(itemId);
+                          return _WishlistHeart(
+                            isDark: isDark,
+                            theme: theme,
+                            enabled: isRestaurantActive,
+                            initialIsInWishlist: isInWishlist,
+                            onToggle: () async {
+                              await wishlistProvider.toggleWishlist(
+                                userId.toString(),
+                                itemId,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 150,
-                  child: _buildProductImage(
-                    context,
-                    item,
-                    itemId,
-                    theme,
-                    isDark,
-                    canInteractProduct,
-                    cartProvider,
-                    isInCart,
-                    cartQuantity,
-                    productId,
-                    product,
-                    isRestaurantActive,
+
+                const SizedBox(width: 12),
+
+                // ========== PRODUCT DETAILS ==========
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Veg/Non-Veg Indicator
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: theme.colorScheme.primary),
+                        ),
+                        child: Icon(
+                          Icons.circle,
+                          size: 12,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Product Name
+                      Text(
+                        item.name,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Price with Discount
+                      Row(
+                        children: [
+                          Text(
+                            "₹${(item.price - (item.price * item.discount / 100)).toStringAsFixed(0)}",
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          if (item.discount > 0) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              "₹${item.price}",
+                              style: TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.6),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color:
+                                    theme.colorScheme.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '${item.discount}% OFF',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Tags (if any)
+                      if (item.tags.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.local_fire_department,
+                              size: 14,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                item.tags.join(" · "),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 6),
+
+                      // Description
+                      Text(
+                        item.content.isNotEmpty
+                            ? item.content
+                            : "Delicious food item",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Category and Add Button Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (item.category.categoryName.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[800]!
+                                    : Colors.grey[100]!,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                item.category.categoryName,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
+                                ),
+                              ),
+                            ),
+                          // Add to Cart Button
+                          _buildProductActionWidget(
+                            context: context,
+                            theme: theme,
+                            isDark: isDark,
+                            cartProvider: cartProvider,
+                            canInteractProduct: canInteractProduct,
+                            isInCart: isInCart,
+                            cartQuantity: cartQuantity,
+                            productId: productId,
+                            product: product,
+                            item: item,
+                            restaurantId: widget.restaurantId,
+                            userId: userId,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1834,6 +2123,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
               }
             },
       child: Container(
+        alignment: Alignment.center, // 👈 ADD THIS
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: isDark ? theme.cardColor : Colors.white,
@@ -1850,6 +2140,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen>
         ),
         child: Text(
           'ADD',
+          textAlign: TextAlign.center, // 👈 optional but good practice
           style: TextStyle(
             color: theme.colorScheme.primary,
             fontWeight: FontWeight.bold,

@@ -1,4 +1,3 @@
-
 // // // cart_screen.dart
 // // import 'dart:async';
 // // import 'dart:convert';
@@ -70,10 +69,10 @@
 // //     await _loadUser();
 // //     final cp = context.read<CartProvider>();
 // //     await cp.loadCart(user?.userId.toString());
-    
+
 // //     // After cart loads, extract coupon info from cart provider
 // //     _extractCouponFromProvider(cp);
-    
+
 // //     await _handleStatusChanges(cp);
 // //     _startPolling();
 // //   }
@@ -82,7 +81,7 @@
 // //   void _extractCouponFromProvider(CartProvider cp) {
 // //     final newId = cp.appliedCouponId;
 // //     final newCode = cp.appliedCouponCode;
-    
+
 // //     setState(() {
 // //       _isLoadingCouponState = false;
 // //       // Only update if changed to avoid unnecessary rebuilds
@@ -109,16 +108,16 @@
 // //       if (!mounted) return;
 // //       if (!AppLifecycleService.instance.isAppInForeground) return;
 // //       if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-      
+
 // //       final cp = context.read<CartProvider>();
 // //       await cp.loadCart(user?.userId.toString());
-      
+
 // //       // Update coupon state if changed (but loadCart already only notifies if changed)
 // //       // Still need to sync local state with provider because we're using local state for coupon bar
 // //       if (mounted) {
 // //         _extractCouponFromProvider(cp);
 // //       }
-      
+
 // //       _handleStatusChanges(cp);
 // //     });
 // //   }
@@ -607,7 +606,7 @@
 // //       );
 
 // //   Widget _checkoutBtn(CartProvider cp, ThemeData theme, ColorScheme cs) {
-// //     final disabled = 
+// //     final disabled =
 // //         !cp.hasItems ||
 // //         !cp.isVendorActive ||
 // //         cp.hasInactiveProducts;
@@ -950,22 +949,6 @@
 // //       );
 // // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // // import 'dart:async';
 // // import 'dart:convert';
 
@@ -1036,10 +1019,10 @@
 // //     await _loadUser();
 // //     final cp = context.read<CartProvider>();
 // //     await cp.loadCart(user?.userId.toString());
-    
+
 // //     // After cart loads, extract coupon info from cart provider
 // //     _extractCouponFromProvider(cp);
-    
+
 // //     await _handleStatusChanges(cp);
 // //     _startPolling();
 // //   }
@@ -1048,7 +1031,7 @@
 // //   void _extractCouponFromProvider(CartProvider cp) {
 // //     final newId = cp.appliedCouponId;
 // //     final newCode = cp.appliedCouponCode;
-    
+
 // //     setState(() {
 // //       _isLoadingCouponState = false;
 // //       if (_appliedCouponId != newId || _appliedCouponCode != newCode) {
@@ -1074,14 +1057,14 @@
 // //       if (!mounted) return;
 // //       if (!AppLifecycleService.instance.isAppInForeground) return;
 // //       if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-      
+
 // //       final cp = context.read<CartProvider>();
 // //       await cp.loadCart(user?.userId.toString());
-      
+
 // //       if (mounted) {
 // //         _extractCouponFromProvider(cp);
 // //       }
-      
+
 // //       _handleStatusChanges(cp);
 // //     });
 // //   }
@@ -1813,7 +1796,7 @@
 // //       );
 
 // //   Widget _checkoutBtn(CartProvider cp, ThemeData theme, ColorScheme cs) {
-// //     final disabled = 
+// //     final disabled =
 // //         !cp.hasItems ||
 // //         !cp.isVendorActive ||
 // //         cp.hasInactiveProducts;
@@ -2155,24 +2138,6 @@
 // //         child: Align(alignment: Alignment.topCenter, child: child),
 // //       );
 // // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import 'dart:async';
 // import 'dart:convert';
@@ -3302,30 +3267,6 @@
 //       );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // lib/views/Cart/cart_screen.dart
 
 import 'dart:async';
@@ -3368,7 +3309,8 @@ class CartScreen extends StatefulWidget {
   State<CartScreen> createState() => _CartScreenState();
 }
 
-class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMixin {
+class _CartScreenState extends State<CartScreen>
+    with AutomaticKeepAliveClientMixin {
   User? user;
   Timer? _pollingTimer;
   bool _vendorInactiveHandled = false;
@@ -3421,7 +3363,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
 
     // Store initial cart state
     _previousCart = cp.cart;
-    
+
     _syncCouponFromProvider(cp);
     await _handleStatusChanges(cp);
     _startPolling();
@@ -3454,37 +3396,37 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
   void _startPolling() {
     _pollingTimer?.cancel();
     if (user == null) return;
-    
+
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
       if (!mounted) return;
-      
+
       // Don't poll if app is in background
       if (!AppLifecycleService.instance.isAppInForeground) return;
-      
+
       // Don't poll if this screen isn't visible
       if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
 
       final cp = context.read<CartProvider>();
-      
+
       // Store current cart before refresh
       final beforeCart = cp.cart;
-      
+
       // SILENT REFRESH - this will NOT show loading indicators
       await cp.loadCart(user?.userId.toString());
-      
+
       if (!mounted) return;
-      
+
       // After refresh, check if cart changed
       final afterCart = cp.cart;
-      
+
       // Update local coupon state silently
       _syncCouponFromProvider(cp);
-      
+
       // Handle status changes if needed (vendor inactive, inactive products)
       if (_shouldHandleStatusChanges(beforeCart, afterCart)) {
         await _handleStatusChanges(cp);
       }
-      
+
       // If cart changed and we have items, we might want to show a subtle
       // indication that something updated, but NOT a full UI flicker
       if (_previousCart != afterCart && cp.hasItems) {
@@ -3500,17 +3442,17 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
   bool _shouldHandleStatusChanges(CartModel? before, CartModel? after) {
     if (before == null && after == null) return false;
     if (before == null || after == null) return true;
-    
+
     // Check vendor status change
     final beforeVendorActive = before.products.every((p) => p.isVendorActive);
     final afterVendorActive = after.products.every((p) => p.isVendorActive);
-    
+
     if (beforeVendorActive != afterVendorActive) return true;
-    
+
     // Check inactive products change
     final beforeHasInactive = before.products.any((p) => !p.isProductActive);
     final afterHasInactive = after.products.any((p) => !p.isProductActive);
-    
+
     return beforeHasInactive != afterHasInactive;
   }
 
@@ -3555,7 +3497,8 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
     showCouponPickerModal(
       context: context,
       userId: user!.userId.toString(),
-      onCouponApplied: ({required String couponId, required String couponCode}) {
+      onCouponApplied: (
+          {required String couponId, required String couponCode}) {
         setState(() {
           _appliedCouponId = couponId;
           _appliedCouponCode = couponCode;
@@ -3692,7 +3635,11 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
     final cs = theme.colorScheme;
     final isMobile = Responsive.isMobile(context);
     final width = MediaQuery.of(context).size.width;
-    final hPad = width >= 1200 ? 40.0 : width >= 900 ? 24.0 : 16.0;
+    final hPad = width >= 1200
+        ? 40.0
+        : width >= 900
+            ? 24.0
+            : 16.0;
     final maxW = width >= 1400
         ? 1200.0
         : width >= 1100
@@ -3754,7 +3701,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
             // ── CART WITH ITEMS ────────────────────────────────────────────
             // Show a subtle indicator if refreshing in background (optional)
             final showRefreshIndicator = cp.isRefreshing;
-            
+
             return RefreshIndicator(
               onRefresh: () => cp.loadCart(user?.userId.toString()),
               color: cs.primary,
@@ -3765,8 +3712,8 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxW),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: hPad, vertical: 16),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -3802,7 +3749,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
                                 ],
                               ),
                             ),
-                          
+
                           _buildHeader(theme, cs),
                           const SizedBox(height: 20),
 
@@ -4091,8 +4038,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
             color: cs.primary.withOpacity(0.08),
             borderRadius: BorderRadius.circular(10),
           ),
-          child:
-              Icon(Icons.local_offer_outlined, color: cs.primary, size: 22),
+          child: Icon(Icons.local_offer_outlined, color: cs.primary, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -4126,8 +4072,8 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
               : GestureDetector(
                   onTap: _removeCoupon,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: cs.errorContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -4143,8 +4089,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
           GestureDetector(
             onTap: _openCouponPicker,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
               decoration: BoxDecoration(
                 color: cs.primary,
                 borderRadius: BorderRadius.circular(10),
@@ -4227,8 +4172,8 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text('Checkout',
-            style: theme.textTheme.titleMedium?.copyWith(
-                color: cs.onPrimary, fontWeight: FontWeight.bold)),
+            style: theme.textTheme.titleMedium
+                ?.copyWith(color: cs.onPrimary, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -4255,8 +4200,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-            color: cs.errorContainer,
-            borderRadius: BorderRadius.circular(12)),
+            color: cs.errorContainer, borderRadius: BorderRadius.circular(12)),
         child: Row(children: [
           Icon(Icons.store_mall_directory, color: cs.onErrorContainer),
           const SizedBox(width: 8),
@@ -4267,8 +4211,7 @@ class _CartScreenState extends State<CartScreen> with AutomaticKeepAliveClientMi
         ]),
       );
 
-  Widget _inactiveBanner(
-          CartProvider cp, ThemeData theme, ColorScheme cs) =>
+  Widget _inactiveBanner(CartProvider cp, ThemeData theme, ColorScheme cs) =>
       Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
@@ -4306,19 +4249,17 @@ class EmptyCartWidget extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child:
-            Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(Icons.shopping_cart_outlined,
-              size: iconSize,
-              color: colorScheme.onSurface.withOpacity(0.5)),
+              size: iconSize, color: colorScheme.onSurface.withOpacity(0.5)),
           const SizedBox(height: 20),
           Text('Your cart is empty',
               style: theme.textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
           Text('Add some delicious items to your cart',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7)),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
               textAlign: TextAlign.center),
           const SizedBox(height: 30),
         ]),
@@ -4383,8 +4324,7 @@ class CartItemWidget extends StatelessWidget {
                       color: colorScheme.surfaceVariant,
                       child: Center(
                           child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.primary))),
+                              strokeWidth: 2, color: colorScheme.primary))),
               errorBuilder: (_, __, ___) => Container(
                   width: 60,
                   height: 60,
@@ -4395,45 +4335,39 @@ class CartItemWidget extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(cartProduct.name,
-                      style: theme.textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 4),
-                  if (cartProduct.addOn.variation.isNotEmpty)
-                    Text('Size: ${cartProduct.addOn.variation}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                colorScheme.onSurface.withOpacity(0.7))),
-                  if (cartProduct.addOn.plateitems > 0) ...[
-                    const SizedBox(height: 2),
-                    Text('Plates: ${cartProduct.addOn.plateitems}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                colorScheme.onSurface.withOpacity(0.7))),
-                  ],
-                  const SizedBox(height: 4),
-                  Text('₹${cartProduct.price}',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary)),
-                  if (inactive) ...[
-                    const SizedBox(height: 6),
-                    Text('Unavailable — remove to continue.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.error,
-                            fontWeight: FontWeight.w600)),
-                    Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                            onPressed: onRemove,
-                            child: const Text('Remove'))),
-                  ],
-                ]),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(cartProduct.name,
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 4),
+              if (cartProduct.addOn.variation.isNotEmpty)
+                Text('Size: ${cartProduct.addOn.variation}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.7))),
+              if (cartProduct.addOn.plateitems > 0) ...[
+                const SizedBox(height: 2),
+                Text('Plates: ${cartProduct.addOn.plateitems}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.7))),
+              ],
+              const SizedBox(height: 4),
+              Text('₹${cartProduct.price}',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold, color: colorScheme.primary)),
+              if (inactive) ...[
+                const SizedBox(height: 6),
+                Text('Unavailable — remove to continue.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error, fontWeight: FontWeight.w600)),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                        onPressed: onRemove, child: const Text('Remove'))),
+              ],
+            ]),
           ),
           Column(children: [
             Row(children: [
@@ -4449,8 +4383,7 @@ class CartItemWidget extends StatelessWidget {
               const SizedBox(width: 8),
               SizedBox(
                 width: 28,
-                child: Text(
-                    cartProduct.quantity.toString().padLeft(2, '0'),
+                child: Text(cartProduct.quantity.toString().padLeft(2, '0'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(fontWeight: FontWeight.w600)),
@@ -4472,8 +4405,7 @@ class CartItemWidget extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                    color: colorScheme.errorContainer,
-                    shape: BoxShape.circle),
+                    color: colorScheme.errorContainer, shape: BoxShape.circle),
                 child: Icon(Icons.delete,
                     size: 20, color: colorScheme.onErrorContainer),
               ),
